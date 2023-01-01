@@ -1,0 +1,57 @@
+{
+  "name": "front-end",
+  "slug": "front-end",
+  "owner": "duy-nguyen-ngoc",
+  "workspace": "top-group-NlOb",
+  "project": "test-cli",
+  "git": {
+    "provider": "bitbucket",
+    "repoURL": "https://bitbucket.org/digitopvn/test-cli-front-end",
+    "repoSSH": "git@bitbucket.org:digitopvn/test-cli-front-end.git"
+  },
+  "framework": {
+    "name": "Diginext13",
+    "slug": "diginext13",
+    "repoSSH": "git@bitbucket.org:digitopvn/diginext13.git",
+    "version": "3.6.0"
+  },
+  "environment": {
+    "dev": {
+      "namespace": "test-cli",
+      "provider": "custom",
+      "cluster": "topgroup-k3s",
+      "domains": [
+        "test-cli-front-end.dev.diginext.site"
+      ],
+      "ssl": "letsencrypt",
+      "tlsSecret": "tls-secret-letsencrypt-test-cli-front-end",
+      "registry": "google-container-registry",
+      "imageURL": "asia.gcr.io/top-group-k8s/test-cli/front-end",
+      "cdn": false,
+      "shoudInherit": true,
+      "redirect": false,
+      "replicas": 1,
+      "size": "none",
+      "port": 3000,
+      "shouldInherit": true
+    },
+    "prod": {
+      "namespace": "test-cli-prod",
+      "provider": "custom",
+      "cluster": "topgroup-k3s",
+      "domains": [
+        "test-cli-front-end.prod.diginext.site"
+      ],
+      "ssl": "letsencrypt",
+      "tlsSecret": "tls-secret-letsencrypt-test-cli-front-end",
+      "registry": "google-container-registry",
+      "imageURL": "asia.gcr.io/top-group-k8s/test-cli/front-end",
+      "cdn": false,
+      "shouldInherit": true,
+      "redirect": false,
+      "replicas": 1,
+      "size": "none",
+      "port": 3000
+    }
+  }
+}
