@@ -1,4 +1,5 @@
 import "../styles/global.css";
+import "antd/dist/reset.css";
 
 import type { AppProps } from "next/app";
 

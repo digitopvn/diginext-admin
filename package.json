@@ -14,7 +14,7 @@
 		"format": "next lint --fix && prettier '**/*.{js,ts,tsx,json,yaml}' --write",
 		"check-types": "tsc --noEmit --pretty && tsc --project cypress --noEmit --pretty",
 		"test": "jest",
-		"commit": "cz",
+		"commit": "git add . && cz && git push origin",
 		"cypress": "cypress open",
 		"cypress:headless": "cypress run",
 		"e2e": "start-server-and-test dev http://localhost:3000 cypress",
@@ -23,6 +23,8 @@
 		"postbuild": "next-sitemap"
 	},
 	"dependencies": {
+		"@ant-design/icons": "^4.8.0",
+		"antd": "^5.1.2",
 		"next": "^13.0.6",
 		"next-seo": "^5.14.1",
 		"next-sitemap": "^3.1.32",
@@ -38,6 +40,7 @@
 		"@percy/cypress": "^3.1.2",
 		"@semantic-release/changelog": "^6.0.2",
 		"@semantic-release/git": "^10.0.1",
+		"@tailwindcss/typography": "^0.5.8",
 		"@testing-library/cypress": "^8.0.7",
 		"@testing-library/jest-dom": "^5.16.5",
 		"@testing-library/react": "^13.4.0",
