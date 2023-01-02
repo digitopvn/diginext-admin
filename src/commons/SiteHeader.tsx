@@ -22,7 +22,7 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 	return (
 		<Header
 			className="w-full"
-			style={{ position: "sticky", top: 0, paddingInline: 24, lineHeight: "48px", height: 48, zIndex: 1, background: colorBgContainer }}
+			style={{ position: "sticky", top: 0, paddingInline: 24, lineHeight: "48px", height: 48, zIndex: 100, background: colorBgContainer }}
 		>
 			{React.createElement(sidebarCollapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
 				className: "trigger",

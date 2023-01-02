@@ -62,7 +62,8 @@
 				"import/no-unresolved": "off",
 				"import/no-named-as-default-member": "off",
 				"import/no-named-as-default": "off",
-				"@next/next/no-img-element": "off"
+				"@next/next/no-img-element": "off",
+				"no-plusplus": "off"
 			}
 		},
 		// Configuration for testing

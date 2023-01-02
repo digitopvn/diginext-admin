@@ -4,10 +4,10 @@ import type { ReactNode } from "react";
 
 export const PageTitle = (props: { children?: ReactNode } = {}) => {
 	return (
-		<div className="px-6 py-4">
+		<div className="border-b border-gray-300 px-6 py-4">
 			<Breadcrumb>
 				<Breadcrumb.Item href="">
-					<HomeOutlined />
+					<HomeOutlined className="align-middle" />
 				</Breadcrumb.Item>
 				<Breadcrumb.Item href="">
 					<span>Projects</span>

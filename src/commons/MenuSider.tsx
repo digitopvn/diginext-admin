@@ -1,4 +1,19 @@
-import { UserOutlined } from "@ant-design/icons";
+import {
+	BranchesOutlined,
+	CloudOutlined,
+	CloudServerOutlined,
+	ClusterOutlined,
+	CodepenOutlined,
+	DashboardOutlined,
+	DatabaseOutlined,
+	DeploymentUnitOutlined,
+	HddOutlined,
+	LockOutlined,
+	ProjectOutlined,
+	SettingOutlined,
+	TeamOutlined,
+	UserOutlined,
+} from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Menu } from "antd";
 import Sider from "antd/lib/layout/Sider";
@@ -8,30 +23,95 @@ import { useLayoutProvider } from "@/providers/LayoutProvider";
 
 const items: MenuProps["items"] = [
 	{
-		key: `menu-1`,
-		icon: <UserOutlined />,
-		label: "Menu 1",
+		key: `menu/`,
+		icon: <DashboardOutlined />,
+		label: "Dashboard",
 	},
 	{
-		key: `menu-2`,
-		icon: <UserOutlined />,
-		label: "Menu 2",
+		key: `menu/project`,
+		icon: <ProjectOutlined />,
+		label: "Projects",
 	},
 	{
-		key: `menu-1`,
-		icon: <UserOutlined />,
-		label: "Menu 3",
+		key: `menu/framework`,
+		icon: <CodepenOutlined />,
+		label: "Git Providers",
+	},
+	{
+		key: `menu/git`,
+		icon: <BranchesOutlined />,
+		label: "Git Providers",
+	},
+	{
+		key: `menu/infrastructure`,
+		icon: <DeploymentUnitOutlined />,
+		label: "Infrastructure",
+		children: [
+			{
+				key: `menu/infrastructure/cloud-provider`,
+				icon: <CloudOutlined />,
+				label: "Cloud Providers",
+			},
+			{
+				key: `menu/infrastructure/cluster`,
+				icon: <ClusterOutlined />,
+				label: "K8S Clusters",
+			},
+			{
+				key: `menu/infrastructure/database`,
+				icon: <DatabaseOutlined />,
+				label: "Databases",
+			},
+			{
+				key: `menu/infrastructure/cloud-provider`,
+				icon: <CloudServerOutlined />,
+				label: "Container Registries",
+			},
+			{
+				key: `menu/infrastructure/cloud-provider`,
+				icon: <HddOutlined />,
+				label: "Cloud Storage",
+			},
+		],
+	},
+	{
+		key: `menu/workspace`,
+		icon: <DeploymentUnitOutlined />,
+		label: "Workspace",
+		children: [
+			{
+				key: `menu/workspace/user`,
+				icon: <UserOutlined />,
+				label: "Users",
+			},
+			{
+				key: `menu/workspace/team`,
+				icon: <TeamOutlined />,
+				label: "Teams",
+			},
+			{
+				key: `menu/workspace/role`,
+				icon: <LockOutlined />,
+				label: "Roles",
+			},
+			{
+				key: `menu/workspace/setting`,
+				icon: <SettingOutlined />,
+				label: "Settings",
+			},
+		],
 	},
 ];
 
 export const MenuSider = () => {
 	const router = useRouter();
-	const { sidebarCollapsed } = useLayoutProvider();
+	const { sidebarCollapsed, toggleSidebar } = useLayoutProvider();
 	return (
 		<Sider
 			theme="light"
 			collapsible
 			collapsed={sidebarCollapsed}
+			onCollapse={(value) => toggleSidebar && toggleSidebar(value)}
 			style={{
 				overflow: "auto",
 				height: "100vh",

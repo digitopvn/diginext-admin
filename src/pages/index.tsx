@@ -1,7 +1,8 @@
 import { useRouter } from "next/router";
 
-import { Meta } from "@/layouts/Meta";
+import { ProjectList } from "@/components/projects/ProjectList";
 import { Main } from "@/templates/Main";
+import { Meta } from "@/templates/Meta";
 
 const Index = () => {
 	const router = useRouter();
@@ -16,6 +17,7 @@ const Index = () => {
 			}
 		>
 			{/* Page Content */}
+			<ProjectList />
 		</Main>
 	);
 };

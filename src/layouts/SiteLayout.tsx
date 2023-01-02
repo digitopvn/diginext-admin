@@ -17,20 +17,23 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 	const { sidebarCollapsed } = useLayoutProvider();
 	return (
 		<Layout hasSider>
+			{/* Meta tags */}
 			{props.meta}
 
 			{/* Sidebar here */}
 			<MenuSider />
 
 			<Layout className="transition-all" style={{ marginLeft: sidebarCollapsed ? 80 : 200 }}>
-				{/* Page title & desc here */}
+				{/* Site Header */}
 				<SiteHeader />
 
+				{/* Page title & desc here */}
 				<PageTitle />
 
-				<div>{props.children}</div>
-
 				{/* Page content here */}
+				<div className="px-2">{props.children}</div>
+
+				{/* Site/Page Footer */}
 				<PageFooter />
 			</Layout>
 		</Layout>

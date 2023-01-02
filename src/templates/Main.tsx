@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
 
+import { SiteLayout } from "@/layouts/SiteLayout";
 import Compose from "@/providers/Compose";
 import LayoutProvider from "@/providers/LayoutProvider";
-
-import { SiteLayout } from "./SiteLayout";
 
 type IMainProps = {
 	meta: ReactNode;

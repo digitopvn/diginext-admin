@@ -25,6 +25,7 @@
 	"dependencies": {
 		"@ant-design/icons": "^4.8.0",
 		"antd": "^5.1.2",
+		"dayjs": "^1.11.7",
 		"next": "^13.0.6",
 		"next-seo": "^5.14.1",
 		"next-sitemap": "^3.1.32",
