@@ -1,11 +1,11 @@
-import { DeleteOutlined, EditOutlined, PauseCircleOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Button, Space, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import React from "react";
 
-import { useFrameworkListApi } from "@/api/api-framework";
-import type { IFramework, IGitProvider, IUser } from "@/api/api-types";
+import { useClusterListApi } from "@/api/api-cluster";
+import type { ICluster, IUser } from "@/api/api-types";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -22,7 +22,7 @@ interface DataType {
 	createdAt: string;
 }
 
-const columns: ColumnsType<IFramework> = [
+const columns: ColumnsType<ICluster> = [
 	{
 		title: "Name",
 		width: 70,
@@ -31,27 +31,28 @@ const columns: ColumnsType<IFramework> = [
 		fixed: "left",
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => record.name.indexOf(value.toString()) > -1,
+		onFilter: (value, record) => (record.name ? record.name.indexOf(value.toString()) > -1 : true),
 	},
 	{
-		title: "Git",
+		title: "Short name",
 		width: 60,
-		dataIndex: "git",
-		key: "git",
-		render: (value, record) => (
+		dataIndex: "shortName",
+		key: "shortName",
+		render: (value) => (
 			<Button type="link" style={{ padding: 0 }}>
-				{record.git?.name}
+				{value}
 			</Button>
 		),
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.git ? ((record.git as IGitProvider).name || "").indexOf(value.toString()) > -1 : true),
+		onFilter: (value, record) => (record.shortName ? record.shortName.indexOf(value.toString()) > -1 : true),
 	},
 	{
-		title: "Version",
-		dataIndex: "version",
-		key: "version",
+		title: "Provider",
+		dataIndex: "provider",
+		key: "provider",
 		width: 30,
+		render: (value, record) => <>{record.provider?.shortName}</>,
 	},
 	{
 		title: "Created by",
@@ -72,6 +73,14 @@ const columns: ColumnsType<IFramework> = [
 		sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
 	},
 	{
+		title: "Updated at",
+		dataIndex: "updatedAt",
+		key: "updatedAt",
+		width: 50,
+		render: (value) => <>{(dayjs(value) as any).fromNow()}</>,
+		sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
+	},
+	{
 		title: "Action",
 		key: "action",
 		width: 50,
@@ -80,7 +89,6 @@ const columns: ColumnsType<IFramework> = [
 			<Space.Compact>
 				<Button icon={<EditOutlined />}></Button>
 				<Button icon={<DeleteOutlined />}></Button>
-				<Button icon={<PauseCircleOutlined />}></Button>
 			</Space.Compact>
 		),
 	},
@@ -90,7 +98,7 @@ const data: DataType[] = [];
 // for (let i = 0; i < 100; i++) {
 // 	data.push({
 // 		key: i,
-// 		name: `Framework #${i}`,
+// 		name: `Cluster #${i}`,
 // 		git: `Github`,
 // 		version: "main",
 // 		username: `goon`,
@@ -98,12 +106,20 @@ const data: DataType[] = [];
 // 	});
 // }
 
-export const FrameworkList = () => {
-	const { data: frameworks } = useFrameworkListApi({ populate: "git,owner" });
-	console.log("frameworks :>> ", frameworks);
+export const ClusterList = () => {
+	const { data: clusters } = useClusterListApi({ populate: "owner,provider" });
+	const displayedClusters = clusters || [];
+	console.log("displayedClusters :>> ", displayedClusters);
+
 	return (
 		<div>
-			<Table columns={columns} dataSource={frameworks} scroll={{ x: 1200 }} sticky={{ offsetHeader: 48 }} pagination={{ pageSize: 20 }} />
+			<Table
+				columns={columns}
+				dataSource={displayedClusters}
+				scroll={{ x: 1200 }}
+				sticky={{ offsetHeader: 48 }}
+				pagination={{ pageSize: 20 }}
+			/>
 		</div>
 	);
 };

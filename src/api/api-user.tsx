@@ -1,8 +1,8 @@
 import { useCreateApi, useDeleteApi, useItemApi, useListApi, useUpdateApi } from "./api";
-import type { IUser } from "./api-types";
+import type { ApiOptions, IUser } from "./api-types";
 
-export const useUserListApi = () => {
-	return useListApi<IUser>(["users"], `/api/v1/user`);
+export const useUserListApi = (options?: ApiOptions) => {
+	return useListApi<IUser>(["users"], `/api/v1/user`, options);
 };
 
 export const useUserApi = (id: string) => {

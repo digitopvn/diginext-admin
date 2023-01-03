@@ -1,8 +1,8 @@
 import { useCreateApi, useDeleteApi, useItemApi, useListApi, useUpdateApi } from "./api";
-import type { IGitProvider } from "./api-types";
+import type { ApiOptions, IGitProvider } from "./api-types";
 
-export const useGitProviderListApi = () => {
-	return useListApi<IGitProvider>(["gits"], `/api/v1/git`);
+export const useGitProviderListApi = (options?: ApiOptions) => {
+	return useListApi<IGitProvider>(["gits"], `/api/v1/git`, options);
 };
 
 export const useGitProviderApi = (id: string) => {

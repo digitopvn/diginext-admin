@@ -1,8 +1,8 @@
 import { useCreateApi, useDeleteApi, useItemApi, useListApi, useUpdateApi } from "./api";
-import type { ICluster } from "./api-types";
+import type { ApiOptions, ICluster } from "./api-types";
 
-export const useClusterListApi = () => {
-	return useListApi<ICluster>(["clusters"], `/api/v1/cluster`);
+export const useClusterListApi = (options?: ApiOptions) => {
+	return useListApi<ICluster>(["clusters"], `/api/v1/cluster`, options);
 };
 
 export const useClusterApi = (id: string) => {

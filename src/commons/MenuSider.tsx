@@ -8,7 +8,6 @@ import {
 	DashboardOutlined,
 	DatabaseOutlined,
 	DeploymentUnitOutlined,
-	HddOutlined,
 	LockOutlined,
 	ProjectOutlined,
 	SettingOutlined,
@@ -69,11 +68,11 @@ const items: MenuProps["items"] = [
 				icon: <CloudServerOutlined />,
 				label: "Container Registries",
 			},
-			{
-				key: `menu/infrastructure/cloud-storage`,
-				icon: <HddOutlined />,
-				label: "Cloud Storage",
-			},
+			// {
+			// 	key: `menu/infrastructure/cloud-storage`,
+			// 	icon: <HddOutlined />,
+			// 	label: "Cloud Storage",
+			// },
 		],
 	},
 	{

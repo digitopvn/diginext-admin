@@ -1,12 +1,12 @@
 import { useCreateApi, useDeleteApi, useItemApi, useListApi, useUpdateApi } from "./api";
-import type { ICloudProvider } from "./api-types";
+import type { ApiOptions, ICloudProvider } from "./api-types";
 
-export const useCloudProviderListApi = () => {
-	return useListApi<ICloudProvider>(["providers"], `/api/v1/provider`);
+export const useCloudProviderListApi = (options?: ApiOptions) => {
+	return useListApi<ICloudProvider>(["providers"], `/api/v1/provider`, options);
 };
 
-export const useCloudProviderApi = (id: string) => {
-	return useItemApi<ICloudProvider>(["providers"], `/api/v1/provider`, id);
+export const useCloudProviderApi = (id: string, options?: ApiOptions) => {
+	return useItemApi<ICloudProvider>(["providers"], `/api/v1/provider`, id, options);
 };
 
 export const useCloudProviderCreateApi = (data: any) => {

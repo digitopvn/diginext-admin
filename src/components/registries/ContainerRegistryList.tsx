@@ -4,8 +4,8 @@ import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import React from "react";
 
-import { useFrameworkListApi } from "@/api/api-framework";
-import type { IFramework, IGitProvider, IUser } from "@/api/api-types";
+import { useContainerRegistryListApi } from "@/api/api-registry";
+import type { IContainerRegistry, IUser } from "@/api/api-types";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -22,7 +22,7 @@ interface DataType {
 	createdAt: string;
 }
 
-const columns: ColumnsType<IFramework> = [
+const columns: ColumnsType<IContainerRegistry> = [
 	{
 		title: "Name",
 		width: 70,
@@ -31,27 +31,28 @@ const columns: ColumnsType<IFramework> = [
 		fixed: "left",
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => record.name.indexOf(value.toString()) > -1,
+		onFilter: (value, record) => (record.name ? record.name.indexOf(value.toString()) > -1 : true),
 	},
 	{
-		title: "Git",
+		title: "Host",
 		width: 60,
-		dataIndex: "git",
-		key: "git",
-		render: (value, record) => (
+		dataIndex: "host",
+		key: "host",
+		render: (value) => (
 			<Button type="link" style={{ padding: 0 }}>
-				{record.git?.name}
+				{value}
 			</Button>
 		),
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.git ? ((record.git as IGitProvider).name || "").indexOf(value.toString()) > -1 : true),
+		onFilter: (value, record) => (record.host ? record.host.indexOf(value.toString()) > -1 : true),
 	},
 	{
-		title: "Version",
-		dataIndex: "version",
-		key: "version",
+		title: "Provider",
+		dataIndex: "provider",
+		key: "provider",
 		width: 30,
+		render: (value, record) => <>{record.provider}</>,
 	},
 	{
 		title: "Created by",
@@ -60,7 +61,7 @@ const columns: ColumnsType<IFramework> = [
 		width: 50,
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.owner ? ((record.owner as IUser).name || "").toLowerCase().indexOf(value.toString()) > -1 : true),
+		onFilter: (value, record) => (record.owner ? ((record.owner as IUser).name ?? "").indexOf(value.toString()) > -1 : true),
 		render: (value, record) => <>{(record.owner as IUser).name}</>,
 	},
 	{
@@ -70,6 +71,14 @@ const columns: ColumnsType<IFramework> = [
 		width: 50,
 		render: (value) => <>{(dayjs(value) as any).fromNow()}</>,
 		sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
+	},
+	{
+		title: "Updated at",
+		dataIndex: "updatedAt",
+		key: "updatedAt",
+		width: 50,
+		render: (value) => <>{(dayjs(value) as any).fromNow()}</>,
+		sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
 	},
 	{
 		title: "Action",
@@ -98,12 +107,19 @@ const data: DataType[] = [];
 // 	});
 // }
 
-export const FrameworkList = () => {
-	const { data: frameworks } = useFrameworkListApi({ populate: "git,owner" });
-	console.log("frameworks :>> ", frameworks);
+export const ContainerRegistryList = () => {
+	const { data: containerRegistries } = useContainerRegistryListApi({ populate: "owner" });
+	console.log("containerRegistries :>> ", containerRegistries);
+
 	return (
 		<div>
-			<Table columns={columns} dataSource={frameworks} scroll={{ x: 1200 }} sticky={{ offsetHeader: 48 }} pagination={{ pageSize: 20 }} />
+			<Table
+				columns={columns}
+				dataSource={containerRegistries}
+				scroll={{ x: 1200 }}
+				sticky={{ offsetHeader: 48 }}
+				pagination={{ pageSize: 20 }}
+			/>
 		</div>
 	);
 };

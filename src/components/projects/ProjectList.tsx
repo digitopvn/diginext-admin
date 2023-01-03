@@ -198,7 +198,7 @@ export const ProjectList = () => {
 								key: `${p.slug}-${app.slug}-${envName}`,
 								action: envName !== "prod" ? "env" : "env-prod",
 								status: "live",
-								url: envData.domains ? envData.domains[0] : "",
+								url: envData.domains ? `https://${envData.domains[0]}` : "",
 								...(envData as any),
 							};
 						});

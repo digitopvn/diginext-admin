@@ -4,13 +4,9 @@ import axios from "axios";
 import { getCookie } from "cookies-next";
 import { useRouter } from "next/router";
 
-import type { IPaginationOptions } from "./api-types";
+import type { ApiOptions } from "./api-types";
 
-export const useListApi = <T,>(
-	keys: any[],
-	apiPath: string,
-	options: AxiosRequestConfig & { pagination?: IPaginationOptions; populate?: string } = {}
-) => {
+export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}) => {
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers = { Authorization: `Bearer ${access_token}` };
@@ -26,9 +22,11 @@ export const useListApi = <T,>(
 				...options,
 				headers,
 			});
-			return data.data.map((d: any) => {
-				return { ...d, key: d._id };
-			});
+			return (
+				data.data.map((d: any) => {
+					return { ...d, key: d._id };
+				}) || []
+			);
 		},
 	});
 };
@@ -38,13 +36,13 @@ const getById = async (apiPath: string, id: string, options: AxiosRequestConfig 
 	return data;
 };
 
-export const useItemApi = <T,>(keys: any[], apiPath: string, id: string) => {
+export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options: ApiOptions = {}) => {
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers = { Authorization: `Bearer ${access_token}` };
 	return useQuery<T, Error>({
 		queryKey: ["website", ...keys, id],
-		queryFn: () => getById(apiPath, id, { headers }),
+		queryFn: () => getById(apiPath, id, { ...options, headers }),
 		enabled: !!id,
 	});
 };
@@ -87,7 +85,7 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, data: any = {}, o
 	return mutation.mutate;
 };
 
-export const useUpdateApi = <T,>(keys: any[], apiPath: string, filter: any = {}, data: any = {}, options: AxiosRequestConfig = {}) => {
+export const useUpdateApi = <T,>(keys: any[], apiPath: string, filter: any = {}, data: any = {}, options: ApiOptions = {}) => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
@@ -130,7 +128,7 @@ export const useUpdateApi = <T,>(keys: any[], apiPath: string, filter: any = {},
 	return mutation.mutate(data);
 };
 
-export const useDeleteApi = <T,>(keys: any[], apiPath: string, filter: any = {}, options: AxiosRequestConfig = {}) => {
+export const useDeleteApi = <T,>(keys: any[], apiPath: string, filter: any = {}, options: ApiOptions = {}) => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");

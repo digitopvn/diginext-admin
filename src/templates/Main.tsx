@@ -1,3 +1,4 @@
+import { ConfigProvider, theme } from "antd";
 import type { ReactNode } from "react";
 
 import { SiteLayout } from "@/layouts/SiteLayout";
@@ -14,7 +15,13 @@ const Main = (props: IMainProps) => {
 
 	return (
 		<Compose components={[LayoutProvider]}>
-			<SiteLayout meta={props.meta}>{props.children}</SiteLayout>
+			<ConfigProvider
+				theme={{
+					algorithm: theme.darkAlgorithm,
+				}}
+			>
+				<SiteLayout meta={props.meta}>{props.children}</SiteLayout>
+			</ConfigProvider>
 		</Compose>
 	);
 };

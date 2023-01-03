@@ -1,7 +1,12 @@
+import type { AxiosRequestConfig } from "axios";
+
+export type ApiOptions = AxiosRequestConfig & { pagination?: IPaginationOptions; populate?: string };
+
 export interface IGeneral {
 	_id?: string;
 	slug?: string;
 	createdAt?: string;
+	updatedAt?: string;
 	createdBy?: string;
 	metadata?: any;
 	/**
@@ -199,7 +204,7 @@ export interface IGitProvider extends IGeneral {
 	workspace?: IWorkspace | string;
 }
 
-export interface IFramework {
+export interface IFramework extends IGeneral {
 	name: string;
 
 	host?: string;

@@ -37,7 +37,10 @@ export const AuthPage = (props: { children?: ReactNode } = {}) => {
 
 	if (isLoading) return <></>;
 
-	if (isError) router.push("/login");
+	if (isError) {
+		router.push("/login");
+		return <></>;
+	}
 
 	const { status, data: loggedInUser } = response;
 

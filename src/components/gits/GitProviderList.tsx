@@ -1,11 +1,11 @@
-import { DeleteOutlined, EditOutlined, PauseCircleOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Button, Space, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import React from "react";
 
-import { useFrameworkListApi } from "@/api/api-framework";
-import type { IFramework, IGitProvider, IUser } from "@/api/api-types";
+import { useGitProviderListApi } from "@/api/api-git-provider";
+import type { IGitProvider, IUser } from "@/api/api-types";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -22,7 +22,7 @@ interface DataType {
 	createdAt: string;
 }
 
-const columns: ColumnsType<IFramework> = [
+const columns: ColumnsType<IGitProvider> = [
 	{
 		title: "Name",
 		width: 70,
@@ -31,27 +31,27 @@ const columns: ColumnsType<IFramework> = [
 		fixed: "left",
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => record.name.indexOf(value.toString()) > -1,
+		onFilter: (value, record) => (record.name ? record.name.indexOf(value.toString()) > -1 : true),
 	},
 	{
-		title: "Git",
-		width: 60,
-		dataIndex: "git",
-		key: "git",
-		render: (value, record) => (
+		title: "Host",
+		dataIndex: "host",
+		key: "host",
+		width: 50,
+	},
+	{
+		title: "Namespace",
+		width: 50,
+		dataIndex: "gitWorkspace",
+		key: "gitWorkspace",
+		render: (value) => (
 			<Button type="link" style={{ padding: 0 }}>
-				{record.git?.name}
+				{value.id}
 			</Button>
 		),
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.git ? ((record.git as IGitProvider).name || "").indexOf(value.toString()) > -1 : true),
-	},
-	{
-		title: "Version",
-		dataIndex: "version",
-		key: "version",
-		width: 30,
+		onFilter: (value, record) => (record.gitWorkspace ? record.gitWorkspace.indexOf(value.toString()) > -1 : true),
 	},
 	{
 		title: "Created by",
@@ -80,7 +80,6 @@ const columns: ColumnsType<IFramework> = [
 			<Space.Compact>
 				<Button icon={<EditOutlined />}></Button>
 				<Button icon={<DeleteOutlined />}></Button>
-				<Button icon={<PauseCircleOutlined />}></Button>
 			</Space.Compact>
 		),
 	},
@@ -98,12 +97,18 @@ const data: DataType[] = [];
 // 	});
 // }
 
-export const FrameworkList = () => {
-	const { data: frameworks } = useFrameworkListApi({ populate: "git,owner" });
-	console.log("frameworks :>> ", frameworks);
+export const GitProviderList = () => {
+	const { data: gitProviders } = useGitProviderListApi({ populate: "owner" });
+	console.log("gitProviders :>> ", gitProviders);
 	return (
 		<div>
-			<Table columns={columns} dataSource={frameworks} scroll={{ x: 1200 }} sticky={{ offsetHeader: 48 }} pagination={{ pageSize: 20 }} />
+			<Table
+				columns={columns}
+				dataSource={gitProviders || []}
+				scroll={{ x: 1200 }}
+				sticky={{ offsetHeader: 48 }}
+				pagination={{ pageSize: 20 }}
+			/>
 		</div>
 	);
 };
