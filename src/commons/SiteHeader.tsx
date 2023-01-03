@@ -1,5 +1,5 @@
-import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
-import { Layout, theme } from "antd";
+import { DownOutlined, MenuFoldOutlined, MenuUnfoldOutlined, QuestionCircleOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
+import { Avatar, Button, Layout, Popover, Space, theme } from "antd";
 import React, { useEffect } from "react";
 
 import { useLayoutProvider } from "@/providers/LayoutProvider";
@@ -24,10 +24,45 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 			className="w-full"
 			style={{ position: "sticky", top: 0, paddingInline: 24, lineHeight: "48px", height: 48, zIndex: 100, background: colorBgContainer }}
 		>
-			{React.createElement(sidebarCollapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
-				className: "trigger",
-				onClick: () => toggleSidebar && toggleSidebar(),
-			})}
+			<div className="flex ">
+				{/* Open/close sidebar menu */}
+				<div className="grow">
+					{React.createElement(sidebarCollapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+						className: "trigger",
+						onClick: () => toggleSidebar && toggleSidebar(),
+					})}
+				</div>
+
+				{/* User & notification */}
+				<Space size={4}>
+					<Button type="text" icon={<SearchOutlined />} />
+					<Button type="text" icon={<QuestionCircleOutlined />} />
+					<Popover
+						placement="bottomRight"
+						trigger="click"
+						content={
+							<Space direction="vertical">
+								<div className="text-center">
+									<p className="mb-0">
+										<strong>Goon Nguyen</strong>
+									</p>
+									<p className="mb-0">duynguyen@wearetopgroup.com</p>
+								</div>
+								<Space.Compact direction="vertical" className="w-full">
+									<Button>Profile</Button>
+									<Button>Sign out</Button>
+								</Space.Compact>
+							</Space>
+						}
+					>
+						<div className="cursor-pointer align-middle">
+							<Avatar style={{ lineHeight: "20px" }} icon={<UserOutlined style={{ verticalAlign: "middle" }} />} size={24} />
+							<span className="ml-2 inline-block">Goon Nguyen</span>
+							<DownOutlined className="ml-2" />
+						</div>
+					</Popover>
+				</Space>
+			</div>
 		</Header>
 	);
 };

@@ -30,7 +30,7 @@ const columns: ColumnsType<DataType> = [
 		fixed: "left",
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => record.username.indexOf(value.toString()) > -1,
+		onFilter: (value, record) => record.name.indexOf(value.toString()) > -1,
 	},
 	{
 		title: "Cluster",
@@ -40,12 +40,12 @@ const columns: ColumnsType<DataType> = [
 		render: (value) => <Button type="link">{value}</Button>,
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => record.username.indexOf(value.toString()) > -1,
+		onFilter: (value, record) => record.cluster.indexOf(value.toString()) > -1,
 	},
 	{
 		title: "Last updated by",
 		dataIndex: "username",
-		key: "1",
+		key: "username",
 		width: 50,
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
@@ -54,7 +54,7 @@ const columns: ColumnsType<DataType> = [
 	{
 		title: "Last updated",
 		dataIndex: "updatedAt",
-		key: "2",
+		key: "updatedAt",
 		width: 50,
 		render: (value) => <>{(dayjs(value) as any).fromNow()}</>,
 		sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
@@ -63,7 +63,7 @@ const columns: ColumnsType<DataType> = [
 		title: "Status",
 		dataIndex: "status",
 		fixed: "right",
-		key: "3",
+		key: "status",
 		width: 30,
 		filters: [{ text: "live", value: "live" }],
 		render: (value) => (
@@ -82,28 +82,28 @@ const columns: ColumnsType<DataType> = [
 			switch (value) {
 				case "app":
 					return (
-						<Space size={2}>
-							<Button icon={<EditOutlined />} type="text"></Button>
-							<Button icon={<PauseCircleOutlined />} type="text"></Button>
-						</Space>
+						<Space.Compact>
+							<Button icon={<EditOutlined />}></Button>
+							<Button icon={<PauseCircleOutlined />}></Button>
+						</Space.Compact>
 					);
 
 				case "env":
 					return (
-						<Space size={2}>
-							<Button icon={<EyeOutlined />} type="text"></Button>
-							<Button icon={<PauseCircleOutlined />} type="text"></Button>
-							<Button icon={<BuildOutlined />} type="text" />
-							<Button icon={<EditOutlined />} type="text"></Button>
-						</Space>
+						<Space.Compact>
+							<Button icon={<EyeOutlined />}></Button>
+							<Button icon={<PauseCircleOutlined />}></Button>
+							<Button icon={<BuildOutlined />} />
+							<Button icon={<EditOutlined />}></Button>
+						</Space.Compact>
 					);
 
 				case "project":
 					return (
-						<Space size={2}>
-							<Button icon={<EditOutlined />} type="text"></Button>
-							<Button icon={<PauseCircleOutlined />} type="text"></Button>
-						</Space>
+						<Space.Compact>
+							<Button icon={<EditOutlined />}></Button>
+							<Button icon={<PauseCircleOutlined />}></Button>
+						</Space.Compact>
 					);
 
 				default:
@@ -153,7 +153,7 @@ for (let i = 0; i < 100; i++) {
 export const ProjectList = () => {
 	return (
 		<div>
-			<Table columns={columns} dataSource={data} scroll={{ x: 1400 }} sticky={{ offsetHeader: 48 }} pagination={{ pageSize: 20 }} />
+			<Table columns={columns} dataSource={data} scroll={{ x: 1200 }} sticky={{ offsetHeader: 48 }} pagination={{ pageSize: 20 }} />
 		</div>
 	);
 };

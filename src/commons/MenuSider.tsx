@@ -1,4 +1,5 @@
 import {
+	ApartmentOutlined,
 	BranchesOutlined,
 	CloudOutlined,
 	CloudServerOutlined,
@@ -17,6 +18,7 @@ import {
 import type { MenuProps } from "antd";
 import { Menu } from "antd";
 import Sider from "antd/lib/layout/Sider";
+import { trimEnd, trimStart } from "lodash";
 import { useRouter } from "next/router";
 
 import { useLayoutProvider } from "@/providers/LayoutProvider";
@@ -35,7 +37,7 @@ const items: MenuProps["items"] = [
 	{
 		key: `menu/framework`,
 		icon: <CodepenOutlined />,
-		label: "Git Providers",
+		label: "Frameworks",
 	},
 	{
 		key: `menu/git`,
@@ -63,12 +65,12 @@ const items: MenuProps["items"] = [
 				label: "Databases",
 			},
 			{
-				key: `menu/infrastructure/cloud-provider`,
+				key: `menu/infrastructure/registry`,
 				icon: <CloudServerOutlined />,
 				label: "Container Registries",
 			},
 			{
-				key: `menu/infrastructure/cloud-provider`,
+				key: `menu/infrastructure/cloud-storage`,
 				icon: <HddOutlined />,
 				label: "Cloud Storage",
 			},
@@ -76,7 +78,7 @@ const items: MenuProps["items"] = [
 	},
 	{
 		key: `menu/workspace`,
-		icon: <DeploymentUnitOutlined />,
+		icon: <ApartmentOutlined />,
 		label: "Workspace",
 		children: [
 			{
@@ -106,6 +108,17 @@ const items: MenuProps["items"] = [
 export const MenuSider = () => {
 	const router = useRouter();
 	const { sidebarCollapsed, toggleSidebar } = useLayoutProvider();
+
+	const pageLv0 = `menu/${trimStart(router.pathname, "/").split("/")[0]}`;
+	const menuPath = `menu${trimEnd(router.pathname, "/")}`;
+	// console.log("menuPath :>> ", menuPath);
+
+	const onMenuSelected: MenuProps["onSelect"] = (e) => {
+		// console.log("e", e);
+		const path = trimStart(e.key, "menu");
+		router.push(path);
+	};
+
 	return (
 		<Sider
 			theme="light"
@@ -131,7 +144,14 @@ export const MenuSider = () => {
 				</div>
 			)}
 
-			<Menu mode="inline" inlineCollapsed={sidebarCollapsed} defaultSelectedKeys={["4"]} items={items} />
+			<Menu
+				mode="inline"
+				inlineCollapsed={sidebarCollapsed}
+				defaultOpenKeys={[pageLv0]}
+				defaultSelectedKeys={[pageLv0, menuPath]}
+				items={items}
+				onSelect={onMenuSelected}
+			/>
 		</Sider>
 	);
 };

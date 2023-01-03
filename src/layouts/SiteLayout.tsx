@@ -23,7 +23,7 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 			{/* Sidebar here */}
 			<MenuSider />
 
-			<Layout className="transition-all" style={{ marginLeft: sidebarCollapsed ? 80 : 200 }}>
+			<Layout className="min-h-screen transition-all" style={{ marginLeft: sidebarCollapsed ? 80 : 200 }}>
 				{/* Site Header */}
 				<SiteHeader />
 
@@ -31,7 +31,7 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 				<PageTitle />
 
 				{/* Page content here */}
-				<div className="px-2">{props.children}</div>
+				<div className="grow px-2">{props.children}</div>
 
 				{/* Site/Page Footer */}
 				<PageFooter />
