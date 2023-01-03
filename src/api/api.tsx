@@ -4,16 +4,31 @@ import axios from "axios";
 import { getCookie } from "cookies-next";
 import { useRouter } from "next/router";
 
-export const useListApi = <T,>(keys: any[], apiPath: string, options: AxiosRequestConfig = {}) => {
+import type { IPaginationOptions } from "./api-types";
+
+export const useListApi = <T,>(
+	keys: any[],
+	apiPath: string,
+	options: AxiosRequestConfig & { pagination?: IPaginationOptions; populate?: string } = {}
+) => {
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers = { Authorization: `Bearer ${access_token}` };
 
+	const { pagination = { page: 1, size: 20 }, populate } = options;
+	const paginationParams = new URLSearchParams(pagination as any).toString();
+	const populateParams = populate ? `populate=${populate}` : "";
+
 	return useQuery<T[], Error>({
 		queryKey: ["website", ...keys],
 		queryFn: async () => {
-			const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}${apiPath}`, { ...options, headers });
-			return data.data;
+			const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${populateParams}&${paginationParams}`, {
+				...options,
+				headers,
+			});
+			return data.data.map((d: any) => {
+				return { ...d, key: d._id };
+			});
 		},
 	});
 };
