@@ -20,5 +20,11 @@
 	},
 	"[postcss]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[ignore]": {
+		"editor.defaultFormatter": "foxundermoon.shell-format"
+	},
+	"[dotenv]": {
+		"editor.defaultFormatter": "foxundermoon.shell-format"
 	}
 }

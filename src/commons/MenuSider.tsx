@@ -82,22 +82,22 @@ const items: MenuProps["items"] = [
 		label: "Workspace",
 		children: [
 			{
-				key: `menu/workspace/user`,
+				key: `menu/workspace/users`,
 				icon: <UserOutlined />,
 				label: "Users",
 			},
 			{
-				key: `menu/workspace/team`,
+				key: `menu/workspace/teams`,
 				icon: <TeamOutlined />,
 				label: "Teams",
 			},
 			{
-				key: `menu/workspace/role`,
+				key: `menu/workspace/roles`,
 				icon: <LockOutlined />,
 				label: "Roles",
 			},
 			{
-				key: `menu/workspace/setting`,
+				key: `menu/workspace/settings`,
 				icon: <SettingOutlined />,
 				label: "Settings",
 			},

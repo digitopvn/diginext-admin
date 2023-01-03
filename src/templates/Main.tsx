@@ -9,10 +9,14 @@ type IMainProps = {
 	children: ReactNode;
 };
 
-const Main = (props: IMainProps) => (
-	<Compose components={[LayoutProvider]}>
-		<SiteLayout meta={props.meta}>{props.children}</SiteLayout>
-	</Compose>
-);
+const Main = (props: IMainProps) => {
+	// TODO: auth here?
+
+	return (
+		<Compose components={[LayoutProvider]}>
+			<SiteLayout meta={props.meta}>{props.children}</SiteLayout>
+		</Compose>
+	);
+};
 
 export { Main };

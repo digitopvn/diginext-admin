@@ -4,6 +4,8 @@ import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import React from "react";
 
+import { useProjectListApi } from "@/api/api-project";
+
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
 
@@ -151,6 +153,10 @@ for (let i = 0; i < 100; i++) {
 }
 
 export const ProjectList = () => {
+	const { data: projects } = useProjectListApi();
+
+	console.log({ projects });
+
 	return (
 		<div>
 			<Table columns={columns} dataSource={data} scroll={{ x: 1200 }} sticky={{ offsetHeader: 48 }} pagination={{ pageSize: 20 }} />

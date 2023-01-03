@@ -63,7 +63,8 @@
 				"import/no-named-as-default-member": "off",
 				"import/no-named-as-default": "off",
 				"@next/next/no-img-element": "off",
-				"no-plusplus": "off"
+				"no-plusplus": "off",
+				"no-underscore-dangle": "off"
 			}
 		},
 		// Configuration for testing
