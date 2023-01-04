@@ -80,7 +80,7 @@ USER nextjs
 # Only copy build files & neccessary files to run:
 COPY --from=BUILD_IMAGE --chown=nextjs:nodejs /usr/app/.yarn ./.yarn
 COPY --from=BUILD_IMAGE --chown=nextjs:nodejs /usr/app/yarn.lock ./yarn.lock
-COPY --from=BUILD_IMAGE --chown=nextjs:nodejs /usr/app/.pnp.cjs ./.pnp.cjs
+# COPY --from=BUILD_IMAGE --chown=nextjs:nodejs /usr/app/.pnp.cjs ./.pnp.cjs
 COPY --from=BUILD_IMAGE --chown=nextjs:nodejs /usr/app/next.config.js .
 COPY --from=BUILD_IMAGE --chown=nextjs:nodejs /usr/app/.next ./.next
 COPY --from=BUILD_IMAGE --chown=nextjs:nodejs /usr/app/public ./public
