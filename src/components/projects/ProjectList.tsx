@@ -13,11 +13,13 @@ import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
 
 import { useProjectListWithAppsApi } from "@/api/api-project";
 import type { IAppEnvironment } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
+import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { AppConfig } from "@/utils/AppConfig";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
@@ -175,50 +177,24 @@ const columns: ColumnsType<DataType> = [
 	},
 ];
 
-// const data: DataType[] = [];
-// for (let i = 0; i < 100; i++) {
-// 	const apps = [{ name: "front-end" }, { name: "back-end" }];
-// 	data.push({
-// 		key: i,
-// 		name: `Project #${i}`,
-// 		cluster: `Cluster ${i}`,
-// 		owner: `goon`,
-// 		updatedAt: dayjs().format("LLL"),
-// 		status: "live",
-// 		action: "project",
-// 		apps: apps.map((app, ai) => {
-// 			const envs = [{ name: "dev" }, { name: "prod" }];
-// 			return {
-// 				key: `app-${i}-${ai}`,
-// 				name: app.name,
-// 				cluster: `Cluster ${i}`,
-// 				owner: `goon`,
-// 				updatedAt: dayjs().format("LLL"),
-// 				status: "live",
-// 				action: "app",
-// 				apps: envs.map((e, ei) => {
-// 					return {
-// 						key: `env-${i}-${ai}-${ei}`,
-// 						name: e.name.toUpperCase(),
-// 						cluster: `Cluster ${i}`,
-// 						owner: `goon`,
-// 						updatedAt: dayjs().format("LLL"),
-// 						status: "live",
-// 						action: "env",
-// 					};
-// 				}),
-// 			};
-// 		}),
-// 	});
-// }
-
 const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const ProjectList = () => {
-	const [page, setPage] = useState(1);
+	const router = useRouter();
+
+	const query = useRouterQuery();
+
+	const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
+
 	const { data } = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: projects, pagination } = data || {};
 	const { total_pages } = pagination || {};
+
+	useEffect(() => {
+		if (!router.isReady) return;
+		const newPage = query.page ? parseInt(query.page.toString(), 10) : 1;
+		setPage(newPage);
+	}, [query.page]);
 
 	const displayedProjects = projects?.map((p) => {
 		return {
@@ -251,12 +227,11 @@ export const ProjectList = () => {
 				: [],
 		};
 	}) as any;
-	console.log({ displayedProjects });
+	// console.log({ displayedProjects });
 
 	const onTableChange = (_pagination: TablePaginationConfig) => {
 		const { current } = _pagination;
-		console.log("current :>> ", current);
-		if (current) setPage(current);
+		router.push(`${router.pathname}`, { query: { page: current ?? 1 } });
 	};
 
 	return (
@@ -266,7 +241,7 @@ export const ProjectList = () => {
 				dataSource={displayedProjects}
 				scroll={{ x: 1200 }}
 				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize, total: total_pages }}
+				pagination={{ current: page, pageSize, total: total_pages }}
 				onChange={onTableChange}
 			/>
 		</div>

@@ -46,7 +46,7 @@ export const AuthPage = (props: { children?: ReactNode } = {}) => {
 
 	if (status === 0) router.push("/login");
 
-	console.log("loggedInUser :>> ", loggedInUser);
+	// console.log("loggedInUser :>> ", loggedInUser);
 	// useEffect(() => {
 	// 	// if (!loggedInUser) router.push(`/login`);
 	// }, [loggedInUser]);
