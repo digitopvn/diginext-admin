@@ -18,7 +18,7 @@ export const useAuthApi = () => {
 	if (access_token) setCookie("x-auth-cookie", access_token);
 
 	return useQuery({
-		staleTime: 60 * 1000, // 1 minute
+		staleTime: 30 * 60 * 1000, // 30 minutes
 		queryKey: ["auth"],
 		queryFn: async () => {
 			const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/profile`, { headers });

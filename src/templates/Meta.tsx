@@ -35,6 +35,8 @@ const Meta = (props: IMetaProps) => {
 					site_name: AppConfig.site_name,
 				}}
 			/>
+			{/* Remix Icon: https://github.com/Remix-Design/remixicon#usage */}
+			<link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet" />
 		</>
 	);
 };

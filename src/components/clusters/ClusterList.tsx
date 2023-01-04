@@ -1,11 +1,13 @@
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Button, Space, Table } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import React from "react";
+import React, { useState } from "react";
 
 import { useClusterListApi } from "@/api/api-cluster";
 import type { ICluster, IUser } from "@/api/api-types";
+import { DateDisplay } from "@/commons/DateDisplay";
+import { AppConfig } from "@/utils/AppConfig";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -69,7 +71,7 @@ const columns: ColumnsType<ICluster> = [
 		dataIndex: "createdAt",
 		key: "createdAt",
 		width: 50,
-		render: (value) => <>{(dayjs(value) as any).fromNow()}</>,
+		render: (value) => <DateDisplay date={value} />,
 		sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
 	},
 	{
@@ -77,7 +79,7 @@ const columns: ColumnsType<ICluster> = [
 		dataIndex: "updatedAt",
 		key: "updatedAt",
 		width: 50,
-		render: (value) => <>{(dayjs(value) as any).fromNow()}</>,
+		render: (value) => <DateDisplay date={value} />,
 		sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
 	},
 	{
@@ -94,7 +96,7 @@ const columns: ColumnsType<ICluster> = [
 	},
 ];
 
-const data: DataType[] = [];
+// const data: DataType[] = [];
 // for (let i = 0; i < 100; i++) {
 // 	data.push({
 // 		key: i,
@@ -105,20 +107,29 @@ const data: DataType[] = [];
 // 		createdAt: dayjs().format("LLL"),
 // 	});
 // }
+const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const ClusterList = () => {
-	const { data: clusters } = useClusterListApi({ populate: "owner,provider" });
-	const displayedClusters = clusters || [];
-	console.log("displayedClusters :>> ", displayedClusters);
+	const [page, setPage] = useState(1);
+	const { data } = useClusterListApi({ populate: "owner", pagination: { page, size: pageSize } });
+	const { list: clusters, pagination } = data || {};
+	const { total_pages } = pagination || {};
+	console.log("clusters :>> ", clusters);
+
+	const onTableChange = (_pagination: TablePaginationConfig) => {
+		const { current } = _pagination;
+		if (current) setPage(current);
+	};
 
 	return (
 		<div>
 			<Table
 				columns={columns}
-				dataSource={displayedClusters}
+				dataSource={clusters}
 				scroll={{ x: 1200 }}
 				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize: 20 }}
+				pagination={{ pageSize, total: total_pages }}
+				onChange={onTableChange}
 			/>
 		</div>
 	);

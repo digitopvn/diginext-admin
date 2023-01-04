@@ -1,6 +1,15 @@
 import type { AxiosRequestConfig } from "axios";
 
-export type ApiOptions = AxiosRequestConfig & { pagination?: IPaginationOptions; populate?: string };
+export type ApiOptions = AxiosRequestConfig & { pagination?: IPaginationOptions; populate?: string; filter?: any };
+
+export type ApiPagination = {
+	current_page: number;
+	total_pages: number;
+	total_items: number;
+	page_size: number;
+	next_page?: number;
+	prev_page?: number;
+};
 
 export interface IGeneral {
 	_id?: string;
@@ -501,6 +510,9 @@ export interface IApp extends IGeneral {
 	git?: string;
 	latestBuild?: string;
 	name?: string;
+
+	project?: IProject | string;
+
 	/**
 	 * User ID of the owner
 	 *

@@ -1,5 +1,6 @@
 import { ConfigProvider, theme } from "antd";
 import type { ReactNode } from "react";
+import { useDarkMode } from "usehooks-ts";
 
 import { SiteLayout } from "@/layouts/SiteLayout";
 import Compose from "@/providers/Compose";
@@ -11,13 +12,13 @@ type IMainProps = {
 };
 
 const Main = (props: IMainProps) => {
-	// TODO: auth here?
+	const { isDarkMode } = useDarkMode();
 
 	return (
 		<Compose components={[LayoutProvider]}>
 			<ConfigProvider
 				theme={{
-					algorithm: theme.darkAlgorithm,
+					algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
 				}}
 			>
 				<SiteLayout meta={props.meta}>{props.children}</SiteLayout>

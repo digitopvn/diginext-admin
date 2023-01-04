@@ -1,11 +1,13 @@
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Button, Space, Table } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import React from "react";
+import React, { useState } from "react";
 
 import { useCloudProviderListApi } from "@/api/api-cloud-provider";
 import type { ICluster, IUser } from "@/api/api-types";
+import { DateDisplay } from "@/commons/DateDisplay";
+import { AppConfig } from "@/utils/AppConfig";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -60,7 +62,7 @@ const columns: ColumnsType<DataType> = [
 		dataIndex: "createdAt",
 		key: "createdAt",
 		width: 50,
-		render: (value) => <>{(dayjs(value) as any).fromNow()}</>,
+		render: (value) => <DateDisplay date={value} />,
 		sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
 	},
 	{
@@ -68,7 +70,7 @@ const columns: ColumnsType<DataType> = [
 		dataIndex: "updatedAt",
 		key: "updatedAt",
 		width: 50,
-		render: (value) => <>{(dayjs(value) as any).fromNow()}</>,
+		render: (value) => <DateDisplay date={value} />,
 		sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
 	},
 	{
@@ -97,8 +99,19 @@ const columns: ColumnsType<DataType> = [
 // 	});
 // }
 
+const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
+
 export const CloudProviderList = () => {
-	const { data: cloudProviders } = useCloudProviderListApi({ populate: "owner,clusters" });
+	const [page, setPage] = useState(1);
+	const { data } = useCloudProviderListApi({ populate: "owner,clusters", pagination: { page, size: pageSize } });
+	const { list: cloudProviders, pagination } = data || {};
+	const { total_pages } = pagination || {};
+	console.log("cloudProviders :>> ", cloudProviders);
+
+	const onTableChange = (_pagination: TablePaginationConfig) => {
+		const { current } = _pagination;
+		if (current) setPage(current);
+	};
 
 	const displayedCloudProviders: DataType[] =
 		cloudProviders?.map((provider, i) => {
@@ -121,7 +134,8 @@ export const CloudProviderList = () => {
 				dataSource={displayedCloudProviders}
 				scroll={{ x: 1200 }}
 				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize: 20 }}
+				pagination={{ pageSize, total: total_pages }}
+				onChange={onTableChange}
 			/>
 		</div>
 	);

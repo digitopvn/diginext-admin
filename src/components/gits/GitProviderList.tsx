@@ -1,11 +1,13 @@
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Button, Space, Table } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import React from "react";
+import React, { useState } from "react";
 
 import { useGitProviderListApi } from "@/api/api-git-provider";
 import type { IGitProvider, IUser } from "@/api/api-types";
+import { DateDisplay } from "@/commons/DateDisplay";
+import { AppConfig } from "@/utils/AppConfig";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -68,7 +70,7 @@ const columns: ColumnsType<IGitProvider> = [
 		dataIndex: "createdAt",
 		key: "createdAt",
 		width: 50,
-		render: (value) => <>{(dayjs(value) as any).fromNow()}</>,
+		render: (value) => <DateDisplay date={value} />,
 		sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
 	},
 	{
@@ -85,7 +87,7 @@ const columns: ColumnsType<IGitProvider> = [
 	},
 ];
 
-const data: DataType[] = [];
+// const data: DataType[] = [];
 // for (let i = 0; i < 100; i++) {
 // 	data.push({
 // 		key: i,
@@ -96,10 +98,20 @@ const data: DataType[] = [];
 // 		createdAt: dayjs().format("LLL"),
 // 	});
 // }
+const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const GitProviderList = () => {
-	const { data: gitProviders } = useGitProviderListApi({ populate: "owner" });
+	const [page, setPage] = useState(1);
+	const { data } = useGitProviderListApi({ populate: "owner", pagination: { page, size: pageSize } });
+	const { list: gitProviders, pagination } = data || {};
+	const { total_pages } = pagination || {};
 	console.log("gitProviders :>> ", gitProviders);
+
+	const onTableChange = (_pagination: TablePaginationConfig) => {
+		const { current } = _pagination;
+		if (current) setPage(current);
+	};
+
 	return (
 		<div>
 			<Table
@@ -107,7 +119,8 @@ export const GitProviderList = () => {
 				dataSource={gitProviders || []}
 				scroll={{ x: 1200 }}
 				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize: 20 }}
+				pagination={{ pageSize, total: total_pages }}
+				onChange={onTableChange}
 			/>
 		</div>
 	);

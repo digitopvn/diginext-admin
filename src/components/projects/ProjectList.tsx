@@ -6,14 +6,19 @@ import {
 	EyeOutlined,
 	GlobalOutlined,
 	PauseCircleOutlined,
+	QrcodeOutlined,
 } from "@ant-design/icons";
-import { Button, Space, Table, Tag } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import { Button, Space, Table, Tag, Tooltip } from "antd";
+import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import React from "react";
+import { isEmpty } from "lodash";
+import Link from "next/link";
+import React, { useState } from "react";
 
 import { useProjectListWithAppsApi } from "@/api/api-project";
 import type { IAppEnvironment } from "@/api/api-types";
+import { DateDisplay } from "@/commons/DateDisplay";
+import { AppConfig } from "@/utils/AppConfig";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -22,14 +27,18 @@ dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
 interface DataType {
+	id?: string;
 	key?: React.Key;
 	name?: string;
+	slug?: string;
 	cluster?: string;
 	owner?: string;
 	updatedAt?: string;
+	createdAt?: string;
 	status?: string;
 	action?: string;
 	url?: string;
+	prereleaseUrl?: string;
 	children?: DataType[];
 }
 
@@ -43,6 +52,7 @@ const columns: ColumnsType<DataType> = [
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
 		onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
+		render: (value, record) => (record.action === "project" ? <Link href={`/project/${record.slug}`}>{value}</Link> : <>{value}</>),
 	},
 	{
 		title: "Cluster",
@@ -73,8 +83,16 @@ const columns: ColumnsType<DataType> = [
 		dataIndex: "updatedAt",
 		key: "updatedAt",
 		width: 50,
-		render: (value) => <>{(dayjs(value) as any).fromNow()}</>,
+		render: (value) => <DateDisplay date={value} />,
 		sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
+	},
+	{
+		title: "Created at",
+		dataIndex: "createdAt",
+		key: "createdAt",
+		width: 50,
+		render: (value) => <DateDisplay date={value} />,
+		sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
 	},
 	{
 		title: "Status",
@@ -93,14 +111,16 @@ const columns: ColumnsType<DataType> = [
 		title: "Action",
 		key: "action",
 		fixed: "right",
-		width: 50,
+		width: 60,
 		dataIndex: "action",
 		render: (value, record) => {
 			switch (value) {
 				case "app":
 					return (
 						<Space.Compact>
-							<Button icon={<EditOutlined />} />
+							<Tooltip title="Edit app">
+								<Button icon={<EditOutlined />} />
+							</Tooltip>
 							<Button icon={<PauseCircleOutlined />} />
 						</Space.Compact>
 					);
@@ -108,7 +128,9 @@ const columns: ColumnsType<DataType> = [
 				case "env":
 					return (
 						<Space.Compact>
-							<Button icon={<EyeOutlined />} href={record.url} target="_blank" />
+							<Tooltip title="View website">
+								<Button icon={<EyeOutlined />} href={record.url} target="_blank" disabled={isEmpty(record.url)} />
+							</Tooltip>
 							<Button icon={<PauseCircleOutlined />} />
 							<Button icon={<BuildOutlined />} />
 							<Button icon={<EditOutlined />} />
@@ -118,18 +140,30 @@ const columns: ColumnsType<DataType> = [
 				case "env-prod":
 					return (
 						<Space.Compact>
-							<Button icon={<EyeOutlined />} />
-							<Button icon={<GlobalOutlined />} />
-							<Button icon={<PauseCircleOutlined />} />
-							<Button icon={<AppstoreAddOutlined />} />
-							<Button icon={<EditOutlined />} />
+							<Tooltip title="Preview pre-release site">
+								<Button icon={<EyeOutlined />} href={record.prereleaseUrl} target="_blank" disabled={isEmpty(record.prereleaseUrl)} />
+							</Tooltip>
+							<Tooltip title="View live website">
+								<Button icon={<GlobalOutlined />} href={record.url} target="_blank" disabled={isEmpty(record.url)} />
+							</Tooltip>
+							<Tooltip title="Take down">
+								<Button icon={<PauseCircleOutlined />} />
+							</Tooltip>
+							<Tooltip title="All releases">
+								<Button icon={<AppstoreAddOutlined />} />
+							</Tooltip>
+							<Tooltip title="Modify environment variables" placement="topRight">
+								<Button icon={<QrcodeOutlined />} />
+							</Tooltip>
 						</Space.Compact>
 					);
 
 				case "project":
 					return (
 						<Space.Compact>
-							<Button icon={<EditOutlined />} />
+							<Tooltip title="Edit project">
+								<Button icon={<EditOutlined />} />
+							</Tooltip>
 							<Button icon={<PauseCircleOutlined />} />
 						</Space.Compact>
 					);
@@ -178,14 +212,20 @@ const columns: ColumnsType<DataType> = [
 // 	});
 // }
 
+const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
+
 export const ProjectList = () => {
-	const { data: projects } = useProjectListWithAppsApi();
+	const [page, setPage] = useState(1);
+	const { data } = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
+	const { list: projects, pagination } = data || {};
+	const { total_pages } = pagination || {};
 
 	const displayedProjects = projects?.map((p) => {
 		return {
 			...p,
 			action: "project",
 			key: p._id,
+			id: p._id,
 			status: "live",
 			children: p.apps
 				? p.apps.map((app) => {
@@ -196,19 +236,28 @@ export const ProjectList = () => {
 							return {
 								name: envName.toUpperCase(),
 								key: `${p.slug}-${app.slug}-${envName}`,
+								id: envName,
+								slug: envName,
 								action: envName !== "prod" ? "env" : "env-prod",
 								status: "live",
 								url: envData.domains ? `https://${envData.domains[0]}` : "",
+								prereleaseUrl: envName === "prod" ? `https://${p.slug}-${app.slug}.prerelease.diginext.site`.toLowerCase() : "",
 								...(envData as any),
 							};
 						});
 
-						return { ...(app as any), key: app._id, status: "live", action: "app", children: environments };
+						return { ...(app as any), key: app._id, id: app._id, status: "live", action: "app", children: environments };
 				  })
 				: [],
 		};
 	}) as any;
 	console.log({ displayedProjects });
+
+	const onTableChange = (_pagination: TablePaginationConfig) => {
+		const { current } = _pagination;
+		console.log("current :>> ", current);
+		if (current) setPage(current);
+	};
 
 	return (
 		<div>
@@ -217,7 +266,8 @@ export const ProjectList = () => {
 				dataSource={displayedProjects}
 				scroll={{ x: 1200 }}
 				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize: 20 }}
+				pagination={{ pageSize, total: total_pages }}
+				onChange={onTableChange}
 			/>
 		</div>
 	);

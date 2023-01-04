@@ -4,29 +4,38 @@ import axios from "axios";
 import { getCookie } from "cookies-next";
 import { useRouter } from "next/router";
 
-import type { ApiOptions } from "./api-types";
+import type { ApiOptions, ApiPagination } from "./api-types";
 
 export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}) => {
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers = { Authorization: `Bearer ${access_token}` };
 
-	const { pagination = { page: 1, size: 20 }, populate } = options;
+	const { pagination = { page: 1, size: 20 }, populate, filter } = options;
 	const paginationParams = new URLSearchParams(pagination as any).toString();
 	const populateParams = populate ? `populate=${populate}` : "";
+	const filterParams = filter ? new URLSearchParams(filter).toString() : "";
 
-	return useQuery<T[], Error>({
-		queryKey: ["website", ...keys],
+	return useQuery<{ list: T[]; pagination: ApiPagination }, Error>({
+		queryKey: ["website", ...keys, filter, pagination],
 		queryFn: async () => {
-			const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${populateParams}&${paginationParams}`, {
-				...options,
-				headers,
-			});
-			return (
-				data.data.map((d: any) => {
-					return { ...d, key: d._id };
-				}) || []
+			const { data } = await axios.get(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${populateParams}&${paginationParams}`,
+				{
+					...options,
+					headers,
+				}
 			);
+
+			const { current_page, total_pages, total_items, page_size, next_page, prev_page } = data;
+
+			return {
+				list:
+					data.data.map((d: any) => {
+						return { ...d, key: d._id };
+					}) || [],
+				pagination: { current_page, total_pages, total_items, page_size, next_page, prev_page },
+			};
 		},
 	});
 };

@@ -1,8 +1,8 @@
 import { useCreateApi, useDeleteApi, useItemApi, useListApi, useUpdateApi } from "./api";
-import type { ITeam } from "./api-types";
+import type { ApiOptions, ITeam } from "./api-types";
 
-export const useTeamListApi = () => {
-	return useListApi<ITeam>(["teams"], `/api/v1/team`);
+export const useTeamListApi = (options?: ApiOptions) => {
+	return useListApi<ITeam>(["teams"], `/api/v1/team`, options);
 };
 
 export const useTeamApi = (id: string) => {

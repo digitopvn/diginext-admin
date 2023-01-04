@@ -1,8 +1,8 @@
 import { useCreateApi, useDeleteApi, useItemApi, useListApi, useUpdateApi } from "./api";
-import type { IApp } from "./api-types";
+import type { ApiOptions, IApp } from "./api-types";
 
-export const useAppListApi = () => {
-	return useListApi<IApp>(["apps"], `/api/v1/app`);
+export const useAppListApi = (options?: ApiOptions) => {
+	return useListApi<IApp>(["apps"], `/api/v1/app`, options);
 };
 
 export const useAppApi = (id: string) => {

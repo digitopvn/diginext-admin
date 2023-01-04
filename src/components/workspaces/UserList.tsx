@@ -1,11 +1,13 @@
 import { DeleteOutlined, EditOutlined, StopOutlined } from "@ant-design/icons";
 import { Button, Space, Table } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import React from "react";
+import React, { useState } from "react";
 
 import type { IRole, ITeam } from "@/api/api-types";
 import { useUserListApi } from "@/api/api-user";
+import { DateDisplay } from "@/commons/DateDisplay";
+import { AppConfig } from "@/utils/AppConfig";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -79,7 +81,7 @@ const columns: ColumnsType<DataType> = [
 		dataIndex: "updatedAt",
 		key: "updatedAt",
 		width: 50,
-		render: (value) => <>{(dayjs(value) as any).fromNow()}</>,
+		render: (value) => <DateDisplay date={value} />,
 		sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
 	},
 	{
@@ -87,7 +89,7 @@ const columns: ColumnsType<DataType> = [
 		dataIndex: "createdAt",
 		key: "createdAt",
 		width: 50,
-		render: (value) => <>{(dayjs(value) as any).fromNow()}</>,
+		render: (value) => <DateDisplay date={value} />,
 		sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
 	},
 	{
@@ -105,23 +107,33 @@ const columns: ColumnsType<DataType> = [
 	},
 ];
 
-const data: DataType[] = [];
-for (let i = 0; i < 20; i++) {
-	data.push({
-		key: i,
-		id: i.toString(),
-		name: `User #${i}`,
-		username: `Github`,
-		email: "name@example.com",
-		roles: [],
-		teams: [],
-		updatedAt: dayjs().format("LLL"),
-		createdAt: dayjs().format("LLL"),
-	});
-}
+// const data: DataType[] = [];
+// for (let i = 0; i < 20; i++) {
+// 	data.push({
+// 		key: i,
+// 		id: i.toString(),
+// 		name: `User #${i}`,
+// 		username: `Github`,
+// 		email: "name@example.com",
+// 		roles: [],
+// 		teams: [],
+// 		updatedAt: dayjs().format("LLL"),
+// 		createdAt: dayjs().format("LLL"),
+// 	});
+// }
+const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const UserList = () => {
-	const { data: users } = useUserListApi({ populate: "roles,teams" });
+	const [page, setPage] = useState(1);
+	const { data } = useUserListApi({ populate: "roles,teams", pagination: { page, size: pageSize } });
+	const { list: users, pagination } = data || {};
+	const { total_pages } = pagination || {};
+	console.log("users :>> ", users);
+
+	const onTableChange = (_pagination: TablePaginationConfig) => {
+		const { current } = _pagination;
+		if (current) setPage(current);
+	};
 
 	const displayedUsers: DataType[] =
 		users?.map((u, i) => {
@@ -133,15 +145,22 @@ export const UserList = () => {
 				email: u.email ?? "",
 				roles: (u.roles as IRole[]) || [],
 				teams: (u.teams as ITeam[]) || [],
-				updatedAt: dayjs(u.updatedAt).format("LLL"),
-				createdAt: dayjs(u.createdAt).format("LLL"),
+				updatedAt: u.updatedAt,
+				createdAt: u.createdAt,
 			};
 		}) || [];
 	console.log("displayedUsers :>> ", displayedUsers);
 
 	return (
 		<div>
-			<Table columns={columns} dataSource={displayedUsers} scroll={{ x: 1200 }} sticky={{ offsetHeader: 48 }} pagination={{ pageSize: 20 }} />
+			<Table
+				columns={columns}
+				dataSource={displayedUsers}
+				scroll={{ x: 1200 }}
+				sticky={{ offsetHeader: 48 }}
+				pagination={{ pageSize, total: total_pages }}
+				onChange={onTableChange}
+			/>
 		</div>
 	);
 };

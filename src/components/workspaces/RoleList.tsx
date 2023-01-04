@@ -4,6 +4,8 @@ import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import React from "react";
 
+import { DateDisplay } from "@/commons/DateDisplay";
+
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
 
@@ -71,7 +73,7 @@ const columns: ColumnsType<DataType> = [
 		dataIndex: "updatedAt",
 		key: "updatedAt",
 		width: 50,
-		render: (value) => <>{(dayjs(value) as any).fromNow()}</>,
+		render: (value) => <DateDisplay date={value} />,
 		sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
 	},
 	{
@@ -79,7 +81,7 @@ const columns: ColumnsType<DataType> = [
 		dataIndex: "createdAt",
 		key: "createdAt",
 		width: 50,
-		render: (value) => <>{(dayjs(value) as any).fromNow()}</>,
+		render: (value) => <DateDisplay date={value} />,
 		sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
 	},
 	{

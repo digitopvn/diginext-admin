@@ -5,4 +5,7 @@ export const AppConfig = {
 	title: "Diginext Site",
 	description: "Admin Site of Diginext",
 	locale: "en",
+	tableConfig: {
+		defaultPageSize: 20,
+	},
 };

@@ -1,8 +1,8 @@
 import { useCreateApi, useDeleteApi, useItemApi, useListApi, useUpdateApi } from "./api";
-import type { IProject } from "./api-types";
+import type { ApiOptions, IProject } from "./api-types";
 
-export const useProjectListApi = () => {
-	return useListApi<IProject>(["projects"], `/api/v1/project`);
+export const useProjectListApi = (options?: ApiOptions) => {
+	return useListApi<IProject>(["projects"], `/api/v1/project`, options);
 };
 
 export const useProjectApi = (id: string) => {
@@ -22,6 +22,6 @@ export const useProjectDeleteApi = (filter: any) => {
 };
 
 // with apps
-export const useProjectListWithAppsApi = () => {
-	return useListApi<IProject>(["projects"], `/api/v1/project/with-apps`, { populate: "owner" });
+export const useProjectListWithAppsApi = (options?: ApiOptions) => {
+	return useListApi<IProject>(["projects"], `/api/v1/project/with-apps`, options);
 };

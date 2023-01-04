@@ -9,8 +9,8 @@ dayjs.extend(localizedFormat);
 
 export const WorkspaceSettings = () => {
 	return (
-		<div>
-			<h1>Workspace Settings</h1>
+		<div className="px-4 py-6">
+			<h2>(Coming soon)</h2>
 		</div>
 	);
 };

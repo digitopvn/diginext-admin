@@ -1,6 +1,7 @@
 import { DownOutlined, MenuFoldOutlined, MenuUnfoldOutlined, QuestionCircleOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Button, Layout, Popover, Space, theme } from "antd";
 import React, { useEffect } from "react";
+import { useDarkMode } from "usehooks-ts";
 
 import { useLayoutProvider } from "@/providers/LayoutProvider";
 
@@ -10,6 +11,7 @@ type ISiteHeaderProps = { onSidebarChange?: (value: boolean) => void };
 
 export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 	const { onSidebarChange } = props;
+	const { isDarkMode, toggle } = useDarkMode();
 
 	const {
 		token: { colorBgContainer },
@@ -37,6 +39,13 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 				<Space size={4}>
 					<Button type="text" icon={<SearchOutlined />} />
 					<Button type="text" icon={<QuestionCircleOutlined />} />
+					{/* eslint-disable-next-line tailwindcss/no-custom-classname */}
+					<Button
+						type="text"
+						style={{ fontSize: 18, verticalAlign: "middle", paddingTop: 0 }}
+						onClick={toggle}
+						icon={isDarkMode ? <i className="ri-sun-line inline-block" /> : <i className="ri-moon-line inline-block" />}
+					/>
 					<Popover
 						placement="bottomRight"
 						trigger="click"

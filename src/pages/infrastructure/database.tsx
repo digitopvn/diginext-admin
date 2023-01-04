@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 
 import { AuthPage } from "@/api/api-auth";
+import { PageTitle } from "@/commons/PageTitle";
 import { Main } from "@/templates/Main";
 import { Meta } from "@/templates/Meta";
 
@@ -20,8 +21,13 @@ const DatabasePage = () => {
 					/>
 				}
 			>
+				{/* Page title & desc here */}
+				<PageTitle title="Databases" breadcrumbs={[{ name: "Infrastructure" }]} />
+
 				{/* Page Content */}
-				<h2>Database</h2>
+				<div className="px-4 py-6">
+					<h2>(Coming soon)</h2>
+				</div>
 			</Main>
 		</AuthPage>
 	);
