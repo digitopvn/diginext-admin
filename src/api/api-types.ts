@@ -1,6 +1,6 @@
 import type { AxiosRequestConfig } from "axios";
 
-export type ApiOptions = AxiosRequestConfig & { pagination?: IPaginationOptions; populate?: string; filter?: any };
+export type ApiOptions = AxiosRequestConfig & { pagination?: IPaginationOptions; populate?: string; filter?: any; sort?: string };
 
 export type ApiPagination = {
 	current_page: number;

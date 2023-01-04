@@ -1,8 +1,8 @@
 import { useCreateApi, useDeleteApi, useItemApi, useListApi, useUpdateApi } from "./api";
-import type { IRelease } from "./api-types";
+import type { ApiOptions, IRelease } from "./api-types";
 
-export const useReleaseListApi = () => {
-	return useListApi<IRelease>(["releases"], `/api/v1/release`);
+export const useReleaseListApi = (options?: ApiOptions) => {
+	return useListApi<IRelease>(["releases"], `/api/v1/release`, options);
 };
 
 export const useReleaseApi = (id: string) => {

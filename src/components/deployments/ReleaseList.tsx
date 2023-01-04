@@ -1,12 +1,12 @@
-import { BugOutlined, CheckCircleOutlined, CloseCircleOutlined, EyeOutlined, InfoCircleOutlined, LoadingOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, CloseCircleOutlined, EyeOutlined, InfoCircleOutlined, LoadingOutlined, RocketOutlined } from "@ant-design/icons";
 import { Button, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 
-import { useBuildListApi } from "@/api/api-build";
-import type { IBuild, IUser } from "@/api/api-types";
+import { useReleaseListApi } from "@/api/api-release";
+import type { IRelease, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
@@ -21,7 +21,7 @@ interface DataType {
 	children?: DataType[];
 }
 
-const columns: ColumnsType<IBuild & DataType> = [
+const columns: ColumnsType<IRelease & DataType> = [
 	{
 		title: "Name",
 		width: 70,
@@ -62,9 +62,9 @@ const columns: ColumnsType<IBuild & DataType> = [
 	// },
 	{
 		title: "Status",
-		dataIndex: "status",
+		dataIndex: "buildStatus",
 		// fixed: "right",
-		key: "status",
+		key: "buildStatus",
 		width: 30,
 		filters: [{ text: "live", value: "live" }],
 		render: (value) => {
@@ -105,11 +105,11 @@ const columns: ColumnsType<IBuild & DataType> = [
 		render: (value, record) => {
 			return (
 				<Space.Compact>
-					<Tooltip title="View log">
-						<Button icon={<BugOutlined />} />
+					<Tooltip title="Roll out">
+						<Button icon={<RocketOutlined />} />
 					</Tooltip>
-					<Tooltip title="Go to image link">
-						<Button icon={<EyeOutlined />} href={`https://${record.image}`} target="_blank" />
+					<Tooltip title="Preview">
+						<Button icon={<EyeOutlined />} href={`https://${record.prereleaseUrl}`} target="_blank" />
 					</Tooltip>
 				</Space.Compact>
 			);
@@ -119,27 +119,26 @@ const columns: ColumnsType<IBuild & DataType> = [
 
 const pageSize = 100;
 
-type IBuildListProps = {
+type IReleaseListProps = {
 	project: string;
 	app: string;
-	env: string;
+	offsetHeader?: number;
 };
 
-export const BuildList = (props: IBuildListProps = {} as IBuildListProps) => {
+export const ReleaseList = (props: IReleaseListProps = {} as IReleaseListProps) => {
 	const router = useRouter();
 	// const [query] = useRouterQuery();
 
-	const { project, app, env } = props;
+	const { project, app, offsetHeader = 0 } = props;
 
 	const filter: any = {};
 	if (project) filter.projectSlug = project;
 	if (app) filter.appSlug = app;
-	if (env) filter.env = env;
 
 	// const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 	const [page, setPage] = useState(1);
 
-	const { data } = useBuildListApi({ populate: "owner", pagination: { page, size: pageSize }, filter });
+	const { data } = useReleaseListApi({ populate: "owner", pagination: { page, size: pageSize }, filter });
 	const { list: builds, pagination } = data || {};
 	const { total_pages } = pagination || {};
 
@@ -163,7 +162,7 @@ export const BuildList = (props: IBuildListProps = {} as IBuildListProps) => {
 				columns={columns}
 				dataSource={builds}
 				scroll={{ x: 600 }}
-				sticky={{ offsetHeader: 0 }}
+				sticky={{ offsetHeader }}
 				pagination={{ current: page, pageSize, total: total_pages }}
 				onChange={onTableChange}
 			/>

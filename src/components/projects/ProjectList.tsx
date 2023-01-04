@@ -23,6 +23,7 @@ import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { AppConfig } from "@/utils/AppConfig";
 
 import { BuildList } from "../deployments/BuildList";
+import { ReleaseList } from "../deployments/ReleaseList";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -143,12 +144,17 @@ export const ProjectList = () => {
 	// builds
 	const onClose = () => {
 		setOpen(false);
-		deleteQuery(["project", "app", "env"]);
+		deleteQuery(["type", "project", "app", "env"]);
 	};
 
 	const openBuildList = (project: string, app: string, env: string) => {
 		setOpen(true);
-		setQuery({ project, app, env });
+		setQuery({ type: "build", project, app, env });
+	};
+
+	const openReleaseList = (project: string, app: string) => {
+		setOpen(true);
+		setQuery({ type: "release", project, app });
 	};
 
 	// table pagination
@@ -218,7 +224,7 @@ export const ProjectList = () => {
 											/>
 										</Tooltip>
 										<Tooltip title="All releases">
-											<Button icon={<RocketOutlined />} />
+											<Button icon={<RocketOutlined />} onClick={() => openReleaseList(record.projectSlug, record.appSlug)} />
 										</Tooltip>
 										<Tooltip title="Modify environment variables (coming soon)" placement="topRight">
 											<Button icon={<QrcodeOutlined />} disabled />
@@ -282,8 +288,9 @@ export const ProjectList = () => {
 				pagination={{ current: page, pageSize, total: total_pages }}
 				onChange={onTableChange}
 			/>
-			<Drawer title="Builds" placement="right" onClose={onClose} open={open} size="large">
-				<BuildList project={query.project} app={query.app} env={query.env} />
+			<Drawer title={query.type === "build" ? "Builds" : "Releases"} placement="right" onClose={onClose} open={open} size="large">
+				{query.type === "build" && <BuildList project={query.project} app={query.app} env={query.env} />}
+				{query.type === "release" && <ReleaseList project={query.project} app={query.app} />}
 			</Drawer>
 		</div>
 	);

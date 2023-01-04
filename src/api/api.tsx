@@ -11,16 +11,17 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers = { Authorization: `Bearer ${access_token}` };
 
-	const { pagination = { page: 1, size: 20 }, populate, filter } = options;
+	const { pagination = { page: 1, size: 20 }, populate, filter, sort = "-createdAt" } = options;
 	const paginationParams = new URLSearchParams(pagination as any).toString();
 	const populateParams = populate ? `populate=${populate}` : "";
 	const filterParams = filter ? new URLSearchParams(filter).toString() : "";
+	const sortParams = `sort=${sort}`;
 
 	return useQuery<{ list: T[]; pagination: ApiPagination }, Error>({
 		queryKey: ["website", ...keys, filter, pagination],
 		queryFn: async () => {
 			const { data } = await axios.get(
-				`${process.env.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${populateParams}&${paginationParams}`,
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${sortParams}&${populateParams}&${paginationParams}`,
 				{
 					...options,
 					headers,
