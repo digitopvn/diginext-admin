@@ -3,6 +3,7 @@ import { Avatar, Button, Layout, Popover, Space, theme } from "antd";
 import React, { useEffect } from "react";
 import { useDarkMode } from "usehooks-ts";
 
+import { useAuth } from "@/api/api-auth";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
 
 const { Header } = Layout;
@@ -12,6 +13,7 @@ type ISiteHeaderProps = { onSidebarChange?: (value: boolean) => void };
 export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 	const { onSidebarChange } = props;
 	const { isDarkMode, toggle } = useDarkMode();
+	const user = useAuth();
 
 	const {
 		token: { colorBgContainer },
@@ -53,9 +55,9 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 							<Space direction="vertical">
 								<div className="text-center">
 									<p className="mb-0">
-										<strong>Goon Nguyen</strong>
+										<strong>{user?.name}</strong>
 									</p>
-									<p className="mb-0">duynguyen@wearetopgroup.com</p>
+									<p className="mb-0">{user?.email}</p>
 								</div>
 								<Space.Compact direction="vertical" className="w-full">
 									<Button>Profile</Button>
@@ -65,8 +67,13 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 						}
 					>
 						<div className="cursor-pointer align-middle">
-							<Avatar style={{ lineHeight: "20px" }} icon={<UserOutlined style={{ verticalAlign: "middle" }} />} size={24} />
-							<span className="ml-2 inline-block">Goon Nguyen</span>
+							<Avatar
+								style={{ lineHeight: "20px" }}
+								icon={<UserOutlined style={{ verticalAlign: "middle" }} />}
+								src={user?.image}
+								size={24}
+							/>
+							<span className="ml-2 inline-block">{user?.name}</span>
 							<DownOutlined className="ml-2" />
 						</div>
 					</Popover>

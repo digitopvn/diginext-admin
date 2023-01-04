@@ -19,6 +19,7 @@ import { Menu } from "antd";
 import Sider from "antd/lib/layout/Sider";
 import { trimEnd, trimStart } from "lodash";
 import { useRouter } from "next/router";
+import { useDarkMode } from "usehooks-ts";
 
 import { useLayoutProvider } from "@/providers/LayoutProvider";
 
@@ -107,6 +108,7 @@ const items: MenuProps["items"] = [
 export const MenuSider = () => {
 	const router = useRouter();
 	const { sidebarCollapsed, toggleSidebar } = useLayoutProvider();
+	const { isDarkMode } = useDarkMode();
 
 	const pageLv0 = `menu/${trimStart(router.pathname, "/").split("/")[0]}`;
 	const menuPath = `menu${trimEnd(router.pathname, "/")}`;
@@ -135,11 +137,25 @@ export const MenuSider = () => {
 		>
 			{sidebarCollapsed ? (
 				<div className="mx-auto my-5 w-8">
-					<img src={`${router.basePath}/assets/images/diginext-icon-black.svg`} alt="Diginext Logo" />
+					<img
+						src={
+							isDarkMode
+								? `${router.basePath}/assets/images/diginext-icon-white.svg`
+								: `${router.basePath}/assets/images/diginext-icon-black.svg`
+						}
+						alt="Diginext Logo"
+					/>
 				</div>
 			) : (
 				<div className="mx-auto my-5 w-36">
-					<img src={`${router.basePath}/assets/images/diginext_logo.svg`} alt="Diginext Logo" />
+					<img
+						src={
+							isDarkMode
+								? `${router.basePath}/assets/images/diginext_logo_white.svg`
+								: `${router.basePath}/assets/images/diginext_logo.svg`
+						}
+						alt="Diginext Logo"
+					/>
 				</div>
 			)}
 

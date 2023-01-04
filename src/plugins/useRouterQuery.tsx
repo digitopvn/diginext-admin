@@ -1,10 +1,26 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
-export const useRouterQuery = () => {
+export const useRouterQuery = (): [any, { setQuery: (query?: any) => any; deleteQuery: (keys: string[]) => any }] => {
 	const router = useRouter();
 
-	const [query, setQuery] = useState(router.query);
+	const [routerQuery, setRouterQuery] = useState(router.query as any);
+
+	const setQuery = (query: any = {}) => {
+		const newQuery = { ...routerQuery, ...query };
+		setRouterQuery(newQuery);
+		router.push(`${router.pathname}`, { query: newQuery });
+		return newQuery;
+	};
+
+	const deleteQuery = (keys: string[]) => {
+		keys.forEach((key) => {
+			delete routerQuery[key];
+		});
+		setRouterQuery(routerQuery);
+		router.push(`${router.pathname}`, { query: routerQuery });
+		return routerQuery;
+	};
 
 	useEffect(() => {
 		if (!router.isReady) return;
@@ -21,7 +37,7 @@ export const useRouterQuery = () => {
 		const urlParams = new URLSearchParams(routerPathQuery.split("?")[1]);
 		const params = Object.fromEntries(urlParams);
 
-		setQuery(params);
+		setRouterQuery(params);
 		// setQuery((_query) => {
 		// 	/**
 		// 	 * ! Return the previous query object, not the new object!!!
@@ -34,5 +50,5 @@ export const useRouterQuery = () => {
 		// });
 	}, [router.asPath, router.isReady]);
 
-	return query;
+	return [routerQuery, { setQuery, deleteQuery }];
 };

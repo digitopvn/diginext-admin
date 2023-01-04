@@ -1,8 +1,8 @@
 import { useCreateApi, useDeleteApi, useItemApi, useListApi, useUpdateApi } from "./api";
-import type { IBuild } from "./api-types";
+import type { ApiOptions, IBuild } from "./api-types";
 
-export const useBuildListApi = () => {
-	return useListApi<IBuild>(["builds"], `/api/v1/build`);
+export const useBuildListApi = (options?: ApiOptions) => {
+	return useListApi<IBuild>(["builds"], `/api/v1/build`, options);
 };
 
 export const useBuildApi = (id: string) => {

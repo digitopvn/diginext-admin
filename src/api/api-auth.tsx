@@ -3,6 +3,9 @@ import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
 import { useRouter } from "next/router";
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
+
+import type { IUser } from "./api-types";
 
 export const login = (params: { redirectURL?: string } = {}) => {
 	const redirectURL = params.redirectURL ?? window.location.href;
@@ -27,29 +30,25 @@ export const useAuthApi = () => {
 	});
 };
 
+export const useAuth = () => {
+	const [user, setUser] = useState();
+	const { data: response, isError } = useAuthApi();
+	const { status, data: loggedInUser } = response || {};
+
+	useEffect(() => {
+		console.log("loggedInUser :>> ", loggedInUser);
+		if (loggedInUser) setUser(loggedInUser);
+	}, [loggedInUser]);
+
+	if (isError || status === 0) return user;
+
+	return user ? (user as IUser) : user;
+};
+
 export const AuthPage = (props: { children?: ReactNode } = {}) => {
 	const { children } = props;
 
-	const getLoggedInUser = useAuthApi();
-	const router = useRouter();
+	const user = useAuth();
 
-	const { data: response, isLoading, isError } = getLoggedInUser;
-
-	if (isLoading) return <></>;
-
-	if (isError) {
-		router.push("/login");
-		return <></>;
-	}
-
-	const { status, data: loggedInUser } = response;
-
-	if (status === 0) router.push("/login");
-
-	// console.log("loggedInUser :>> ", loggedInUser);
-	// useEffect(() => {
-	// 	// if (!loggedInUser) router.push(`/login`);
-	// }, [loggedInUser]);
-
-	return <>{children}</>;
+	return user ? <>{children}</> : <></>;
 };

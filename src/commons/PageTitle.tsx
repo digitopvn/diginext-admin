@@ -1,5 +1,5 @@
 import { EllipsisOutlined, HomeOutlined, SettingOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Space } from "antd";
+import { Breadcrumb, Button, Space, theme } from "antd";
 import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 
@@ -12,6 +12,7 @@ export type IPageTitleProps = {
 
 export const PageTitle = (props: IPageTitleProps = {}) => {
 	const router = useRouter();
+
 	const {
 		breadcrumbs = [],
 		title = "Page Title",
@@ -22,6 +23,10 @@ export const PageTitle = (props: IPageTitleProps = {}) => {
 			<Button key="more-btn" type="default" icon={<EllipsisOutlined className="align-middle" />}></Button>,
 		],
 	} = props;
+
+	const {
+		token: { colorTextHeading },
+	} = theme.useToken();
 
 	return (
 		<div className="border-b border-gray-300 px-6 py-4">
@@ -37,7 +42,9 @@ export const PageTitle = (props: IPageTitleProps = {}) => {
 				))}
 			</Breadcrumb>
 			<div className=" flex w-full flex-row">
-				<h1 className="my-0 grow py-0 pt-2 text-xl font-bold">{title}</h1>
+				<h1 className="my-0 grow py-0 pt-2 text-xl font-bold" style={{ color: colorTextHeading }}>
+					{title}
+				</h1>
 				<div>
 					<Space>
 						{actions}

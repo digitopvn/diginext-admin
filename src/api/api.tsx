@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
-import { getCookie } from "cookies-next";
+import { getCookie, setCookie } from "cookies-next";
 import { useRouter } from "next/router";
 
 import type { ApiOptions, ApiPagination } from "./api-types";
@@ -27,7 +27,11 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 				}
 			);
 
-			const { current_page, total_pages, total_items, page_size, next_page, prev_page } = data;
+			const { current_page, total_pages, total_items, page_size, next_page, prev_page, ...rest } = data;
+			const { token = {} } = rest;
+
+			// for token is about to expired
+			if (token.access_token) setCookie("x-auth-cookie", access_token);
 
 			return {
 				list:

@@ -1,14 +1,14 @@
 import {
-	AppstoreAddOutlined,
 	BuildOutlined,
-	CheckCircleOutlined,
 	EditOutlined,
 	EyeOutlined,
 	GlobalOutlined,
+	InfoCircleOutlined,
 	PauseCircleOutlined,
 	QrcodeOutlined,
+	RocketOutlined,
 } from "@ant-design/icons";
-import { Button, Space, Table, Tag, Tooltip } from "antd";
+import { Button, Drawer, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
@@ -21,6 +21,8 @@ import type { IAppEnvironment } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { AppConfig } from "@/utils/AppConfig";
+
+import { BuildList } from "../deployments/BuildList";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -38,7 +40,8 @@ interface DataType {
 	updatedAt?: string;
 	createdAt?: string;
 	status?: string;
-	action?: string;
+	type?: string;
+	actions?: string;
 	url?: string;
 	prereleaseUrl?: string;
 	children?: DataType[];
@@ -54,7 +57,7 @@ const columns: ColumnsType<DataType> = [
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
 		onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
-		render: (value, record) => (record.action === "project" ? <Link href={`/project/${record.slug}`}>{value}</Link> : <>{value}</>),
+		render: (value, record) => (record.type === "project" ? <Link href={`/project/${record.slug}`}>{value}</Link> : <>{value}</>),
 	},
 	{
 		title: "Cluster",
@@ -78,7 +81,7 @@ const columns: ColumnsType<DataType> = [
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
 		onFilter: (value, record) => (record.owner && record.owner.indexOf(value.toString()) > -1) || true,
-		render: (value) => <>{value?.email}</>,
+		render: (value) => <>{value?.name}</>,
 	},
 	{
 		title: "Last updated",
@@ -104,7 +107,8 @@ const columns: ColumnsType<DataType> = [
 		width: 30,
 		filters: [{ text: "live", value: "live" }],
 		render: (value) => (
-			<Tag color="success" icon={<CheckCircleOutlined className="align-middle" />}>
+			// <Tag color="success" icon={<CheckCircleOutlined className="align-middle" />}>
+			<Tag color="warning" icon={<InfoCircleOutlined className="align-middle" />}>
 				{value}
 			</Tag>
 		),
@@ -113,67 +117,9 @@ const columns: ColumnsType<DataType> = [
 		title: "Action",
 		key: "action",
 		fixed: "right",
-		width: 60,
+		width: 70,
 		dataIndex: "action",
-		render: (value, record) => {
-			switch (value) {
-				case "app":
-					return (
-						<Space.Compact>
-							<Tooltip title="Edit app">
-								<Button icon={<EditOutlined />} />
-							</Tooltip>
-							<Button icon={<PauseCircleOutlined />} />
-						</Space.Compact>
-					);
-
-				case "env":
-					return (
-						<Space.Compact>
-							<Tooltip title="View website">
-								<Button icon={<EyeOutlined />} href={record.url} target="_blank" disabled={isEmpty(record.url)} />
-							</Tooltip>
-							<Button icon={<PauseCircleOutlined />} />
-							<Button icon={<BuildOutlined />} />
-							<Button icon={<EditOutlined />} />
-						</Space.Compact>
-					);
-
-				case "env-prod":
-					return (
-						<Space.Compact>
-							<Tooltip title="Preview pre-release site">
-								<Button icon={<EyeOutlined />} href={record.prereleaseUrl} target="_blank" disabled={isEmpty(record.prereleaseUrl)} />
-							</Tooltip>
-							<Tooltip title="View live website">
-								<Button icon={<GlobalOutlined />} href={record.url} target="_blank" disabled={isEmpty(record.url)} />
-							</Tooltip>
-							<Tooltip title="Take down">
-								<Button icon={<PauseCircleOutlined />} />
-							</Tooltip>
-							<Tooltip title="All releases">
-								<Button icon={<AppstoreAddOutlined />} />
-							</Tooltip>
-							<Tooltip title="Modify environment variables" placement="topRight">
-								<Button icon={<QrcodeOutlined />} />
-							</Tooltip>
-						</Space.Compact>
-					);
-
-				case "project":
-					return (
-						<Space.Compact>
-							<Tooltip title="Edit project">
-								<Button icon={<EditOutlined />} />
-							</Tooltip>
-							<Button icon={<PauseCircleOutlined />} />
-						</Space.Compact>
-					);
-
-				default:
-					return <></>;
-			}
-		},
+		render: (value, record) => record.actions,
 	},
 ];
 
@@ -181,15 +127,31 @@ const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const ProjectList = () => {
 	const router = useRouter();
+	const [query, { setQuery, deleteQuery }] = useRouterQuery();
 
-	const query = useRouterQuery();
-
+	// pagination
 	const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 
+	// build drawer
+	const [open, setOpen] = useState(false);
+
+	// fetch projects
 	const { data } = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: projects, pagination } = data || {};
 	const { total_pages } = pagination || {};
 
+	// builds
+	const onClose = () => {
+		setOpen(false);
+		deleteQuery(["project", "app", "env"]);
+	};
+
+	const openBuildList = (project: string, app: string, env: string) => {
+		setOpen(true);
+		setQuery({ project, app, env });
+	};
+
+	// table pagination
 	useEffect(() => {
 		if (!router.isReady) return;
 		const newPage = query.page ? parseInt(query.page.toString(), 10) : 1;
@@ -199,30 +161,106 @@ export const ProjectList = () => {
 	const displayedProjects = projects?.map((p) => {
 		return {
 			...p,
-			action: "project",
+			type: "project",
+			actions: (
+				<Space.Compact>
+					<Tooltip title="Edit project">
+						<Button icon={<EditOutlined />} />
+					</Tooltip>
+					<Button icon={<PauseCircleOutlined />} />
+				</Space.Compact>
+			),
 			key: p._id,
 			id: p._id,
-			status: "live",
+			status: "N/A",
 			children: p.apps
 				? p.apps.map((app) => {
 						const environmentNames = Object.keys(app.environment ?? {});
 						const environments: DataType[] = environmentNames.map((envName) => {
 							const envStr = app.environment ? (app.environment[envName] as string) : "[]";
 							const envData = JSON.parse(envStr) as IAppEnvironment;
-							return {
+
+							const record: any = {
 								name: envName.toUpperCase(),
 								key: `${p.slug}-${app.slug}-${envName}`,
 								id: envName,
 								slug: envName,
-								action: envName !== "prod" ? "env" : "env-prod",
-								status: "live",
+								projectSlug: p.slug,
+								appSlug: app.slug,
+								type: envName !== "prod" ? "env" : "env-prod",
+								status: "N/A",
 								url: envData.domains ? `https://${envData.domains[0]}` : "",
 								prereleaseUrl: envName === "prod" ? `https://${p.slug}-${app.slug}.prerelease.diginext.site`.toLowerCase() : "",
 								...(envData as any),
 							};
+
+							record.actions =
+								envName === "prod" ? (
+									<Space.Compact>
+										<Tooltip title="Preview pre-release site">
+											<Button
+												icon={<EyeOutlined />}
+												href={record.prereleaseUrl}
+												target="_blank"
+												disabled={isEmpty(record.prereleaseUrl)}
+											/>
+										</Tooltip>
+										<Tooltip title="View live website">
+											<Button icon={<GlobalOutlined />} href={record.url} target="_blank" disabled={isEmpty(record.url)} />
+										</Tooltip>
+										{/* <Tooltip title="Take down">
+											<Button icon={<PauseCircleOutlined />} />
+										</Tooltip> */}
+										<Tooltip title="List of builds">
+											<Button
+												icon={<BuildOutlined />}
+												onClick={() => openBuildList(record.projectSlug, record.appSlug, record.id)}
+											/>
+										</Tooltip>
+										<Tooltip title="All releases">
+											<Button icon={<RocketOutlined />} />
+										</Tooltip>
+										<Tooltip title="Modify environment variables (coming soon)" placement="topRight">
+											<Button icon={<QrcodeOutlined />} disabled />
+										</Tooltip>
+									</Space.Compact>
+								) : (
+									<Space.Compact>
+										<Tooltip title="View website">
+											<Button icon={<EyeOutlined />} href={record.url} target="_blank" disabled={isEmpty(record.url)} />
+										</Tooltip>
+										{/* <Button icon={<PauseCircleOutlined />} /> */}
+										<Tooltip title="List of builds">
+											<Button
+												icon={<BuildOutlined />}
+												onClick={() => openBuildList(record.projectSlug, record.appSlug, record.id)}
+											/>
+										</Tooltip>
+										<Tooltip title="Modify environment variables (coming soon)" placement="topRight">
+											<Button icon={<QrcodeOutlined />} disabled />
+										</Tooltip>
+									</Space.Compact>
+								);
+
+							return record;
 						});
 
-						return { ...(app as any), key: app._id, id: app._id, status: "live", action: "app", children: environments };
+						return {
+							...(app as any),
+							key: app._id,
+							id: app._id,
+							status: "N/A",
+							type: "app",
+							children: environments,
+							actions: (
+								<Space.Compact>
+									<Tooltip title="Edit app">
+										<Button icon={<EditOutlined />} />
+									</Tooltip>
+									<Button icon={<PauseCircleOutlined />} />
+								</Space.Compact>
+							),
+						};
 				  })
 				: [],
 		};
@@ -231,7 +269,7 @@ export const ProjectList = () => {
 
 	const onTableChange = (_pagination: TablePaginationConfig) => {
 		const { current } = _pagination;
-		router.push(`${router.pathname}`, { query: { page: current ?? 1 } });
+		setQuery({ page: current ?? 1 });
 	};
 
 	return (
@@ -244,6 +282,9 @@ export const ProjectList = () => {
 				pagination={{ current: page, pageSize, total: total_pages }}
 				onChange={onTableChange}
 			/>
+			<Drawer title="Builds" placement="right" onClose={onClose} open={open} size="large">
+				<BuildList project={query.project} app={query.app} env={query.env} />
+			</Drawer>
 		</div>
 	);
 };
