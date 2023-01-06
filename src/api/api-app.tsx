@@ -9,14 +9,14 @@ export const useAppApi = (id: string) => {
 	return useItemApi<IApp>(["apps"], `/api/v1/app`, id);
 };
 
-export const useAppCreateApi = (data: any) => {
-	return useCreateApi<IApp>(["apps"], `/api/v1/app`, data);
+export const useAppCreateApi = () => {
+	return useCreateApi<IApp>(["apps"], `/api/v1/app`);
 };
 
-export const useAppUpdateApi = (filter: any, data: any) => {
-	return useUpdateApi<IApp>(["apps"], `/api/v1/app`, filter, data);
+export const useAppUpdateApi = () => {
+	return useUpdateApi<IApp>(["apps"], `/api/v1/app`);
 };
 
-export const useAppDeleteApi = (filter: any) => {
-	return useDeleteApi<IApp>(["apps"], `/api/v1/app`, filter);
+export const useAppDeleteApi = () => {
+	return useDeleteApi<IApp>(["apps"], `/api/v1/app`);
 };

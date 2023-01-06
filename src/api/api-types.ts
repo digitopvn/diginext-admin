@@ -12,7 +12,17 @@ export type ApiPagination = {
 };
 
 export interface IGeneral {
+	/**
+	 * Alias of `_id` MongoDB
+	 */
+	id?: string;
+	/**
+	 * MongoDB `ID`
+	 */
 	_id?: string;
+	/**
+	 * A unique slug of this instance
+	 */
 	slug?: string;
 	createdAt?: string;
 	updatedAt?: string;

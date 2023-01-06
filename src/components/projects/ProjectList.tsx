@@ -129,12 +129,13 @@ const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 export const ProjectList = () => {
 	const router = useRouter();
 	const [query, { setQuery, deleteQuery }] = useRouterQuery();
+	const { type } = query;
 
 	// pagination
 	const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 
 	// build drawer
-	const [open, setOpen] = useState(false);
+	const [open, setOpen] = useState(type === "release" || type === "build");
 
 	// fetch projects
 	const { data } = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
@@ -152,9 +153,9 @@ export const ProjectList = () => {
 		setQuery({ type: "build", project, app, env });
 	};
 
-	const openReleaseList = (project: string, app: string) => {
+	const openReleaseList = (project: string, app: string, env: string) => {
 		setOpen(true);
-		setQuery({ type: "release", project, app });
+		setQuery({ type: "release", project, app, env });
 	};
 
 	// table pagination
@@ -220,11 +221,14 @@ export const ProjectList = () => {
 										<Tooltip title="List of builds">
 											<Button
 												icon={<BuildOutlined />}
-												onClick={() => openBuildList(record.projectSlug, record.appSlug, record.id)}
+												onClick={() => openBuildList(record.projectSlug, record.appSlug, envName)}
 											/>
 										</Tooltip>
 										<Tooltip title="All releases">
-											<Button icon={<RocketOutlined />} onClick={() => openReleaseList(record.projectSlug, record.appSlug)} />
+											<Button
+												icon={<RocketOutlined />}
+												onClick={() => openReleaseList(record.projectSlug, record.appSlug, envName)}
+											/>
 										</Tooltip>
 										<Tooltip title="Modify environment variables (coming soon)" placement="topRight">
 											<Button icon={<QrcodeOutlined />} disabled />
@@ -290,7 +294,7 @@ export const ProjectList = () => {
 			/>
 			<Drawer title={query.type === "build" ? "Builds" : "Releases"} placement="right" onClose={onClose} open={open} size="large">
 				{query.type === "build" && <BuildList project={query.project} app={query.app} env={query.env} />}
-				{query.type === "release" && <ReleaseList project={query.project} app={query.app} />}
+				{query.type === "release" && <ReleaseList project={query.project} app={query.app} env={query.env} />}
 			</Drawer>
 		</div>
 	);

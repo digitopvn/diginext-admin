@@ -9,14 +9,14 @@ export const useUserApi = (id: string) => {
 	return useItemApi<IUser>(["users"], `/api/v1/user`, id);
 };
 
-export const useUserCreateApi = (data: any) => {
-	return useCreateApi<IUser>(["users"], `/api/v1/user`, data);
+export const useUserCreateApi = () => {
+	return useCreateApi<IUser>(["users"], `/api/v1/user`);
 };
 
-export const useUserUpdateApi = (filter: any, data: any) => {
-	return useUpdateApi<IUser>(["users"], `/api/v1/user`, filter, data);
+export const useUserUpdateApi = () => {
+	return useUpdateApi<IUser>(["users"], `/api/v1/user`);
 };
 
-export const useUserDeleteApi = (filter: any) => {
-	return useDeleteApi<IUser>(["users"], `/api/v1/user`, filter);
+export const useUserDeleteApi = () => {
+	return useDeleteApi<IUser>(["users"], `/api/v1/user`);
 };

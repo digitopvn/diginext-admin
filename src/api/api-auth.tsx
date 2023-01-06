@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
+import { isEmpty } from "lodash";
 import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
@@ -31,13 +32,19 @@ export const useAuthApi = () => {
 };
 
 export const useAuth = () => {
+	const router = useRouter();
 	const [user, setUser] = useState();
 	const { data: response, isError } = useAuthApi();
 	const { status, data: loggedInUser } = response || {};
 
 	useEffect(() => {
+		if (typeof loggedInUser === "undefined") return;
 		console.log("loggedInUser :>> ", loggedInUser);
-		if (loggedInUser) setUser(loggedInUser);
+		if (!isEmpty(loggedInUser)) {
+			setUser(loggedInUser);
+		} else {
+			router.push(`/login`);
+		}
 	}, [loggedInUser]);
 
 	if (isError || status === 0) return user;

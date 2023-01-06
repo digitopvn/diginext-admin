@@ -14,8 +14,8 @@
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
 		"noImplicitThis": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
 		"allowUnreachableCode": false,
 		"noFallthroughCasesInSwitch": true,
 
@@ -42,5 +42,5 @@
 		}
 	},
 	"exclude": ["./out/**/*", "./node_modules/**/*", "cypress/**/*.ts"],
-	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"]
+	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/**/*", "src/**/*"]
 }

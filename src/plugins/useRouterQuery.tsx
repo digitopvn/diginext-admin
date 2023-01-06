@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
-export const useRouterQuery = (): [any, { setQuery: (query?: any) => any; deleteQuery: (keys: string[]) => any }] => {
+export const useRouterQuery = (): [any, { setQuery: (query?: any) => any; deleteQuery: (keys: string[]) => any; deleteAllQueryKeys: () => any }] => {
 	const router = useRouter();
 
 	const [routerQuery, setRouterQuery] = useState(router.query as any);
@@ -20,6 +20,11 @@ export const useRouterQuery = (): [any, { setQuery: (query?: any) => any; delete
 		setRouterQuery(routerQuery);
 		router.push(`${router.pathname}`, { query: routerQuery });
 		return routerQuery;
+	};
+
+	const deleteAllQueryKeys = () => {
+		const keys = Object.keys(routerQuery);
+		return deleteQuery(keys);
 	};
 
 	useEffect(() => {
@@ -50,5 +55,5 @@ export const useRouterQuery = (): [any, { setQuery: (query?: any) => any; delete
 		// });
 	}, [router.asPath, router.isReady]);
 
-	return [routerQuery, { setQuery, deleteQuery }];
+	return [routerQuery, { setQuery, deleteQuery, deleteAllQueryKeys }];
 };

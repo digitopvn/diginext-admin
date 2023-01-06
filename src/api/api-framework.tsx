@@ -9,14 +9,14 @@ export const useFrameworkApi = (id: string) => {
 	return useItemApi<IFramework>(["frameworks"], `/api/v1/framework`, id);
 };
 
-export const useFrameworkCreateApi = (data: any) => {
-	return useCreateApi<IFramework>(["frameworks"], `/api/v1/framework`, data);
+export const useFrameworkCreateApi = () => {
+	return useCreateApi<IFramework>(["frameworks"], `/api/v1/framework`);
 };
 
-export const useFrameworkUpdateApi = (filter: any, data: any) => {
-	return useUpdateApi<IFramework>(["frameworks"], `/api/v1/framework`, filter, data);
+export const useFrameworkUpdateApi = () => {
+	return useUpdateApi<IFramework>(["frameworks"], `/api/v1/framework`);
 };
 
 export const useFrameworkDeleteApi = (filter: any) => {
-	return useDeleteApi<IFramework>(["frameworks"], `/api/v1/framework`, filter);
+	return useDeleteApi<IFramework>(["frameworks"], `/api/v1/framework`);
 };

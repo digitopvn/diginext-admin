@@ -9,14 +9,14 @@ export const useRoleApi = (id: string) => {
 	return useItemApi<IRole>(["roles"], `/api/v1/role`, id);
 };
 
-export const useRoleCreateApi = (data: any) => {
-	return useCreateApi<IRole>(["roles"], `/api/v1/role`, data);
+export const useRoleCreateApi = () => {
+	return useCreateApi<IRole>(["roles"], `/api/v1/role`);
 };
 
-export const useRoleUpdateApi = (filter: any, data: any) => {
-	return useUpdateApi<IRole>(["roles"], `/api/v1/role`, filter, data);
+export const useRoleUpdateApi = () => {
+	return useUpdateApi<IRole>(["roles"], `/api/v1/role`);
 };
 
 export const useRoleDeleteApi = (filter: any) => {
-	return useDeleteApi<IRole>(["roles"], `/api/v1/role`, filter);
+	return useDeleteApi<IRole>(["roles"], `/api/v1/role`);
 };

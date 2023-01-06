@@ -9,16 +9,16 @@ export const useProjectApi = (id: string) => {
 	return useItemApi<IProject>(["projects"], `/api/v1/project`, id);
 };
 
-export const useProjectCreateApi = (data: any) => {
-	return useCreateApi<IProject>(["projects"], `/api/v1/project`, data);
+export const useProjectCreateApi = () => {
+	return useCreateApi<IProject>(["projects"], `/api/v1/project`);
 };
 
-export const useProjectUpdateApi = (filter: any, data: any) => {
-	return useUpdateApi<IProject>(["projects"], `/api/v1/project`, filter, data);
+export const useProjectUpdateApi = () => {
+	return useUpdateApi<IProject>(["projects"], `/api/v1/project`);
 };
 
-export const useProjectDeleteApi = (filter: any) => {
-	return useDeleteApi<IProject>(["projects"], `/api/v1/project`, filter);
+export const useProjectDeleteApi = () => {
+	return useDeleteApi<IProject>(["projects"], `/api/v1/project`);
 };
 
 // with apps

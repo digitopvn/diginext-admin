@@ -9,14 +9,14 @@ export const useContainerRegistryApi = (id: string) => {
 	return useItemApi<IContainerRegistry>(["registries"], `/api/v1/registry`, id);
 };
 
-export const useContainerRegistryCreateApi = (data: any) => {
-	return useCreateApi<IContainerRegistry>(["registries"], `/api/v1/registry`, data);
+export const useContainerRegistryCreateApi = () => {
+	return useCreateApi<IContainerRegistry>(["registries"], `/api/v1/registry`);
 };
 
-export const useContainerRegistryUpdateApi = (filter: any, data: any) => {
-	return useUpdateApi<IContainerRegistry>(["registries"], `/api/v1/registry`, filter, data);
+export const useContainerRegistryUpdateApi = () => {
+	return useUpdateApi<IContainerRegistry>(["registries"], `/api/v1/registry`);
 };
 
-export const useContainerRegistryDeleteApi = (filter: any) => {
-	return useDeleteApi<IContainerRegistry>(["registries"], `/api/v1/registry`, filter);
+export const useContainerRegistryDeleteApi = () => {
+	return useDeleteApi<IContainerRegistry>(["registries"], `/api/v1/registry`);
 };

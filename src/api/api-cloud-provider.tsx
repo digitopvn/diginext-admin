@@ -9,14 +9,14 @@ export const useCloudProviderApi = (id: string, options?: ApiOptions) => {
 	return useItemApi<ICloudProvider>(["providers"], `/api/v1/provider`, id, options);
 };
 
-export const useCloudProviderCreateApi = (data: any) => {
-	return useCreateApi<ICloudProvider>(["providers"], `/api/v1/provider`, data);
+export const useCloudProviderCreateApi = () => {
+	return useCreateApi<ICloudProvider>(["providers"], `/api/v1/provider`);
 };
 
-export const useCloudProviderUpdateApi = (filter: any, data: any) => {
-	return useUpdateApi<ICloudProvider>(["providers"], `/api/v1/provider`, filter, data);
+export const useCloudProviderUpdateApi = () => {
+	return useUpdateApi<ICloudProvider>(["providers"], `/api/v1/provider`);
 };
 
-export const useCloudProviderDeleteApi = (filter: any) => {
-	return useDeleteApi<ICloudProvider>(["providers"], `/api/v1/provider`, filter);
+export const useCloudProviderDeleteApi = () => {
+	return useDeleteApi<ICloudProvider>(["providers"], `/api/v1/provider`);
 };

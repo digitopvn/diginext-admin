@@ -1,11 +1,21 @@
-import { BugOutlined, CheckCircleOutlined, CloseCircleOutlined, EyeOutlined, InfoCircleOutlined, LoadingOutlined } from "@ant-design/icons";
-import { Button, Space, Table, Tag, Tooltip } from "antd";
+import {
+	BugOutlined,
+	CheckCircleOutlined,
+	CloseCircleOutlined,
+	EyeOutlined,
+	InfoCircleOutlined,
+	LoadingOutlined,
+	RocketOutlined,
+} from "@ant-design/icons";
+import { App, Button, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
+import { isEmpty } from "lodash";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 
 import { useBuildListApi } from "@/api/api-build";
+import { useCreateReleaseFromBuildApi } from "@/api/api-release";
 import type { IBuild, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 
@@ -14,6 +24,8 @@ const relativeTime = require("dayjs/plugin/relativeTime");
 
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
+
+const { useApp } = App;
 
 interface DataType {
 	id?: string;
@@ -99,21 +111,8 @@ const columns: ColumnsType<IBuild & DataType> = [
 	{
 		title: "Action",
 		key: "action",
-		// fixed: "right",
 		width: 30,
 		dataIndex: "action",
-		render: (value, record) => {
-			return (
-				<Space.Compact>
-					<Tooltip title="View log">
-						<Button icon={<BugOutlined />} />
-					</Tooltip>
-					<Tooltip title="Go to image link">
-						<Button icon={<EyeOutlined />} href={`https://${record.image}`} target="_blank" />
-					</Tooltip>
-				</Space.Compact>
-			);
-		},
 	},
 ];
 
@@ -127,7 +126,7 @@ type IBuildListProps = {
 
 export const BuildList = (props: IBuildListProps = {} as IBuildListProps) => {
 	const router = useRouter();
-	// const [query] = useRouterQuery();
+	const root = useApp();
 
 	const { project, app, env } = props;
 
@@ -143,11 +142,62 @@ export const BuildList = (props: IBuildListProps = {} as IBuildListProps) => {
 	const { list: builds, pagination } = data || {};
 	const { total_pages } = pagination || {};
 
-	// useEffect(() => {
-	// 	if (!router.isReady) return;
-	// 	const newPage = query.page ? parseInt(query.page.toString(), 10) : 1;
-	// 	setPage(newPage);
-	// }, [query.page]);
+	// release
+	const releaseCreateFromBuildApi = useCreateReleaseFromBuildApi();
+	const releaseBuild = async (buildId?: string) => {
+		if (isEmpty(buildId)) {
+			root.notification.error({
+				message: `Failed to release the build.`,
+				description: `Build not found: ${buildId}`,
+				placement: "top",
+			});
+			return;
+		}
+
+		try {
+			const release = await releaseCreateFromBuildApi.proceed({ build: buildId } as any);
+
+			root.notification.success({
+				message: `Congrats, the release has been created successfully!`,
+				description: (
+					<>
+						You can now preview it on <a href={`https://${release.prereleaseUrl}`}>PRE-RELEASE</a> endpoint.
+					</>
+				),
+				placement: "top",
+			});
+		} catch (e) {
+			console.error(`Could not process releasing this build:`, e);
+
+			root.notification.error({
+				message: `Failed to roll out.`,
+				description: `Could not process releasing this build: ${e}`,
+				placement: "top",
+			});
+		}
+	};
+
+	const displayedBuilds = builds?.map((build) => {
+		return {
+			id: build._id,
+			...build,
+			action: (
+				<Space.Compact>
+					<Tooltip title="View log history">
+						<Button icon={<BugOutlined />} />
+					</Tooltip>
+					<Tooltip title="Go to image link">
+						<Button icon={<EyeOutlined />} href={`https://${build.image}`} target="_blank" />
+					</Tooltip>
+					{build.env === "prod" && (
+						<Tooltip title="Release this build">
+							<Button icon={<RocketOutlined />} onClick={() => releaseBuild(build._id?.toString())} />
+						</Tooltip>
+					)}
+				</Space.Compact>
+			),
+		} as IBuild & DataType;
+	});
 
 	// console.log({ builds });
 
@@ -161,7 +211,7 @@ export const BuildList = (props: IBuildListProps = {} as IBuildListProps) => {
 		<div>
 			<Table
 				columns={columns}
-				dataSource={builds}
+				dataSource={displayedBuilds}
 				scroll={{ x: 600 }}
 				sticky={{ offsetHeader: 0 }}
 				pagination={{ current: page, pageSize, total: total_pages }}

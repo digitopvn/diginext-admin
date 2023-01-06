@@ -9,14 +9,14 @@ export const useTeamApi = (id: string) => {
 	return useItemApi<ITeam>(["teams"], `/api/v1/team`, id);
 };
 
-export const useTeamCreateApi = (data: any) => {
-	return useCreateApi<ITeam>(["teams"], `/api/v1/team`, data);
+export const useTeamCreateApi = () => {
+	return useCreateApi<ITeam>(["teams"], `/api/v1/team`);
 };
 
-export const useTeamUpdateApi = (filter: any, data: any) => {
-	return useUpdateApi<ITeam>(["teams"], `/api/v1/team`, filter, data);
+export const useTeamUpdateApi = () => {
+	return useUpdateApi<ITeam>(["teams"], `/api/v1/team`);
 };
 
-export const useTeamDeleteApi = (filter: any) => {
-	return useDeleteApi<ITeam>(["teams"], `/api/v1/team`, filter);
+export const useTeamDeleteApi = () => {
+	return useDeleteApi<ITeam>(["teams"], `/api/v1/team`);
 };

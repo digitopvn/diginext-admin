@@ -9,14 +9,14 @@ export const useBuildApi = (id: string) => {
 	return useItemApi<IBuild>(["builds"], `/api/v1/build`, id);
 };
 
-export const useBuildCreateApi = (data: any) => {
-	return useCreateApi<IBuild>(["builds"], `/api/v1/build`, data);
+export const useBuildCreateApi = () => {
+	return useCreateApi<IBuild>(["builds"], `/api/v1/build`);
 };
 
-export const useBuildUpdateApi = (filter: any, data: any) => {
-	return useUpdateApi<IBuild>(["builds"], `/api/v1/build`, filter, data);
+export const useBuildUpdateApi = () => {
+	return useUpdateApi<IBuild>(["builds"], `/api/v1/build`);
 };
 
-export const useBuildDeleteApi = (filter: any) => {
-	return useDeleteApi<IBuild>(["builds"], `/api/v1/build`, filter);
+export const useBuildDeleteApi = () => {
+	return useDeleteApi<IBuild>(["builds"], `/api/v1/build`);
 };

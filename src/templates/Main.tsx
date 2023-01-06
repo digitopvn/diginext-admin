@@ -1,9 +1,10 @@
-import { ConfigProvider, theme } from "antd";
+import { App, ConfigProvider, theme } from "antd";
 import type { ReactNode } from "react";
 import { useDarkMode } from "usehooks-ts";
 
 import { SiteLayout } from "@/layouts/SiteLayout";
 import Compose from "@/providers/Compose";
+import DrawerProvider from "@/providers/DrawerProvider";
 import LayoutProvider from "@/providers/LayoutProvider";
 
 type IMainProps = {
@@ -15,13 +16,15 @@ const Main = (props: IMainProps) => {
 	const { isDarkMode } = useDarkMode();
 
 	return (
-		<Compose components={[LayoutProvider]}>
+		<Compose components={[LayoutProvider, DrawerProvider]}>
 			<ConfigProvider
 				theme={{
 					algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
 				}}
 			>
-				<SiteLayout meta={props.meta}>{props.children}</SiteLayout>
+				<App>
+					<SiteLayout meta={props.meta}>{props.children}</SiteLayout>
+				</App>
 			</ConfigProvider>
 		</Compose>
 	);
