@@ -6,6 +6,9 @@ metadata:
   labels:
     project: diginext-site
     owner: topgroup
+    app: admin
+    main-app: admin-2023-01-08-23-31-58
+    phase: live
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/affinity: cookie
@@ -26,7 +29,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: admin-2023-01-04-15-12-41
+                name: admin-2023-01-08-23-31-58
                 port:
                   number: 3000
 
@@ -34,10 +37,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: admin-2023-01-04-15-12-41
+  name: admin-2023-01-08-23-31-58
   namespace: diginext-site-dev
   labels:
-    app: admin-2023-01-04-15-12-41
+    app: admin-2023-01-08-23-31-58
     project: diginext-site
     owner: topgroup
     main-app: admin
@@ -47,35 +50,38 @@ spec:
     - port: 3000
       targetPort: 3000
   selector:
-    app: admin-2023-01-04-15-12-41
+    app: admin-2023-01-08-23-31-58
   sessionAffinity: ClientIP
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: admin-2023-01-04-15-12-41
+  name: admin-2023-01-08-23-31-58
   namespace: diginext-site-dev
   labels:
     project: diginext-site
     owner: topgroup
+    app: admin-2023-01-08-23-31-58
+    main-app: admin
     phase: prerelease
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: admin-2023-01-04-15-12-41
+      app: admin-2023-01-08-23-31-58
   template:
     metadata:
       labels:
         owner: topgroup
-        app: admin-2023-01-04-15-12-41
+        app: admin-2023-01-08-23-31-58
         project: diginext-site
         main-app: admin
+        phase: live
     spec:
       containers:
         - name: admin
-          image: asia.gcr.io/top-group-k8s/diginext-site/admin:2023-01-04-15-12-41
+          image: asia.gcr.io/top-group-k8s/diginext-site/admin:2023-01-08-23-31-58
           ports:
             - containerPort: 3000
           resources: {}
@@ -90,6 +96,10 @@ spec:
               value: development
             - name: BASE_PATH
               value: ''
+            - name: NEXT_PUBLIC_API_BASE_URL
+              value: https://build.digitop.vn
+            - name: NEXT_PUBLIC_BASE_URL
+              value: https://undefined
             - name: NODE_URL
               value: https://undefined
       imagePullSecrets:
