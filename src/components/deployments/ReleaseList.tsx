@@ -9,6 +9,7 @@ import React, { useState } from "react";
 import { usePreviewPrereleaseApi, useReleaseListApi, useReleaseRollOutApi } from "@/api/api-release";
 import type { IRelease, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
+import { useRouterQuery } from "@/plugins/useRouterQuery";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -125,12 +126,12 @@ type IReleaseListProps = {
 	offsetHeader?: number;
 };
 
-export const ReleaseList = (props: IReleaseListProps = {} as IReleaseListProps) => {
+export const ReleaseList = () => {
 	const router = useRouter();
 	const root = useApp();
-	// const [query] = useRouterQuery();
+	const [query] = useRouterQuery();
 
-	const { project, app, offsetHeader = 0, env = "prod" } = props;
+	const { project, app, offsetHeader = 0, env = "prod" } = query;
 
 	const filter: any = {};
 	if (project) filter.projectSlug = project;

@@ -8,7 +8,7 @@ import {
 	QrcodeOutlined,
 	RocketOutlined,
 } from "@ant-design/icons";
-import { Button, Drawer, Space, Table, Tag, Tooltip } from "antd";
+import { Button, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
@@ -21,9 +21,6 @@ import type { IAppEnvironment } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { AppConfig } from "@/utils/AppConfig";
-
-import { BuildList } from "../deployments/BuildList";
-import { ReleaseList } from "../deployments/ReleaseList";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -128,34 +125,22 @@ const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const ProjectList = () => {
 	const router = useRouter();
-	const [query, { setQuery, deleteQuery }] = useRouterQuery();
-	const { type } = query;
+	const [query, { setQuery }] = useRouterQuery();
 
 	// pagination
 	const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
-
-	// build drawer
-	const [open, setOpen] = useState(type === "release" || type === "build");
 
 	// fetch projects
 	const { data } = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: projects, pagination } = data || {};
 	const { total_pages } = pagination || {};
 
-	// builds
-	const onClose = () => {
-		setOpen(false);
-		deleteQuery(["type", "project", "app", "env"]);
-	};
-
 	const openBuildList = (project: string, app: string, env: string) => {
-		setOpen(true);
-		setQuery({ type: "build", project, app, env });
+		setQuery({ lv1: "build", project, app, env });
 	};
 
 	const openReleaseList = (project: string, app: string, env: string) => {
-		setOpen(true);
-		setQuery({ type: "release", project, app, env });
+		setQuery({ lv1: "release", project, app, env });
 	};
 
 	// table pagination
@@ -292,10 +277,10 @@ export const ProjectList = () => {
 				pagination={{ current: page, pageSize, total: total_pages }}
 				onChange={onTableChange}
 			/>
-			<Drawer title={query.type === "build" ? "Builds" : "Releases"} placement="right" onClose={onClose} open={open} size="large">
+			{/* <Drawer title={query.type === "build" ? "Builds" : "Releases"} placement="right" onClose={onClose} open={open} size="large">
 				{query.type === "build" && <BuildList project={query.project} app={query.app} env={query.env} />}
 				{query.type === "release" && <ReleaseList project={query.project} app={query.app} env={query.env} />}
-			</Drawer>
+			</Drawer> */}
 		</div>
 	);
 };

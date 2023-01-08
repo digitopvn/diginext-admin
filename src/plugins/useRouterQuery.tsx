@@ -14,11 +14,13 @@ export const useRouterQuery = (): [any, { setQuery: (query?: any) => any; delete
 	};
 
 	const deleteQuery = (keys: string[]) => {
+		const newQuery = { ...routerQuery };
 		keys.forEach((key) => {
-			delete routerQuery[key];
+			delete newQuery[key];
 		});
-		setRouterQuery(routerQuery);
-		router.push(`${router.pathname}`, { query: routerQuery });
+		setRouterQuery(newQuery);
+
+		router.push(router.pathname, { query: newQuery });
 		return routerQuery;
 	};
 
@@ -31,7 +33,10 @@ export const useRouterQuery = (): [any, { setQuery: (query?: any) => any; delete
 		if (!router.isReady) return;
 
 		const routerPathQuery = router.asPath;
-		if (routerPathQuery.indexOf("?") === -1) return;
+		if (routerPathQuery.indexOf("?") === -1) {
+			deleteAllQueryKeys();
+			return;
+		}
 
 		/**
 		 * ! [Goon's note]
@@ -43,16 +48,6 @@ export const useRouterQuery = (): [any, { setQuery: (query?: any) => any; delete
 		const params = Object.fromEntries(urlParams);
 
 		setRouterQuery(params);
-		// setQuery((_query) => {
-		// 	/**
-		// 	 * ! Return the previous query object, not the new object!!!
-		// 	 */
-		// 	Object.entries(params).forEach(([key, val]) => {
-		// 		// eslint-disable-next-line no-param-reassign
-		// 		_query[key] = val;
-		// 	});
-		// 	return _query;
-		// });
 	}, [router.asPath, router.isReady]);
 
 	return [routerQuery, { setQuery, deleteQuery, deleteAllQueryKeys }];

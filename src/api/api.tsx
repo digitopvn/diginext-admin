@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
+import { isArray } from "lodash";
 import { useRouter } from "next/router";
 
 import type { ApiOptions, ApiPagination } from "./api-types";
@@ -41,6 +42,40 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 					}) || [],
 				pagination: { current_page, total_pages, total_items, page_size, next_page, prev_page },
 			};
+		},
+	});
+};
+
+export const useItemSlugApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}) => {
+	const router = useRouter();
+	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+
+	const { populate, filter } = options;
+	const populateParams = populate ? `populate=${populate}` : "";
+	const filterParams = filter ? new URLSearchParams(filter).toString() : "";
+
+	return useQuery<T, Error>({
+		enabled: filterParams !== "",
+		queryKey: ["website", ...keys, filter],
+		queryFn: async () => {
+			const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${populateParams}`;
+			const { data } = await axios.get(url, { ...options, headers });
+
+			// for token is about to expired
+			const { token = {} } = data;
+			if (token.access_token) setCookie("x-auth-cookie", access_token);
+
+			console.log("data :>> ", data);
+
+			const result =
+				isArray(data.data) && data.data.length > 0
+					? data.data.map((d: any) => {
+							return { ...d, key: d._id };
+					  })
+					: data.data;
+
+			return result;
 		},
 	});
 };

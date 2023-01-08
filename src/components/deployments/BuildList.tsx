@@ -11,6 +11,7 @@ import { App, Button, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 
@@ -18,6 +19,7 @@ import { useBuildListApi } from "@/api/api-build";
 import { useCreateReleaseFromBuildApi } from "@/api/api-release";
 import type { IBuild, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
+import { useRouterQuery } from "@/plugins/useRouterQuery";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -46,7 +48,9 @@ const columns: ColumnsType<IBuild & DataType> = [
 		render: (value, record) => (
 			<>
 				<p>
-					<strong>{value}</strong>
+					<Link href={{ pathname: `/build/[...slugs]`, query: { slugs: [record.slug as string] } }}>
+						<strong>{value}</strong>
+					</Link>
 				</p>
 				<p>
 					Created <DateDisplay date={record.createdAt} />
@@ -124,11 +128,12 @@ type IBuildListProps = {
 	env: string;
 };
 
-export const BuildList = (props: IBuildListProps = {} as IBuildListProps) => {
+export const BuildList = () => {
 	const router = useRouter();
 	const root = useApp();
 
-	const { project, app, env } = props;
+	const [query, { setQuery }] = useRouterQuery();
+	const { project, app, env } = query;
 
 	const filter: any = {};
 	if (project) filter.projectSlug = project;
@@ -141,6 +146,10 @@ export const BuildList = (props: IBuildListProps = {} as IBuildListProps) => {
 	const { data } = useBuildListApi({ populate: "owner", pagination: { page, size: pageSize }, filter });
 	const { list: builds, pagination } = data || {};
 	const { total_pages } = pagination || {};
+
+	const openBuildLogs = (slug?: string) => {
+		setQuery({ lv2: "build_logs", build_slug: slug });
+	};
 
 	// release
 	const releaseCreateFromBuildApi = useCreateReleaseFromBuildApi();
@@ -184,7 +193,7 @@ export const BuildList = (props: IBuildListProps = {} as IBuildListProps) => {
 			action: (
 				<Space.Compact>
 					<Tooltip title="View log history">
-						<Button icon={<BugOutlined />} />
+						<Button icon={<BugOutlined />} onClick={() => openBuildLogs(build.slug)} />
 					</Tooltip>
 					<Tooltip title="Go to image link">
 						<Button icon={<EyeOutlined />} href={`https://${build.image}`} target="_blank" />

@@ -16,17 +16,17 @@ const Main = (props: IMainProps) => {
 	const { isDarkMode } = useDarkMode();
 
 	return (
-		<Compose components={[LayoutProvider, DrawerProvider]}>
-			<ConfigProvider
-				theme={{
-					algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
-				}}
-			>
+		<ConfigProvider
+			theme={{
+				algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
+			}}
+		>
+			<Compose components={[LayoutProvider, DrawerProvider]}>
 				<App>
 					<SiteLayout meta={props.meta}>{props.children}</SiteLayout>
 				</App>
-			</ConfigProvider>
-		</Compose>
+			</Compose>
+		</ConfigProvider>
 	);
 };
 

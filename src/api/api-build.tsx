@@ -1,4 +1,4 @@
-import { useCreateApi, useDeleteApi, useItemApi, useListApi, useUpdateApi } from "./api";
+import { useCreateApi, useDeleteApi, useItemApi, useItemSlugApi, useListApi, useUpdateApi } from "./api";
 import type { ApiOptions, IBuild } from "./api-types";
 
 export const useBuildListApi = (options?: ApiOptions) => {
@@ -19,4 +19,8 @@ export const useBuildUpdateApi = () => {
 
 export const useBuildDeleteApi = () => {
 	return useDeleteApi<IBuild>(["builds"], `/api/v1/build`);
+};
+
+export const useBuildLogsApi = (options?: ApiOptions) => {
+	return useItemSlugApi<any>(["logs"], `/api/v1/build/logs`, options);
 };
