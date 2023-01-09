@@ -28,7 +28,26 @@
       "size": "none",
       "port": 3000,
       "domains": [
+        "build.digitop.vn",
         "diginext-site-admin.dev.diginext.site"
+      ],
+      "ssl": "letsencrypt",
+      "tlsSecret": "tls-secret-letsencrypt-diginext-site-admin"
+    },
+    "prod": {
+      "namespace": "diginext-site-prod",
+      "provider": "custom",
+      "cluster": "topgroup-k3s",
+      "registry": "google-container-registry",
+      "imageURL": "asia.gcr.io/top-group-k8s/diginext-site/admin",
+      "cdn": false,
+      "shouldInherit": true,
+      "redirect": false,
+      "replicas": 1,
+      "size": "none",
+      "port": 3000,
+      "domains": [
+        "diginext-site-admin.prod.diginext.site"
       ],
       "ssl": "letsencrypt",
       "tlsSecret": "tls-secret-letsencrypt-diginext-site-admin"

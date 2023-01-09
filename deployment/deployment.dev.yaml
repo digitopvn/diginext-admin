@@ -6,8 +6,8 @@ metadata:
   labels:
     project: diginext-site
     owner: topgroup
-    app: admin
-    main-app: admin-2023-01-08-23-31-58
+    app: admin-2023-01-09-11-15-27
+    main-app: admin
     phase: live
   annotations:
     kubernetes.io/ingress.class: nginx
@@ -19,9 +19,22 @@ metadata:
 spec:
   tls:
     - hosts:
+        - build.digitop.vn
+      secretName: tls-secret-letsencrypt-diginext-site-admin
+    - hosts:
         - diginext-site-admin.dev.diginext.site
       secretName: tls-secret-letsencrypt-diginext-site-admin
   rules:
+    - host: build.digitop.vn
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: admin
+                port:
+                  number: 3000
     - host: diginext-site-admin.dev.diginext.site
       http:
         paths:
@@ -40,48 +53,48 @@ metadata:
   name: admin
   namespace: diginext-site-dev
   labels:
-    app: admin
+    app: admin-2023-01-09-11-15-27
     project: diginext-site
     owner: topgroup
-    main-app: admin-2023-01-08-23-31-58
+    main-app: admin
     phase: live
 spec:
   ports:
     - port: 3000
       targetPort: 3000
   selector:
-    app: admin
+    app: admin-2023-01-09-11-15-27
   sessionAffinity: ClientIP
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: admin
+  name: admin-2023-01-09-11-15-27
   namespace: diginext-site-dev
   labels:
     project: diginext-site
     owner: topgroup
-    app: admin-2023-01-08-23-31-58
+    app: admin-2023-01-09-11-15-27
     main-app: admin
     phase: live
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: admin
+      app: admin-2023-01-09-11-15-27
   template:
     metadata:
       labels:
         owner: topgroup
-        app: admin-2023-01-08-23-31-58
+        app: admin-2023-01-09-11-15-27
         project: diginext-site
         main-app: admin
         phase: live
     spec:
       containers:
-        - name: admin
-          image: asia.gcr.io/top-group-k8s/diginext-site/admin:2023-01-08-23-31-58
+        - name: admin-2023-01-09-11-15-27
+          image: asia.gcr.io/top-group-k8s/diginext-site/admin:2023-01-09-11-15-27
           ports:
             - containerPort: 3000
           resources: {}
@@ -93,15 +106,15 @@ spec:
             - name: NODE_PORT
               value: '3000'
             - name: NODE_ENV
-              value: development
+              value: production
             - name: BASE_PATH
               value: ''
             - name: NEXT_PUBLIC_API_BASE_URL
-              value: https://build.digitop.vn
+              value: https://api.build.digitop.vn
             - name: NEXT_PUBLIC_BASE_URL
-              value: https://diginext-site-admin.dev.diginext.site
+              value: https://build.digitop.vn
             - name: NODE_URL
-              value: https://diginext-site-admin.dev.diginext.site
+              value: https://build.digitop.vn
       imagePullSecrets:
         - name: gcloud-docker-registry-key
 
