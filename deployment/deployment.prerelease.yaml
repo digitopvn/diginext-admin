@@ -2,11 +2,11 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: prerelease-admin
-  namespace: diginext-site-prod
+  namespace: diginext-site-dev
   labels:
     project: diginext-site
     owner: topgroup
-    app: admin-2023-01-09-11-45-03
+    app: admin-2023-01-09-12-06-05
     main-app: admin
     phase: live
   annotations:
@@ -20,17 +20,16 @@ metadata:
 spec:
   tls:
     - hosts:
-        - diginext-site-admin.prerelease.diginext.site
-      secretName: secret-diginext-site-admin-prerelease-diginext-site
+        - null
+      secretName: secret-
   rules:
-    - host: diginext-site-admin.prerelease.diginext.site
-      http:
+    - http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: admin-2023-01-09-11-45-03
+                name: admin-2023-01-09-12-06-05
                 port:
                   number: 3000
 
@@ -38,10 +37,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: admin-2023-01-09-11-45-03
-  namespace: diginext-site-prod
+  name: admin-2023-01-09-12-06-05
+  namespace: diginext-site-dev
   labels:
-    app: admin-2023-01-09-11-45-03
+    app: admin-2023-01-09-12-06-05
     project: diginext-site
     owner: topgroup
     main-app: admin
@@ -51,38 +50,38 @@ spec:
     - port: 3000
       targetPort: 3000
   selector:
-    app: admin-2023-01-09-11-45-03
+    app: admin-2023-01-09-12-06-05
   sessionAffinity: ClientIP
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: admin-2023-01-09-11-45-03
-  namespace: diginext-site-prod
+  name: admin-2023-01-09-12-06-05
+  namespace: diginext-site-dev
   labels:
     project: diginext-site
     owner: topgroup
-    app: admin-2023-01-09-11-45-03
+    app: admin-2023-01-09-12-06-05
     main-app: admin
     phase: prerelease
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: admin-2023-01-09-11-45-03
+      app: admin-2023-01-09-12-06-05
   template:
     metadata:
       labels:
         owner: topgroup
-        app: admin-2023-01-09-11-45-03
+        app: admin-2023-01-09-12-06-05
         project: diginext-site
         main-app: admin
         phase: prerelease
     spec:
       containers:
-        - name: admin-2023-01-09-11-45-03
-          image: asia.gcr.io/top-group-k8s/diginext-site/admin:2023-01-09-11-45-03
+        - name: admin-2023-01-09-12-06-05
+          image: asia.gcr.io/top-group-k8s/diginext-site/admin:2023-01-09-12-06-05
           ports:
             - containerPort: 3000
           resources: {}
@@ -98,11 +97,11 @@ spec:
             - name: BASE_PATH
               value: ''
             - name: NEXT_PUBLIC_API_BASE_URL
-              value: https://api.app.diginext.site
+              value: https://api.undefined
             - name: NEXT_PUBLIC_BASE_URL
-              value: https://app.diginext.site
+              value: https://undefined
             - name: NODE_URL
-              value: https://diginext-site-admin.prerelease.diginext.site
+              value: https://undefined
       imagePullSecrets:
         - name: gcloud-docker-registry-key
 

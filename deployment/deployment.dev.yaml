@@ -6,7 +6,7 @@ metadata:
   labels:
     project: diginext-site
     owner: topgroup
-    app: admin-2023-01-09-11-15-27
+    app: admin-2023-01-09-12-06-05
     main-app: admin
     phase: live
   annotations:
@@ -53,7 +53,7 @@ metadata:
   name: admin
   namespace: diginext-site-dev
   labels:
-    app: admin-2023-01-09-11-15-27
+    app: admin-2023-01-09-12-06-05
     project: diginext-site
     owner: topgroup
     main-app: admin
@@ -63,38 +63,38 @@ spec:
     - port: 3000
       targetPort: 3000
   selector:
-    app: admin-2023-01-09-11-15-27
+    app: admin-2023-01-09-12-06-05
   sessionAffinity: ClientIP
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: admin-2023-01-09-11-15-27
+  name: admin-2023-01-09-12-06-05
   namespace: diginext-site-dev
   labels:
     project: diginext-site
     owner: topgroup
-    app: admin-2023-01-09-11-15-27
+    app: admin-2023-01-09-12-06-05
     main-app: admin
     phase: live
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: admin-2023-01-09-11-15-27
+      app: admin-2023-01-09-12-06-05
   template:
     metadata:
       labels:
         owner: topgroup
-        app: admin-2023-01-09-11-15-27
+        app: admin-2023-01-09-12-06-05
         project: diginext-site
         main-app: admin
         phase: live
     spec:
       containers:
-        - name: admin-2023-01-09-11-15-27
-          image: asia.gcr.io/top-group-k8s/diginext-site/admin:2023-01-09-11-15-27
+        - name: admin-2023-01-09-12-06-05
+          image: asia.gcr.io/top-group-k8s/diginext-site/admin:2023-01-09-12-06-05
           ports:
             - containerPort: 3000
           resources: {}

@@ -1,6 +1,6 @@
 {
   "name": "diginext-site",
-  "version": "3.6.43",
+  "version": "3.6.44",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

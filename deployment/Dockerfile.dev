@@ -88,4 +88,4 @@ COPY --from=BUILD_IMAGE --chown=nextjs:nodejs /usr/app/.env .
 
 EXPOSE 3000 80
 
-CMD node server.js
+CMD npm run start
