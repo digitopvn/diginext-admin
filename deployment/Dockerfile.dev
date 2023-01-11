@@ -59,10 +59,10 @@ RUN yarn build
 # RUN rm -rf ./node_modules/.cache
 
 # install node-prune (https://github.com/tj/node-prune)
-RUN curl -sf https://gobinaries.com/tj/node-prune | sh
+# RUN curl -sf https://gobinaries.com/tj/node-prune | sh
 
 # run node-prune to scan for other unused node_modules packages
-RUN /usr/local/bin/node-prune
+# RUN /usr/local/bin/node-prune
 
 # ===================================
 #       PHASE 2 - RUNNER
@@ -88,4 +88,4 @@ COPY --from=BUILD_IMAGE --chown=nextjs:nodejs /usr/app/.env .
 
 EXPOSE 3000 80
 
-CMD node server.js
+CMD npm run start

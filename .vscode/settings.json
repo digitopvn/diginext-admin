@@ -1,11 +1,11 @@
 {
-	"editor.tabSize": 2,
-	"editor.detectIndentation": false,
+	"editor.tabSize": 4,
+	"editor.detectIndentation": true,
 	"search.exclude": {
 		"package-lock.json": true
 	},
 	"editor.defaultFormatter": "dbaeumer.vscode-eslint",
-	"editor.formatOnSave": false,
+	"editor.formatOnSave": true,
 	"editor.codeActionsOnSave": ["source.addMissingImports", "source.fixAll.eslint"],
 	"jest.autoRun": {
 		"watch": false // Start the jest with the watch flag
@@ -17,5 +17,14 @@
 	"[json][jsonc][yaml]": {
 		"editor.formatOnSave": true,
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[postcss]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[ignore]": {
+		"editor.defaultFormatter": "foxundermoon.shell-format"
+	},
+	"[dotenv]": {
+		"editor.defaultFormatter": "foxundermoon.shell-format"
 	}
 }

@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: test-cli
+  name: diginext-site
   labels:
-    project: test-cli
-    owner: duynguyen
-    workspace: top-group-nlob
+    project: diginext-site
+    owner: duy-nguyen-ngoc
+    workspace: top-group
 
 ---

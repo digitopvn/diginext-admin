@@ -41,6 +41,11 @@
 						"printWidth": 150
 					}
 				],
+				// common
+				"no-plusplus": "off",
+				"no-underscore-dangle": "off",
+				"no-console": "off",
+				// react
 				"react/destructuring-assignment": "off", // Vscode doesn't support automatically destructuring, it's a pain to add a new variable
 				"react/require-default-props": "off", // Allow non-defined react props as undefined
 				"react-hooks/exhaustive-deps": "off",
@@ -48,6 +53,7 @@
 				"react/jsx-filename-extension": "off", //
 				"react/no-unescaped-entities": "off",
 				"react/display-name": "off",
+				// typescrypt
 				"@typescript-eslint/naming-convention": "off",
 				"@typescript-eslint/comma-dangle": "off", // Avoid conflict rule between Eslint and Prettier
 				"@typescript-eslint/consistent-type-imports": "error", // Ensure `import type` is used when it's necessary
@@ -56,12 +62,16 @@
 				"simple-import-sort/exports": "error", // Export configuration for `eslint-plugin-simple-import-sort`
 				"@typescript-eslint/no-unused-vars": "off",
 				"unused-imports/no-unused-imports": "error",
-				// "unused-imports/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
 				"unused-imports/no-unused-vars": "off",
-				"import/extensions": ["error", "always", { "": "never", "ts": "never", "js": "never" }], // This is problem about airbnb -> override with this
+				"no-unused-vars": "off",
+				"import/extensions": ["error", "always", { "": "never", "ts": "never", "js": "never", "tsx": "never", "jsx": "never" }], // This is problem about airbnb -> override with this
 				"import/no-unresolved": "off",
 				"import/no-named-as-default-member": "off",
-				"import/no-named-as-default": "off"
+				"import/no-named-as-default": "off",
+				// next.js
+				"@next/next/no-img-element": "off",
+				// tailwind
+				"tailwindcss/no-custom-classname": "off"
 			}
 		},
 		// Configuration for testing
