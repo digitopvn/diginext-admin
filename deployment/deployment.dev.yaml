@@ -2,11 +2,11 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: admin
-  namespace: diginext-site-dev
+  namespace: diginext-site
   labels:
     project: diginext-site
     owner: topgroup
-    app: admin-2023-01-09-12-06-05
+    app: admin
     main-app: admin
     phase: live
   annotations:
@@ -19,23 +19,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - build.digitop.vn
-      secretName: tls-secret-letsencrypt-diginext-site-admin
-    - hosts:
-        - diginext-site-admin.dev.diginext.site
-      secretName: tls-secret-letsencrypt-diginext-site-admin
+        - app.diginext.site
+      secretName: tls-secret-letsencrypt-app-diginext-site
   rules:
-    - host: build.digitop.vn
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: admin
-                port:
-                  number: 3000
-    - host: diginext-site-admin.dev.diginext.site
+    - host: app.diginext.site
       http:
         paths:
           - path: /
@@ -51,9 +38,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: admin
-  namespace: diginext-site-dev
+  namespace: diginext-site
   labels:
-    app: admin-2023-01-09-12-06-05
+    app: admin
     project: diginext-site
     owner: topgroup
     main-app: admin
@@ -63,38 +50,38 @@ spec:
     - port: 3000
       targetPort: 3000
   selector:
-    app: admin-2023-01-09-12-06-05
+    app: admin
   sessionAffinity: ClientIP
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: admin-2023-01-09-12-06-05
-  namespace: diginext-site-dev
+  name: admin
+  namespace: diginext-site
   labels:
     project: diginext-site
     owner: topgroup
-    app: admin-2023-01-09-12-06-05
+    app: admin
     main-app: admin
     phase: live
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: admin-2023-01-09-12-06-05
+      app: admin
   template:
     metadata:
       labels:
         owner: topgroup
-        app: admin-2023-01-09-12-06-05
+        app: admin
         project: diginext-site
         main-app: admin
         phase: live
     spec:
       containers:
-        - name: admin-2023-01-09-12-06-05
-          image: asia.gcr.io/top-group-k8s/diginext-site/admin:2023-01-09-12-06-05
+        - name: admin
+          image: asia.gcr.io/top-group-k8s/diginext-site/admin:latest
           ports:
             - containerPort: 3000
           resources: {}
@@ -110,11 +97,11 @@ spec:
             - name: BASE_PATH
               value: ''
             - name: NEXT_PUBLIC_API_BASE_URL
-              value: https://api.build.digitop.vn
+              value: https://api.diginext.site
             - name: NEXT_PUBLIC_BASE_URL
-              value: https://build.digitop.vn
+              value: https://app.diginext.site
             - name: NODE_URL
-              value: https://build.digitop.vn
+              value: https://app.diginext.site
       imagePullSecrets:
         - name: gcloud-docker-registry-key
 

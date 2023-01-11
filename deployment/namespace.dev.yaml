@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: diginext-site-dev
+  name: diginext-site
   labels:
     project: diginext-site
     owner: duy-nguyen-ngoc

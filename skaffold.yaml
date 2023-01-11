@@ -1,0 +1,13 @@
+apiVersion: skaffold/v4beta1
+kind: Config
+metadata:
+  name: diginext-site
+build:
+  artifacts:
+  - image: asia.gcr.io/top-group-k8s/diginext-site/admin
+    context: .
+    docker:
+      dockerfile: deployment/Dockerfile.dev
+manifests:
+  rawYaml:
+  - deployment/deployment.dev.yaml
