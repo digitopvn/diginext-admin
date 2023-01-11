@@ -120,5 +120,13 @@
 			"@semantic-release/github"
 		]
 	},
-	"author": "Ixartz (https://github.com/ixartz)"
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/digitopvn/diginext-admin.git"
+	},
+	"bugs": {
+		"url": "https://github.com/digitopvn/diginext-admin/issues"
+	},
+	"homepage": "https://diginext.site",
+	"author": "Goon Nguyen (https://github.com/mrgoonie)"
 }
