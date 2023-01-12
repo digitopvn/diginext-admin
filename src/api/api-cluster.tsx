@@ -13,8 +13,8 @@ export const useClusterCreateApi = () => {
 	return useCreateApi<ICluster>(["clusters"], `/api/v1/cluster`);
 };
 
-export const useClusterUpdateApi = () => {
-	return useUpdateApi<ICluster>(["clusters"], `/api/v1/cluster`);
+export const useClusterUpdateApi = (filter: any, options?: ApiOptions) => {
+	return useUpdateApi<ICluster>(["clusters"], `/api/v1/cluster`, filter, options);
 };
 
 export const useClusterDeleteApi = () => {

@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { useClusterListApi } from "@/api/api-cluster";
 import type { ICluster, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
+import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { AppConfig } from "@/utils/AppConfig";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
@@ -15,16 +16,13 @@ const relativeTime = require("dayjs/plugin/relativeTime");
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
-interface DataType {
-	key: React.Key;
-	name: string;
-	git: string;
-	version: string;
-	username: string;
-	createdAt: string;
+interface DataType extends ICluster {
+	key?: React.Key;
+	id?: string;
+	actions?: any;
 }
 
-const columns: ColumnsType<ICluster> = [
+const columns: ColumnsType<DataType> = [
 	{
 		title: "Name",
 		width: 70,
@@ -87,26 +85,10 @@ const columns: ColumnsType<ICluster> = [
 		key: "action",
 		width: 50,
 		fixed: "right",
-		render: () => (
-			<Space.Compact>
-				<Button icon={<EditOutlined />}></Button>
-				<Button icon={<DeleteOutlined />}></Button>
-			</Space.Compact>
-		),
+		render: (value, record) => record.actions,
 	},
 ];
 
-// const data: DataType[] = [];
-// for (let i = 0; i < 100; i++) {
-// 	data.push({
-// 		key: i,
-// 		name: `Cluster #${i}`,
-// 		git: `Github`,
-// 		version: "main",
-// 		username: `goon`,
-// 		createdAt: dayjs().format("LLL"),
-// 	});
-// }
 const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const ClusterList = () => {
@@ -115,6 +97,21 @@ export const ClusterList = () => {
 	const { list: clusters, pagination } = data || {};
 	const { total_pages } = pagination || {};
 	console.log("clusters :>> ", clusters);
+
+	const [query, { setQuery }] = useRouterQuery();
+
+	const displayedData =
+		clusters?.map((cluster) => {
+			return {
+				...cluster,
+				actions: (
+					<Space.Compact>
+						<Button icon={<EditOutlined />} onClick={() => setQuery({ lv1: "edit", type: "cluster", slug: cluster.slug })}></Button>
+						<Button icon={<DeleteOutlined />}></Button>
+					</Space.Compact>
+				),
+			} as DataType;
+		}) || [];
 
 	const onTableChange = (_pagination: TablePaginationConfig) => {
 		const { current } = _pagination;
@@ -125,7 +122,7 @@ export const ClusterList = () => {
 		<div>
 			<Table
 				columns={columns}
-				dataSource={clusters}
+				dataSource={displayedData}
 				scroll={{ x: 1200 }}
 				sticky={{ offsetHeader: 48 }}
 				pagination={{ pageSize, total: total_pages }}

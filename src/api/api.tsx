@@ -1,3 +1,4 @@
+import type { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
@@ -97,7 +98,11 @@ export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options
 	});
 };
 
-export const useCreateApi = <T,>(keys: any[], apiPath: string, options: AxiosRequestConfig = {}) => {
+export const useCreateApi = <T,>(
+	keys: any[],
+	apiPath: string,
+	options: AxiosRequestConfig = {}
+): [(data: T) => Promise<T> | undefined, "error" | "idle" | "loading" | "success"] => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
@@ -136,7 +141,10 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: AxiosReq
 		// },
 	});
 
-	return { proceed: mutation.mutateAsync, status: mutation.status };
+	const proceed = mutation.mutateAsync;
+	const { status } = mutation;
+
+	return [proceed, status];
 };
 
 type UpdateData = { id?: string; _id?: string; state?: string };
@@ -147,7 +155,20 @@ const updateById = async (apiPath: string, id: string, updateData: any, options:
 	return data;
 };
 
-export const useUpdateApi = <T,>(keys: any[], apiPath: string, filter: any = {}, options: ApiOptions = {}) => {
+export type UseUpdateApi<T = any> = [
+	UseMutateAsyncFunction<
+		T,
+		Error,
+		any,
+		{
+			id?: string | undefined;
+			previousData?: any;
+		}
+	>,
+	"error" | "idle" | "loading" | "success"
+];
+
+export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, filter: any = {}, options: ApiOptions = {}): UseUpdateApi<T> => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
@@ -250,7 +271,7 @@ export const useUpdateApi = <T,>(keys: any[], apiPath: string, filter: any = {},
 		},
 	});
 
-	return mutation;
+	return [mutation.mutateAsync, mutation.status];
 };
 
 export const useDeleteApi = <T,>(keys: any[], apiPath: string, filter: any = {}, options: ApiOptions = {}) => {

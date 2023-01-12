@@ -2,6 +2,7 @@ import { EllipsisOutlined, HomeOutlined, SettingOutlined } from "@ant-design/ico
 import { Breadcrumb, Button, Space, theme } from "antd";
 import { useRouter } from "next/router";
 import type { ReactNode } from "react";
+import { useDarkMode } from "usehooks-ts";
 
 export type IPageTitleProps = {
 	children?: ReactNode;
@@ -9,6 +10,21 @@ export type IPageTitleProps = {
 	title?: string;
 	actions?: ReactNode[];
 };
+
+export function Title(props: { color?: string; value?: string }) {
+	const {
+		token: { colorTextHeading },
+	} = theme.useToken();
+	const { isDarkMode } = useDarkMode();
+
+	const { color = isDarkMode ? "white" : "black", value: title } = props;
+
+	return (
+		<h1 className="my-0 grow py-0 pt-2 text-xl font-bold" style={{ color }}>
+			{title}
+		</h1>
+	);
+}
 
 export const PageTitle = (props: IPageTitleProps = {}) => {
 	const router = useRouter();
@@ -42,9 +58,7 @@ export const PageTitle = (props: IPageTitleProps = {}) => {
 				))}
 			</Breadcrumb>
 			<div className=" flex w-full flex-row">
-				<h1 className="my-0 grow py-0 pt-2 text-xl font-bold" style={{ color: colorTextHeading }}>
-					{title}
-				</h1>
+				<Title value={title} />
 				<div>
 					<Space>
 						{actions}

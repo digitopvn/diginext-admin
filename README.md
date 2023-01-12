@@ -8,30 +8,38 @@ An admin UI of [Diginext Build Server & CLI](https://github.com/digitopvn/digine
 
 | *Build faster. Deploy easier. More flexible.*
 
-## Getting Started
 ---
+
+## Getting Started
 
 ```bash
 npm install
 npm start dev
 ```
 
-## Changelog
 ---
+
+## Changelog
+
 - Visit our [changelog here](CHANGELOG.md)
 
-## Contributing
 ---
+
+## Contributing
+
 *(To be updated)*
 
-## Community and Support:
 ---
+
+## Community and Support:
 
 Join our community on [Discord]()!
 
 Suggest improvements and report problems.
 
-## Credits
 ---
+
+## Credits
+
 - Author: Duy Nguyen <duynguyen@wearetopgroup.com>
 - CTO at [TOP GROUP](https://wearetopgroup.com)

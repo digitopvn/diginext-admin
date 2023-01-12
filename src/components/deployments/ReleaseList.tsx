@@ -145,12 +145,11 @@ export const ReleaseList = () => {
 	const { list: releases = [], pagination } = data || {};
 	const { total_pages } = pagination || {};
 
-	const rolloutApi = useReleaseRollOutApi();
-	const { status: rolloutApiStatus } = rolloutApi;
+	const [rolloutApi, rolloutApiStatus] = useReleaseRollOutApi();
 	console.log("rolloutApiStatus :>> ", rolloutApiStatus);
 	const [rolloutId, setRolloutId] = useState("");
 
-	const previewApi = usePreviewPrereleaseApi();
+	const [previewApi] = usePreviewPrereleaseApi();
 
 	const rollout = async (id: string) => {
 		// show loading ?
@@ -167,15 +166,15 @@ export const ReleaseList = () => {
 		setRolloutId(id);
 
 		try {
-			const release = await rolloutApi.mutateAsync({ id });
+			const release = await rolloutApi({ id });
 
 			root.notification.success({
 				message: `Congrats, the release has been rolled out successfully!`,
 				description: (
 					<>
 						Your website is ready to access on PRODUCTION environment:{" "}
-						<a href={`https://${release.productionUrl}`} target="_blank" rel="noreferrer">
-							{release.productionUrl}
+						<a href={`https://${release?.productionUrl}`} target="_blank" rel="noreferrer">
+							{release?.productionUrl}
 						</a>
 					</>
 				),
@@ -205,15 +204,15 @@ export const ReleaseList = () => {
 		}
 
 		try {
-			const release = await previewApi.mutateAsync({ id });
+			const release = await previewApi({ id });
 
 			root.notification.success({
 				message: `Congrats!`,
 				description: (
 					<>
 						The PRE-RELEASE environment has been setup successfully at:{" "}
-						<a href={`https://${release.prereleaseUrl}`} target="_blank" rel="noreferrer">
-							{release.prereleaseUrl}
+						<a href={`https://${release?.prereleaseUrl}`} target="_blank" rel="noreferrer">
+							{release?.prereleaseUrl}
 						</a>
 					</>
 				),

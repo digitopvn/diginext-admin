@@ -10,10 +10,12 @@ import LayoutProvider from "@/providers/LayoutProvider";
 type IMainProps = {
 	meta: ReactNode;
 	children: ReactNode;
+	useSidebar?: boolean;
 };
 
 const Main = (props: IMainProps) => {
 	const { isDarkMode } = useDarkMode();
+	const { useSidebar = true } = props;
 
 	return (
 		<ConfigProvider
@@ -23,7 +25,9 @@ const Main = (props: IMainProps) => {
 		>
 			<Compose components={[LayoutProvider, DrawerProvider]}>
 				<App>
-					<SiteLayout meta={props.meta}>{props.children}</SiteLayout>
+					<SiteLayout meta={props.meta} useSidebar={useSidebar}>
+						{props.children}
+					</SiteLayout>
 				</App>
 			</Compose>
 		</ConfigProvider>

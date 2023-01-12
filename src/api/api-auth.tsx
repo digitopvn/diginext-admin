@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
 import { isEmpty } from "lodash";
@@ -22,7 +22,7 @@ export const useAuthApi = () => {
 	if (access_token) setCookie("x-auth-cookie", access_token);
 
 	return useQuery({
-		staleTime: 30 * 60 * 1000, // 30 minutes
+		staleTime: 2 * 60 * 1000, // 2 minutes
 		queryKey: ["auth"],
 		queryFn: async () => {
 			const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/profile`, { headers });
@@ -31,11 +31,12 @@ export const useAuthApi = () => {
 	});
 };
 
-export const useAuth = () => {
+export const useAuth = (): [IUser | undefined, () => Promise<void> | undefined] => {
 	const router = useRouter();
-	const [user, setUser] = useState();
+	const [user, setUser] = useState<IUser>();
 	const { data: response, isError } = useAuthApi();
 	const { status, data: loggedInUser } = response || {};
+	const queryClient = useQueryClient();
 
 	useEffect(() => {
 		if (typeof loggedInUser === "undefined") return;
@@ -47,15 +48,19 @@ export const useAuth = () => {
 		}
 	}, [loggedInUser]);
 
-	if (isError || status === 0) return user;
+	if (isError || status === 0) return [user, () => undefined];
 
-	return user ? (user as IUser) : user;
+	const reload = async () => {
+		await queryClient.invalidateQueries({ queryKey: ["auth"] });
+	};
+
+	return [user, reload];
 };
 
 export const AuthPage = (props: { children?: ReactNode } = {}) => {
 	const { children } = props;
 
-	const user = useAuth();
+	const [user] = useAuth();
 
 	return user ? <>{children}</> : <></>;
 };
