@@ -52,7 +52,7 @@ const columns: ColumnsType<DataType> = [
 		dataIndex: "provider",
 		key: "provider",
 		width: 30,
-		render: (value, record) => <>{record.provider?.shortName}</>,
+		render: (value, record) => <>{record.providerShortName}</>,
 	},
 	{
 		title: "Created by",
@@ -106,7 +106,10 @@ export const ClusterList = () => {
 				...cluster,
 				actions: (
 					<Space.Compact>
-						<Button icon={<EditOutlined />} onClick={() => setQuery({ lv1: "edit", type: "cluster", slug: cluster.slug })}></Button>
+						<Button
+							icon={<EditOutlined />}
+							onClick={() => setQuery({ lv1: "edit", type: "cluster", cluster_slug: cluster.slug })}
+						></Button>
 						<Button icon={<DeleteOutlined />}></Button>
 					</Space.Compact>
 				),

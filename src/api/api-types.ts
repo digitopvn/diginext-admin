@@ -476,7 +476,7 @@ export interface ICluster extends IGeneral {
 	primaryDomain?: string;
 
 	/**
-	 * The PRIMARY IP ADDRESS of this cluster
+	 * The PRIMARY IP ADDRESS of this cluster, or IP ADDRESS of the LOAD BALANCER
 	 */
 	primaryIP?: string;
 
