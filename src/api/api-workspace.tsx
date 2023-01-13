@@ -20,3 +20,7 @@ export const useWorkspaceUpdateApi = (filter: any, options?: ApiOptions) => {
 export const useWorkspaceDeleteApi = (filter: any, options?: ApiOptions) => {
 	return useDeleteApi<IWorkspace>(["workspaces"], `/api/v1/workspace`, filter, options);
 };
+
+// export const useWorkspaceJoinApi = (filter: any, options?: ApiOptions) => {
+// 	return useUpdateApi<IWorkspace>(["workspaces"], `/api/v1/workspace`, filter, options);
+// };

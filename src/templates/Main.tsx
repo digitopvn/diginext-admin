@@ -8,8 +8,8 @@ import DrawerProvider from "@/providers/DrawerProvider";
 import LayoutProvider from "@/providers/LayoutProvider";
 
 type IMainProps = {
-	meta: ReactNode;
-	children: ReactNode;
+	meta?: ReactNode;
+	children?: ReactNode;
 	useSidebar?: boolean;
 };
 

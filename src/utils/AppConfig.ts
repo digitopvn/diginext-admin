@@ -33,7 +33,7 @@ export class Config {
 	}
 
 	static get NEXT_PUBLIC_BASE_PATH() {
-		return process.env.NEXT_PUBLIC_BASE_PATH;
+		return process.env.NEXT_PUBLIC_BASE_PATH || "";
 	}
 
 	static getBasePath(extendedPath = "") {
@@ -54,11 +54,11 @@ export class Config {
 	}
 
 	static get NEXT_PUBLIC_ENV() {
-		return process.env.NEXT_PUBLIC_ENV;
+		return process.env.NEXT_PUBLIC_ENV || "development";
 	}
 
 	static get NEXT_PUBLIC_API_BASE_URL() {
-		return trimEnd(process.env.NEXT_PUBLIC_API_BASE_URL, "/") || `http://localhost:${this.PORT}`;
+		return trimEnd(process.env.NEXT_PUBLIC_API_BASE_URL || "", "/") || "/";
 	}
 
 	static get NEXT_PUBLIC_DOMAIN() {
@@ -66,7 +66,7 @@ export class Config {
 	}
 
 	static get NEXT_PUBLIC_BASE_URL() {
-		return trimEnd(process.env.NEXT_PUBLIC_BASE_URL, "/") || `http://localhost:${this.PORT}`;
+		return trimEnd(process.env.NEXT_PUBLIC_BASE_URL || "", "/") || "/";
 	}
 
 	static get DISABLE_INPECT_MEMORY() {

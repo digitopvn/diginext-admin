@@ -20,3 +20,7 @@ export const useUserUpdateApi = () => {
 export const useUserDeleteApi = () => {
 	return useDeleteApi<IUser>(["users"], `/api/v1/user`);
 };
+
+export const useUserJoinWorkspaceApi = (filter?: any, options?: ApiOptions) => {
+	return useUpdateApi<IUser>(["users"], `/api/v1/user/join-workspace`, filter, options);
+};

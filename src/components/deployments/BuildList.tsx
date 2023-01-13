@@ -17,7 +17,7 @@ import React, { useState } from "react";
 
 import { useBuildListApi } from "@/api/api-build";
 import { useCreateReleaseFromBuildApi } from "@/api/api-release";
-import type { IBuild, IUser } from "@/api/api-types";
+import type { IBuild, IRelease, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 
@@ -152,7 +152,7 @@ export const BuildList = () => {
 	};
 
 	// release
-	const releaseCreateFromBuildApi = useCreateReleaseFromBuildApi();
+	const [releaseCreateFromBuildApi] = useCreateReleaseFromBuildApi();
 	const releaseBuild = async (buildId?: string) => {
 		if (isEmpty(buildId)) {
 			root.notification.error({
@@ -164,13 +164,13 @@ export const BuildList = () => {
 		}
 
 		try {
-			const release = await releaseCreateFromBuildApi.proceed({ build: buildId } as any);
+			const release = await releaseCreateFromBuildApi({ build: buildId } as IRelease);
 
 			root.notification.success({
 				message: `Congrats, the release has been created successfully!`,
 				description: (
 					<>
-						You can now preview it on <a href={`https://${release.prereleaseUrl}`}>PRE-RELEASE</a> endpoint.
+						You can now preview it on <a href={`https://${release?.prereleaseUrl}`}>PRE-RELEASE</a> endpoint.
 					</>
 				),
 				placement: "top",

@@ -187,8 +187,8 @@ export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, filter: any
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 
-	console.log("useUpdateApi > keys :>> ", keys);
-	console.log("useUpdateApi > filter :>> ", filter);
+	// console.log("useUpdateApi > keys :>> ", keys);
+	// console.log("useUpdateApi > filter :>> ", filter);
 
 	const { pagination = { page: 1, size: 20 }, populate, sort = "-createdAt" } = options;
 	const paginationParams = new URLSearchParams(pagination as any).toString();
@@ -200,7 +200,7 @@ export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, filter: any
 	const mutation = useMutation<T & UpdateData, Error, any, { id?: string; previousData?: any }>({
 		// [2] START
 		mutationFn: async (updateData) => {
-			console.log("UPDATE > start > filter :>> ", filter);
+			// console.log("UPDATE > start > filter :>> ", filter);
 
 			const { data } = await axios.patch(apiURL, updateData, { ...options, headers });
 
@@ -279,7 +279,7 @@ export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, filter: any
 			queryClient.invalidateQueries({ queryKey: keys });
 			// queryClient.refetchQueries({ queryKey: keys });
 			// Boom baby!
-			console.log("UPDATE > success > updateData :>> ", updateData);
+			// console.log("UPDATE > success > updateData :>> ", updateData);
 		},
 
 		// [3] - FINISH !

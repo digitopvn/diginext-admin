@@ -3,6 +3,7 @@ import { Button } from "antd";
 import { useRouter } from "next/router";
 
 import { login, useAuth } from "@/api/api-auth";
+import CenterContainer from "@/commons/CenterContainer";
 import DiginextLogo from "@/commons/DiginextLogo";
 import { Main } from "@/templates/Main";
 import { Meta } from "@/templates/Meta";
@@ -23,13 +24,13 @@ const LoginPage = () => {
 	return (
 		<Main useSidebar={false} meta={<Meta title="Dashboard" description="Your workspace overview." />}>
 			{/* Page Content */}
-			<div className="fixed top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 pb-12 text-center">
+			<CenterContainer className="text-center">
 				<DiginextLogo useTagline />
 				<Button type="primary" size="large" onClick={() => login({ redirectURL })}>
 					<GoogleOutlined />
 					Sign in with Google
 				</Button>
-			</div>
+			</CenterContainer>
 		</Main>
 	);
 };
