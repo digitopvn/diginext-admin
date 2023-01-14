@@ -6,6 +6,8 @@ import { getCookie, setCookie } from "cookies-next";
 import { isArray, isEmpty } from "lodash";
 import { useRouter } from "next/router";
 
+import { Config } from "@/utils/AppConfig";
+
 import type { ApiOptions, ApiPagination } from "./api-types";
 
 export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}) => {
@@ -29,7 +31,7 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 		queryKey: queryKeys,
 		queryFn: async () => {
 			const { data } = await axios.get(
-				`${process.env.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${sortParams}&${populateParams}&${paginationParams}`,
+				`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${sortParams}&${populateParams}&${paginationParams}`,
 				{
 					...options,
 					headers,
@@ -73,7 +75,7 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, options: ApiOpt
 		enabled: filter.slug !== undefined && filter.slug !== null,
 		queryKey,
 		queryFn: async () => {
-			const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${populateParams}`;
+			const url = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${populateParams}`;
 			const { data } = await axios.get(url, { ...options, headers });
 
 			// for token is about to expired
@@ -94,7 +96,7 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, options: ApiOpt
 };
 
 const getById = async (apiPath: string, id: string, options: AxiosRequestConfig = {}) => {
-	const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}${apiPath}?id=${id}`, options);
+	const { data } = await axios.get(`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?id=${id}`, options);
 	return data;
 };
 
@@ -122,7 +124,7 @@ export const useCreateApi = <T,>(
 
 	const mutation = useMutation<T, Error, T>({
 		mutationFn: async (newData) => {
-			const apiURL = `${process.env.NEXT_PUBLIC_API_BASE_URL}${apiPath}`;
+			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}`;
 			const { data } = await axios.post(apiURL, newData, { ...options, headers });
 			return data.data;
 		},
@@ -162,7 +164,7 @@ export const useCreateApi = <T,>(
 type UpdateData = { id?: string; _id?: string; state?: string };
 
 const updateById = async (apiPath: string, id: string, updateData: any, options: AxiosRequestConfig = {}) => {
-	const apiURL = `${process.env.NEXT_PUBLIC_API_BASE_URL}${apiPath}?id=${id}`;
+	const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?id=${id}`;
 	const { data } = await axios.post(apiURL, updateData, options);
 	return data;
 };
@@ -194,7 +196,7 @@ export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, filter: any
 	const populateParams = populate ? `populate=${populate}` : "";
 	const filterParams = filter ? new URLSearchParams(filter).toString() : "";
 	const sortParams = `sort=${sort}`;
-	const apiURL = `${process.env.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${sortParams}&${populateParams}&${paginationParams}`;
+	const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${sortParams}&${populateParams}&${paginationParams}`;
 
 	const mutation = useMutation<T & UpdateData, Error, any, { id?: string; previousData?: any }>({
 		// [2] START
@@ -303,7 +305,7 @@ export const useDeleteApi = <T,>(keys: any[], apiPath: string, filter: any = {},
 
 	const mutation = useMutation<T, Error>({
 		mutationFn: () => {
-			const apiURL = `${process.env.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${queryFilter}`;
+			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${queryFilter}`;
 			return axios.delete(apiURL, { ...options, headers });
 		},
 		onSuccess: (data) => {

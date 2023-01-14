@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 
 import { useBuildLogsApi } from "@/api/api-build";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
+import { Config } from "@/utils/AppConfig";
 
 const io = require("socket.io-client");
 
@@ -48,7 +49,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	// socket
 
 	const SOCKET_ROOM = build_slug;
-	const SOCKET_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+	const SOCKET_URL = Config.NEXT_PUBLIC_API_BASE_URL;
 
 	const [messages, setMessages] = useState<string[]>(["Connecting..."]);
 	const [status, setStatus] = useState<"failed" | "in_progress" | "success">("in_progress"); // failed, in_progress, success

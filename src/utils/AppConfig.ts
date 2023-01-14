@@ -23,8 +23,6 @@ export const AppConfig = {
 export class Config {
 	static grab = (key: string, defaultValue: string = "") => {
 		const env = { ...process.env };
-		console.log("process.env :>> ", process.env);
-		console.log("process.env :>> ", process.env.NEXT_PUBLIC_ENV);
 		return env[key] ?? defaultValue;
 	};
 
@@ -43,14 +41,6 @@ export class Config {
 
 	static path(extendedPath = "") {
 		return this.getBasePath(extendedPath);
-	}
-
-	static get PORT() {
-		return toInt(this.grab("PORT")) || toInt(this.grab("NODE_PORT")) || 4000;
-	}
-
-	static get BASE_URL() {
-		return trimEnd(this.grab("BASE_URL", `http://localhost:${this.PORT}`), "/");
 	}
 
 	static get NEXT_PUBLIC_ENV() {

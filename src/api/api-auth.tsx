@@ -14,7 +14,7 @@ import { useWorkspace } from "@/providers/useWorkspace";
 import { Config } from "@/utils/AppConfig";
 
 export const login = (params: { redirectURL?: string } = {}) => {
-	const redirectURL = params.redirectURL ?? Config.BASE_URL;
+	const redirectURL = params.redirectURL ?? Config.NEXT_PUBLIC_API_BASE_URL;
 	window.location.href = `${Config.NEXT_PUBLIC_API_BASE_URL}/auth/google?redirect_url=${redirectURL}`;
 };
 
@@ -29,7 +29,6 @@ export const useAuthApi = (props: { access_token?: string } = {}) => {
 		queryFn: async () => {
 			const { access_token: queryToken } = query;
 			const token = access_token ?? getCookie("x-auth-cookie") ?? queryToken;
-			// console.log("token", token);
 
 			const headers = token ? { Authorization: `Bearer ${token}` } : {};
 			const { data } = await axios.get(`${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile`, { headers });
@@ -83,7 +82,7 @@ export const AuthPage = (props: { children?: ReactNode } = {}) => {
 
 	const [user, { isLoading, isFetched }] = useAuth();
 
-	const workspace = useWorkspace({ name: user.workspaces[0].slug });
+	const workspace = useWorkspace({ name: user?.workspaces[0].slug });
 
 	if (isLoading)
 		return (
