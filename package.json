@@ -1,6 +1,6 @@
 {
 	"name": "diginext-site",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"scripts": {
 		"dev": "next dev",
 		"start": "next start",
@@ -114,14 +114,7 @@
 		"plugins": [
 			"@semantic-release/commit-analyzer",
 			"@semantic-release/release-notes-generator",
-			"@semantic-release/changelog",
-			[
-				"@semantic-release/npm",
-				{
-					"npmPublish": false
-				}
-			],
-			"@semantic-release/git"
+			"@semantic-release/changelog"
 		]
 	},
 	"repository": {
