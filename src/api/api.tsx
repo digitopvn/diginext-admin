@@ -82,12 +82,11 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, options: ApiOpt
 
 			// console.log("data :>> ", data);
 
-			const result =
-				isArray(data.data) && data.data.length > 0
-					? data.data.map((d: any) => {
-							return { ...d, key: d._id };
-					  })[0]
-					: data.data;
+			const result = isArray(data.data)
+				? data.data.map((d: any) => {
+						return { ...d, key: d._id };
+				  })[0]
+				: data.data[0];
 
 			return result;
 		},

@@ -1,4 +1,4 @@
-import { useCreateApi, useDeleteApi, useItemApi, useListApi, useUpdateApi } from "./api";
+import { useCreateApi, useDeleteApi, useItemApi, useItemSlugApi, useListApi, useUpdateApi } from "./api";
 import type { ApiOptions, IWorkspace } from "./api-types";
 
 export const useWorkspaceListApi = (options?: ApiOptions) => {
@@ -7,6 +7,10 @@ export const useWorkspaceListApi = (options?: ApiOptions) => {
 
 export const useWorkspaceApi = (id: string) => {
 	return useItemApi<IWorkspace>(["workspaces"], `/api/v1/workspace`, id);
+};
+
+export const useWorkspaceSlugApi = (options?: ApiOptions) => {
+	return useItemSlugApi<IWorkspace>(["workspaces"], `/api/v1/workspace`, options);
 };
 
 export const useWorkspaceCreateApi = (options?: ApiOptions) => {

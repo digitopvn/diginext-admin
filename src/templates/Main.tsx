@@ -13,6 +13,8 @@ type IMainProps = {
 	useSidebar?: boolean;
 };
 
+// const SiteLayout = dynamic(() => import("../layouts/SiteLayout").then((mod) => mod.SiteLayout), { ssr: false });
+
 const Main = (props: IMainProps) => {
 	const { isDarkMode } = useDarkMode();
 	const { useSidebar = true } = props;
@@ -20,6 +22,7 @@ const Main = (props: IMainProps) => {
 	return (
 		<ConfigProvider
 			theme={{
+				hashed: false,
 				algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
 			}}
 		>

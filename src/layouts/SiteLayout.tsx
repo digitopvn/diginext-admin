@@ -56,7 +56,7 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 	};
 
 	useEffect(() => {
-		console.log("lv1 :>> ", lv1);
+		// console.log("lv1 :>> ", lv1);
 		switch (lv1) {
 			case "build":
 				openBuildList();
@@ -89,7 +89,7 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 	}, [lv1, lv2, project, app, env]);
 
 	useEffect(() => {
-		if (drawerVisibility?.lv1 === false) deleteAllQueryKeys();
+		if (drawerVisibility?.lv1 === false) deleteQuery(["lv1", "project", "app", "release"]);
 	}, [drawerVisibility?.lv1]);
 
 	useEffect(() => {
