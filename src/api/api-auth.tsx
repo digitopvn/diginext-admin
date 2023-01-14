@@ -82,7 +82,9 @@ export const AuthPage = (props: { children?: ReactNode } = {}) => {
 
 	const [user, { isLoading, isFetched }] = useAuth();
 
-	const workspace = useWorkspace({ name: user?.workspaces[0].slug });
+	const { workspaces = [] } = user || {};
+
+	const workspace = useWorkspace({ name: workspaces[0]?.slug });
 
 	if (isLoading)
 		return (
