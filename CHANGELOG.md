@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/digitopvn/diginext-admin/compare/v1.0.0...v1.0.1) (2023-01-14)
+
+
+### Bug Fixes
+
+* **hotfix auth:** undefined workspace ([f1ffbec](https://github.com/digitopvn/diginext-admin/commit/f1ffbeca327ac8da3f190901e96bfbdf448e9a24))
+
 # 1.0.0 (2023-01-14)
 
 
