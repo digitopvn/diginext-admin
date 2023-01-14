@@ -109,7 +109,7 @@
 	},
 	"release": {
 		"branches": [
-			"main"
+			"prerelease"
 		],
 		"plugins": [
 			"@semantic-release/commit-analyzer",
@@ -121,8 +121,7 @@
 					"npmPublish": false
 				}
 			],
-			"@semantic-release/git",
-			"@semantic-release/github"
+			"@semantic-release/git"
 		]
 	},
 	"repository": {
