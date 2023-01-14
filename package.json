@@ -1,14 +1,17 @@
 {
 	"name": "diginext-site",
-	"version": "3.6.44",
+	"version": "1.0.0",
 	"scripts": {
 		"dev": "next dev",
-		"build": "next build",
 		"start": "next start",
 		"serve": "serve ./out",
+		"build": "cross-env NODE_ENV=production next build",
 		"build-stats": "cross-env ANALYZE=true npm run build",
-		"build-prod": "run-s clean build export",
+		"release-dev": "run-s clean build export-prod copy-prod",
+		"release": "mv .env.local env.bak && run-s clean build export-prod copy-prod && mv env.bak .env.local",
 		"export": "next export",
+		"export-prod": "NODE_ENV=production next export",
+		"copy-prod": "ncp ./out ../diginext/public",
 		"clean": "rimraf .next out",
 		"lint": "next lint",
 		"format": "next lint --fix && prettier '**/*.{js,ts,tsx,json,yaml}' --write",
@@ -31,8 +34,10 @@
 		"cookies-next": "^2.1.1",
 		"dayjs": "^1.11.7",
 		"diginext-utils": "^2.0.32",
+		"dotenv": "^16.0.3",
 		"html-react-parser": "^3.0.7",
 		"lodash": "^4.17.21",
+		"ncp": "^2.0.0",
 		"next": "^13.0.6",
 		"next-seo": "^5.14.1",
 		"next-sitemap": "^3.1.32",
@@ -104,7 +109,7 @@
 	},
 	"release": {
 		"branches": [
-			"main"
+			"prerelease"
 		],
 		"plugins": [
 			"@semantic-release/commit-analyzer",
@@ -116,9 +121,16 @@
 					"npmPublish": false
 				}
 			],
-			"@semantic-release/git",
-			"@semantic-release/github"
+			"@semantic-release/git"
 		]
 	},
-	"author": "Ixartz (https://github.com/ixartz)"
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/digitopvn/diginext-admin.git"
+	},
+	"bugs": {
+		"url": "https://github.com/digitopvn/diginext-admin/issues"
+	},
+	"homepage": "https://diginext.site",
+	"author": "Goon Nguyen (https://github.com/mrgoonie)"
 }

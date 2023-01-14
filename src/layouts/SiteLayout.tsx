@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 
+import EditPage from "@/commons/EditPage";
 import { MenuSider } from "@/commons/MenuSider";
 import { PageFooter } from "@/commons/PageFooter";
 import { SiteHeader } from "@/commons/SiteHeader";
@@ -17,28 +18,32 @@ type ISiteLayoutProps = {
 	meta: ReactNode;
 	children: ReactNode;
 	showMenu?: boolean;
+	useSidebar: boolean;
 };
 
 export const SiteLayout = (props: ISiteLayoutProps) => {
+	const { useSidebar } = props;
 	const router = useRouter();
 	const { sidebarCollapsed } = useLayoutProvider();
+	let marginLeft: string | number = "auto";
+	if (useSidebar) marginLeft = sidebarCollapsed ? 80 : 200;
 
 	// handling Drawers
 	const drawer = useDrawerProvider();
 	const { drawerVisibility, showDrawer, closeDrawer } = drawer;
 
-	const [query, { setQuery, deleteQuery }] = useRouterQuery();
-	const { lv1, lv2, project, app, env } = query;
+	const [query, { setQuery, deleteQuery, deleteAllQueryKeys }] = useRouterQuery();
+	const { lv1, lv2, type, slug, project, app, env } = query;
 
 	const {
 		token: { colorText },
 	} = theme.useToken();
 
-	const openBuildList = (_project: string, _app: string, _env: string) => {
+	const openBuildList = () => {
 		if (showDrawer) showDrawer({ title: "Builds", content: <BuildList /> }, { level: 1 });
 	};
 
-	const openReleaseList = (_project: string, _app: string, _env: string) => {
+	const openReleaseList = () => {
 		if (showDrawer) showDrawer({ title: "Releases", content: <ReleaseList /> }, { level: 1 });
 	};
 
@@ -46,17 +51,23 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 		if (showDrawer) showDrawer({ title: "Build Logs", content: <BuildLogs /> }, { level: 2 });
 	};
 
+	const openEditPage = () => {
+		if (showDrawer) showDrawer({ title: "Edit", content: <EditPage /> }, { level: 1 });
+	};
+
 	useEffect(() => {
-		console.log("lv1 :>> ", lv1);
+		// console.log("lv1 :>> ", lv1);
 		switch (lv1) {
 			case "build":
-				if (!project || !app || !env) return;
-				openBuildList(project, app, env);
+				openBuildList();
 				break;
 
 			case "release":
-				if (!project || !app || !env) return;
-				openReleaseList(project, app, env);
+				openReleaseList();
+				break;
+
+			case "edit":
+				openEditPage();
 				break;
 
 			default:
@@ -78,9 +89,12 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 	}, [lv1, lv2, project, app, env]);
 
 	useEffect(() => {
-		if (!drawerVisibility?.lv1) deleteQuery(["lv1", "project", "app", "env"]);
-		if (!drawerVisibility?.lv2) deleteQuery(["lv2", "build_slug"]);
-	}, [drawerVisibility?.lv1, drawerVisibility?.lv2]);
+		if (drawerVisibility?.lv1 === false) deleteQuery(["lv1", "project", "app", "release"]);
+	}, [drawerVisibility?.lv1]);
+
+	useEffect(() => {
+		if (drawerVisibility?.lv2 === false) deleteQuery(["lv2", "build_slug"]);
+	}, [drawerVisibility?.lv2]);
 
 	return (
 		<Layout hasSider>
@@ -88,11 +102,11 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 			{props.meta}
 
 			{/* Sidebar here */}
-			<MenuSider />
+			{useSidebar && <MenuSider />}
 
-			<Layout className="min-h-screen transition-all" style={{ marginLeft: sidebarCollapsed ? 80 : 200 }}>
+			<Layout className="min-h-screen transition-all" style={{ marginLeft }}>
 				{/* Site Header */}
-				<SiteHeader />
+				{useSidebar && <SiteHeader />}
 
 				{/* Page content here */}
 				<div className="grow px-2">{props.children}</div>

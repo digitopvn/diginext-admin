@@ -8,22 +8,29 @@ import DrawerProvider from "@/providers/DrawerProvider";
 import LayoutProvider from "@/providers/LayoutProvider";
 
 type IMainProps = {
-	meta: ReactNode;
-	children: ReactNode;
+	meta?: ReactNode;
+	children?: ReactNode;
+	useSidebar?: boolean;
 };
+
+// const SiteLayout = dynamic(() => import("../layouts/SiteLayout").then((mod) => mod.SiteLayout), { ssr: false });
 
 const Main = (props: IMainProps) => {
 	const { isDarkMode } = useDarkMode();
+	const { useSidebar = true } = props;
 
 	return (
 		<ConfigProvider
 			theme={{
+				hashed: false,
 				algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
 			}}
 		>
 			<Compose components={[LayoutProvider, DrawerProvider]}>
 				<App>
-					<SiteLayout meta={props.meta}>{props.children}</SiteLayout>
+					<SiteLayout meta={props.meta} useSidebar={useSidebar}>
+						{props.children}
+					</SiteLayout>
 				</App>
 			</Compose>
 		</ConfigProvider>

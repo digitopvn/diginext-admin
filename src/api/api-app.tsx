@@ -1,4 +1,4 @@
-import { useCreateApi, useDeleteApi, useItemApi, useListApi, useUpdateApi } from "./api";
+import { useCreateApi, useDeleteApi, useItemApi, useItemSlugApi, useListApi, useUpdateApi } from "./api";
 import type { ApiOptions, IApp } from "./api-types";
 
 export const useAppListApi = (options?: ApiOptions) => {
@@ -7,6 +7,10 @@ export const useAppListApi = (options?: ApiOptions) => {
 
 export const useAppApi = (id: string) => {
 	return useItemApi<IApp>(["apps"], `/api/v1/app`, id);
+};
+
+export const useAppSlugApi = (options?: ApiOptions) => {
+	return useItemSlugApi<IApp>(["apps"], `/api/v1/app`, options);
 };
 
 export const useAppCreateApi = () => {

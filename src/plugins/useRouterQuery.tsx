@@ -20,7 +20,9 @@ export const useRouterQuery = (): [any, { setQuery: (query?: any) => any; delete
 		});
 		setRouterQuery(newQuery);
 
+		const urlParams = new URLSearchParams(newQuery);
 		router.push(router.pathname, { query: newQuery });
+
 		return routerQuery;
 	};
 

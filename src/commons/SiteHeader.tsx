@@ -13,7 +13,7 @@ type ISiteHeaderProps = { onSidebarChange?: (value: boolean) => void };
 export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 	const { onSidebarChange } = props;
 	const { isDarkMode, toggle } = useDarkMode();
-	const user = useAuth();
+	const [user] = useAuth();
 
 	const {
 		token: { colorBgContainer },
@@ -61,7 +61,7 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 								</div>
 								<Space.Compact direction="vertical" className="w-full">
 									<Button>Profile</Button>
-									<Button>Sign out</Button>
+									<Button href="/logout">Sign out</Button>
 								</Space.Compact>
 							</Space>
 						}

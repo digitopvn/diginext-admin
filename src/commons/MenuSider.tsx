@@ -137,7 +137,7 @@ export const MenuSider = () => {
 			}}
 		>
 			{sidebarCollapsed ? (
-				<div className="mx-auto my-5 w-8">
+				<div className="mx-auto my-5 w-[32px]">
 					<Link href="/">
 						<img
 							src={
