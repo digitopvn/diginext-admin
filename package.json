@@ -31,6 +31,7 @@
 		"@tanstack/react-query-devtools": "^4.20.4",
 		"antd": "^5.1.2",
 		"axios": "^1.2.2",
+		"class-validator": "^0.14.0",
 		"cookies-next": "^2.1.1",
 		"dayjs": "^1.11.7",
 		"diginext-utils": "^2.0.32",

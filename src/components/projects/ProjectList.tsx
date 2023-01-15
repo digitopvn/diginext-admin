@@ -10,6 +10,7 @@ import {
 } from "@ant-design/icons";
 import { Button, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
+import { isJSON } from "class-validator";
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
 import Link from "next/link";
@@ -170,7 +171,8 @@ export const ProjectList = () => {
 						const environmentNames = Object.keys(app.environment ?? {});
 						const environments: DataType[] = environmentNames.map((envName) => {
 							const envStr = app.environment ? (app.environment[envName] as string) : "[]";
-							const envData = JSON.parse(envStr) as IAppEnvironment;
+							// console.log("envStr :>> ", envStr);
+							const envData = isJSON(envStr) ? (JSON.parse(envStr) as IAppEnvironment) : {};
 
 							const record: any = {
 								name: envName.toUpperCase(),
