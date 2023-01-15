@@ -1,12 +1,13 @@
 {
 	"name": "diginext-site",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"scripts": {
 		"dev": "next dev",
 		"start": "next start",
 		"serve": "serve ./out",
 		"build": "cross-env NODE_ENV=production next build",
 		"build-stats": "cross-env ANALYZE=true npm run build",
+		"prerelease": "yarn semantic-release --no-ci && git add . && git commit -m 'docs(changelog): update change log before releasing' && git push origin prerelease",
 		"release-dev": "run-s clean build export-prod copy-prod",
 		"release": "mv .env.local env.bak && run-s clean build export-prod copy-prod && mv env.bak .env.local",
 		"export": "next export",
@@ -31,6 +32,7 @@
 		"@tanstack/react-query-devtools": "^4.20.4",
 		"antd": "^5.1.2",
 		"axios": "^1.2.2",
+		"class-validator": "^0.14.0",
 		"cookies-next": "^2.1.1",
 		"dayjs": "^1.11.7",
 		"diginext-utils": "^2.0.32",

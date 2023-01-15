@@ -2591,6 +2591,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/validator@npm:^13.7.10":
+  version: 13.7.10
+  resolution: "@types/validator@npm:13.7.10"
+  checksum: 7b142c08019f484d62c9f3074231f640c24311558f157dd253a60810dd0cb29e41ec64ca210a192b54f6de51f4fe016bfeb2c30f90fa49c9337ed54a9d8e02aa
+  languageName: node
+  linkType: hard
+
 "@types/yargs-parser@npm:*":
   version: 21.0.0
   resolution: "@types/yargs-parser@npm:21.0.0"
@@ -3929,6 +3936,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"class-validator@npm:^0.14.0":
+  version: 0.14.0
+  resolution: "class-validator@npm:0.14.0"
+  dependencies:
+    "@types/validator": ^13.7.10
+    libphonenumber-js: ^1.10.14
+    validator: ^13.7.0
+  checksum: f62e4a0ad24cee68f4b2bc70d32b96de90cb598f96bde362b4dbf4234151af8eb6ae225458312a38fc49fa3959844cf61c60e731a8205e9a570454cff8de2710
+  languageName: node
+  linkType: hard
+
 "classnames@npm:2.x, classnames@npm:^2.2.1, classnames@npm:^2.2.3, classnames@npm:^2.2.5, classnames@npm:^2.2.6, classnames@npm:^2.3.1, classnames@npm:^2.3.2":
   version: 2.3.2
   resolution: "classnames@npm:2.3.2"
@@ -5137,6 +5155,7 @@ __metadata:
     antd: ^5.1.2
     autoprefixer: ^10.4.13
     axios: ^1.2.2
+    class-validator: ^0.14.0
     commitizen: ^4.2.5
     cookies-next: ^2.1.1
     cross-env: ^7.0.3
@@ -9091,6 +9110,13 @@ __metadata:
     proc-log: ^2.0.0
     semver: ^7.3.7
   checksum: 7ac0357c2227ee07511b423d3e43231bef2ac02254e858e73ff5502eea9f2c3372747ba5152fd6952aa47b4ba9482182b64493159fa7ef20c1fbb025458cb43f
+  languageName: node
+  linkType: hard
+
+"libphonenumber-js@npm:^1.10.14":
+  version: 1.10.18
+  resolution: "libphonenumber-js@npm:1.10.18"
+  checksum: df0a4b8adfb79666636913f6da730ffc3bc037094e35be492d2f7a23ef26754d65a7afa5f64e04f5c5c2883193fa10bd4bea966fd28edcf0c72ddd13bd4b3625
   languageName: node
   linkType: hard
 
@@ -14453,6 +14479,13 @@ __metadata:
   dependencies:
     builtins: ^5.0.0
   checksum: a32fd537bad17fcb59cfd58ae95a414d443866020d448ec3b22e8d40550cb585026582a57efbe1f132b882eea4da8ac38ee35f7be0dd72988a3cb55d305a20c1
+  languageName: node
+  linkType: hard
+
+"validator@npm:^13.7.0":
+  version: 13.7.0
+  resolution: "validator@npm:13.7.0"
+  checksum: 2b83283de1222ca549a7ef57f46e8d49c6669213348db78b7045bce36a3b5843ff1e9f709ebf74574e06223461ee1f264f8cc9a26a0060a79a27de079d8286ef
   languageName: node
   linkType: hard
 
