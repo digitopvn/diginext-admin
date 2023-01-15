@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/digitopvn/diginext-admin/compare/v1.0.1...v1.0.2) (2023-01-15)
+
+
+### Bug Fixes
+
+* **app list:** bugs of parse environment variables ([a02551d](https://github.com/digitopvn/diginext-admin/commit/a02551d77f11710c297f193bdb39872a4aa516bd))
+
 ## [1.0.1](https://github.com/digitopvn/diginext-admin/compare/v1.0.0...v1.0.1) (2023-01-14)
 
 

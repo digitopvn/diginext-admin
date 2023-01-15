@@ -7,6 +7,7 @@
 		"serve": "serve ./out",
 		"build": "cross-env NODE_ENV=production next build",
 		"build-stats": "cross-env ANALYZE=true npm run build",
+		"prerelease": "yarn semantic-release --no-ci && git add . && git commit -m 'docs(changelog): update change log before releasing' && git push origin prerelease",
 		"release-dev": "run-s clean build export-prod copy-prod",
 		"release": "mv .env.local env.bak && run-s clean build export-prod copy-prod && mv env.bak .env.local",
 		"export": "next export",
