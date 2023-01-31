@@ -23,8 +23,9 @@ const CliPage = () => {
 	// console.log("user :>> ", user);
 	const [joinApi] = useUserJoinWorkspaceApi();
 
-	const workspace = useWorkspace({ name: user?.workspaces[0].slug });
-	const { slug: workspaceSlug } = workspace || {};
+	const workspaceSlug = user?.workspaces && user?.workspaces.length > 0 ? user?.workspaces[0].slug : undefined;
+	const workspace = useWorkspace({ name: workspaceSlug });
+	// const { slug: workspaceSlug } = workspace || {};
 	// console.log("workspace :>> ", workspace);
 
 	const joinWorkspace = async (userId: string) => {

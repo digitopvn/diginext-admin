@@ -86,7 +86,13 @@ export const AuthPage = (props: { children?: ReactNode } = {}) => {
 
 	const { workspaces = [] } = user || {};
 
-	const workspace = useWorkspace({ name: workspaces[0]?.slug });
+	const workspaceSlug = workspaces[0]?.slug;
+	const workspace = useWorkspace({ name: workspaceSlug });
+
+	// useEffect(() => {
+	// 	if (!workspaces) return;
+	// 	if (workspaces.length === 0) router.push(`/workspace/setup`);
+	// }, [workspaces]);
 
 	if (isLoading)
 		return (
