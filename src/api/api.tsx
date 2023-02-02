@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
-import { isArray, isEmpty } from "lodash";
+import { isArray, isEmpty, isString } from "lodash";
 import { useRouter } from "next/router";
 
 import { Config } from "@/utils/AppConfig";
@@ -81,16 +81,17 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, options: ApiOpt
 			// for token is about to expired
 			const { token = {} } = data;
 			if (token.access_token) setCookie("x-auth-cookie", token.access_token);
-
 			// console.log("data :>> ", data);
 
-			const result = isArray(data.data)
-				? data.data.map((d: any) => {
-						return { ...d, key: d._id };
-				  })[0]
-				: data.data[0];
-
-			return result;
+			if (isArray(data.data)) {
+				return data.data.map((d: any) => {
+					return { ...d, key: d._id };
+				})[0];
+			}
+			if (isString(data.data)) {
+				return data.data;
+			}
+			return data.data[0];
 		},
 	});
 };

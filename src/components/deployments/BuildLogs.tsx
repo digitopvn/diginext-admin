@@ -38,13 +38,16 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	const { build_slug } = query;
 
 	// api
+	console.log("build_slug :>> ", build_slug);
 
 	const { data: logData = "", isLoading } = useBuildLogsApi({ filter: { slug: slug ?? build_slug } });
 	console.log({ logData });
 
 	const displayedData = stripAnsiCodes(logData);
+	console.log("displayedData :>> ", displayedData);
 
 	const lines: any[] = displayedData.split("\n").map((line: any, i: number) => line.toString());
+	console.log("lines :>> ", lines);
 
 	// socket
 
