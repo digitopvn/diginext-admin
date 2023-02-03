@@ -33,7 +33,7 @@ const CliPage = () => {
 		if (!workspaceSlug) return;
 		if (!workspace) return;
 
-		console.log("userId :>> ", userId);
+		// console.log("userId :>> ", userId);
 
 		const joinedUser = await joinApi({
 			userId,
