@@ -70,8 +70,8 @@ export const useAuth = (props: { redirectUrl?: string } = {}) => {
 		setTimeout(() => {
 			const cookieToken = getCookie("x-auth-cookie");
 
-			console.log("cookieToken :>>", cookieToken);
-			console.log("status :>>", status);
+			// console.log("cookieToken :>>", cookieToken);
+			// console.log("status :>>", status);
 
 			if (!cookieToken || !status) {
 				router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
