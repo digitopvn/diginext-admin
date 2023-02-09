@@ -82,10 +82,11 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 		if (buildLog.indexOf(failedKeyword) > -1 || buildLog.indexOf("[error]") > -1) setStatus("failed");
 
 		//
+		console.log(`[socket] connecting to "${SOCKET_ROOM}" room...`);
 		const socket = io(SOCKET_URL, { transports: ["websocket"] });
 
 		socket.on("connect", () => {
-			console.log("connected:", socket.connected); // false
+			console.log("[socket] connected:", socket.connected); // false
 
 			// Join to the room:
 			socket.emit("join", { room: SOCKET_ROOM });

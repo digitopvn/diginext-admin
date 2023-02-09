@@ -134,8 +134,8 @@ export const ProjectList = () => {
 	// fetch projects
 	const { data } = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: projects, pagination } = data || {};
-	const { total_pages } = pagination || {};
-
+	const { total_pages, total_items } = pagination || {};
+	console.log({ total_pages });
 	const openBuildList = (project: string, app: string, env: string) => {
 		setQuery({ lv1: "build", project, app, env });
 	};
@@ -276,7 +276,15 @@ export const ProjectList = () => {
 				dataSource={displayedProjects}
 				scroll={{ x: 1200 }}
 				sticky={{ offsetHeader: 48 }}
-				pagination={{ current: page, pageSize, total: total_pages }}
+				pagination={{
+					showSizeChanger: true,
+					current: page,
+					// defaultCurrent: page,
+					defaultPageSize: pageSize,
+					total: total_items,
+					// total: total_pages,
+					// , pageSize
+				}}
 				onChange={onTableChange}
 			/>
 			{/* <Drawer title={query.type === "build" ? "Builds" : "Releases"} placement="right" onClose={onClose} open={open} size="large">

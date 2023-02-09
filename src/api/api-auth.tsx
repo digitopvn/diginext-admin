@@ -24,7 +24,7 @@ export const useAuthApi = (props: { access_token?: string } = {}) => {
 	// const [query] = useRouterQuery();
 
 	return useQuery({
-		// staleTime: 2 * 60 * 1000, // 2 minutes
+		staleTime: 2 * 60 * 1000, // 2 minutes
 		queryKey: ["auth"],
 		// enabled: typeof access_token !== "undefined",
 		queryFn: async () => {

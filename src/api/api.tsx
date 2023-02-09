@@ -15,7 +15,7 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 
-	const { pagination = { page: 1, size: 20 }, populate, filter, sort = "-createdAt" } = options;
+	const { pagination = { page: 1, size: 20 }, populate, filter, sort = "-updatedAt,-createdAt" } = options;
 	const paginationParams = new URLSearchParams(pagination as any).toString();
 	const populateParams = populate ? `populate=${populate}` : "";
 	const filterParams = filter ? new URLSearchParams(filter).toString() : "";
