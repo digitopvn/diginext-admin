@@ -143,7 +143,7 @@ export const ReleaseList = () => {
 
 	const { data } = useReleaseListApi({ populate: "owner", pagination: { page, size: pageSize }, filter });
 	const { list: releases = [], pagination } = data || {};
-	const { total_pages } = pagination || {};
+	const { total_items } = pagination || {};
 
 	const [rolloutApi, rolloutApiStatus] = useReleaseRollOutApi();
 	console.log("rolloutApiStatus :>> ", rolloutApiStatus);
@@ -264,7 +264,7 @@ export const ReleaseList = () => {
 				dataSource={displayedReleases}
 				scroll={{ x: 600 }}
 				sticky={{ offsetHeader }}
-				pagination={{ current: page, pageSize, total: total_pages }}
+				pagination={{ current: page, pageSize, total: total_items }}
 				onChange={onTableChange}
 			/>
 		</div>

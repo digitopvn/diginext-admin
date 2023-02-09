@@ -95,7 +95,7 @@ export const ClusterList = () => {
 	const [page, setPage] = useState(1);
 	const { data } = useClusterListApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: clusters, pagination } = data || {};
-	const { total_pages } = pagination || {};
+	const { total_items } = pagination || {};
 	console.log("clusters :>> ", clusters);
 
 	const [query, { setQuery }] = useRouterQuery();
@@ -128,7 +128,7 @@ export const ClusterList = () => {
 				dataSource={displayedData}
 				scroll={{ x: 1200 }}
 				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize, total: total_pages }}
+				pagination={{ pageSize, total: total_items }}
 				onChange={onTableChange}
 			/>
 		</div>

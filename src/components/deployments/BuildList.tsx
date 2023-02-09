@@ -145,7 +145,7 @@ export const BuildList = () => {
 
 	const { data } = useBuildListApi({ populate: "owner", pagination: { page, size: pageSize }, filter });
 	const { list: builds, pagination } = data || {};
-	const { total_pages } = pagination || {};
+	const { total_items } = pagination || {};
 
 	const openBuildLogs = (slug?: string) => {
 		setQuery({ lv2: "build_logs", build_slug: slug });
@@ -223,7 +223,7 @@ export const BuildList = () => {
 				dataSource={displayedBuilds}
 				scroll={{ x: 600 }}
 				sticky={{ offsetHeader: 0 }}
-				pagination={{ current: page, pageSize, total: total_pages }}
+				pagination={{ current: page, pageSize, total: total_items }}
 				onChange={onTableChange}
 			/>
 		</div>

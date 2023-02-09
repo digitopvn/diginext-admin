@@ -114,7 +114,7 @@ export const ContainerRegistryList = () => {
 	const [page, setPage] = useState(1);
 	const { data } = useContainerRegistryListApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: containerRegistries, pagination } = data || {};
-	const { total_pages } = pagination || {};
+	const { total_items } = pagination || {};
 	console.log("containerRegistries :>> ", containerRegistries);
 
 	const onTableChange = (_pagination: TablePaginationConfig) => {
@@ -129,7 +129,7 @@ export const ContainerRegistryList = () => {
 				dataSource={containerRegistries}
 				scroll={{ x: 1200 }}
 				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize, total: total_pages }}
+				pagination={{ pageSize, total: total_items }}
 				onChange={onTableChange}
 			/>
 		</div>

@@ -106,7 +106,7 @@ export const TeamList = () => {
 	const [page, setPage] = useState(1);
 	const { data } = useTeamListApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: teams, pagination } = data || {};
-	const { total_pages } = pagination || {};
+	const { total_items } = pagination || {};
 	console.log("teams :>> ", teams);
 
 	const onTableChange = (_pagination: TablePaginationConfig) => {
@@ -121,7 +121,7 @@ export const TeamList = () => {
 				dataSource={teams}
 				scroll={{ x: 1200 }}
 				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize, total: total_pages }}
+				pagination={{ pageSize, total: total_items }}
 				onChange={onTableChange}
 			/>
 		</div>
