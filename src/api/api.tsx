@@ -156,10 +156,10 @@ export const useCreateApi = <T,>(
 		// },
 	});
 
-	const proceed = mutation.mutateAsync;
-	const { status } = mutation;
+	// const proceed = mutation.mutateAsync;
+	const { mutateAsync, status } = mutation;
 
-	return [proceed, status];
+	return [mutateAsync, status];
 };
 
 type UpdateData = { id?: string; _id?: string; state?: string };
@@ -278,7 +278,10 @@ export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, filter: any
 
 		// [3] - FINISH & SUCCESS!
 		onSuccess: (updateData, variables, context) => {
-			queryClient.invalidateQueries({ queryKey: keys });
+			// queryClient.setQueryData<T[]>(keys, (currentList) =>
+			// 	currentList?.map((item) => (previousData && (item as any)._id === previousData?._id ? previousData : item))
+			// );
+			queryClient.invalidateQueries({ queryKey: [keys[0], "list"] });
 			// queryClient.refetchQueries({ queryKey: keys });
 			// Boom baby!
 			// console.log("UPDATE > success > updateData :>> ", updateData);

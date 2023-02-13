@@ -1,3 +1,4 @@
+import { LoadingOutlined } from "@ant-design/icons";
 import { App, theme, Timeline } from "antd";
 import dayjs from "dayjs";
 import parser from "html-react-parser";
@@ -38,16 +39,16 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	const { build_slug } = query;
 
 	// api
-	console.log("build_slug :>> ", build_slug);
+	// console.log("build_slug :>> ", build_slug);
 
 	const { data: logData = "", isLoading } = useBuildLogsApi({ filter: { slug: slug ?? build_slug } });
-	console.log({ logData });
+	// console.log({ logData });
 
 	const displayedData = stripAnsiCodes(logData);
-	console.log("displayedData :>> ", displayedData);
+	// console.log("displayedData :>> ", displayedData);
 
 	const lines: any[] = displayedData.split("\n").map((line: any, i: number) => line.toString());
-	console.log("lines :>> ", lines);
+	// console.log("lines :>> ", lines);
 
 	// socket
 
@@ -65,7 +66,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	// effects
 
 	useEffect(() => {
-		console.log("lines :>> ", lines);
+		// console.log("lines :>> ", lines);
 		if (isEmpty(logData)) return;
 		setMessages(lines);
 	}, [lines.length]);
@@ -95,7 +96,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 			socket.on("message", ({ action, message }: { action: string; message: string }) => {
 				// print out the message
 				if (message) {
-					setMessages((oldMsgs) => [...oldMsgs, message]);
+					setMessages((oldMsgs) => [...oldMsgs, stripAnsiCodes(message)]);
 
 					// if build failed keyword detected -> mark as BUILD FAILED
 					if (message?.toLowerCase().indexOf(failedKeyword) > -1 || message?.toLowerCase().indexOf("[error]") > -1) {
@@ -118,16 +119,26 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 		});
 
 		return () => {
-			socket.disconnect();
+			if (socket.connected) socket.disconnect();
 			setMessages([]);
 		};
-	}, []);
+	}, [logData]);
 
 	return (
 		<div style={{ color: colorText }}>
+			{status === "failed" && <h2 className="text-xl text-red-600">Build lỗi rồi má ơi!</h2>}
+			{status === "success" && <h2 className="text-xl text-green-600">Build thành công rồi, đỉnh quá idol ơi!</h2>}
+
 			<Timeline>
+				{status === "in_progress" && (
+					<Timeline.Item key={`message-spin`} dot={<LoadingOutlined />}>
+						Building...
+					</Timeline.Item>
+				)}
+
 				{messages
 					.filter((m) => m !== "")
+					.reverse()
 					.map((message, index) =>
 						`${message}`.toLowerCase().indexOf("error") > -1 ? (
 							<Timeline.Item key={`message-${index}`} className="text-red-600">
@@ -138,9 +149,6 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 						)
 					)}
 			</Timeline>
-
-			{status === "failed" && <h2 className="text-xl text-red-600">Build lỗi rồi má ơi!</h2>}
-			{status === "success" && <h2 className="text-xl text-green-600">Build thành công rồi, đỉnh quá idol ơi!</h2>}
 		</div>
 	);
 };

@@ -89,7 +89,7 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 	}, [lv1, lv2, project, app, env]);
 
 	useEffect(() => {
-		if (drawerVisibility?.lv1 === false) deleteQuery(["lv1", "project", "app", "release"]);
+		if (drawerVisibility?.lv1 === false) deleteQuery(["lv1", "project", "app", "release", "type", "cluster_slug"]);
 	}, [drawerVisibility?.lv1]);
 
 	useEffect(() => {

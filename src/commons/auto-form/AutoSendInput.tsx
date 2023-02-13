@@ -1,33 +1,22 @@
 import { CheckOutlined, CloseOutlined, LoadingOutlined } from "@ant-design/icons";
-import type { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { Form, Input } from "antd";
 import type { SyntheticEvent } from "react";
 import React, { useEffect, useState } from "react";
 import { useDebounce } from "usehooks-ts";
 
-import { useAuth } from "@/api/api-auth";
-
-const AutoSendInput = <T = any,>(props: {
+const AutoSendInput = (props: {
+	// form: FormInstance;
 	name: string;
 	value?: any;
 	defaultValue?: any;
 	label?: string;
 	requiredMessage?: string;
-	updateApi: UseMutateAsyncFunction<
-		T,
-		Error,
-		any,
-		{
-			id?: string | undefined;
-			previousData?: any;
-		}
-	>;
-	status: "error" | "idle" | "loading" | "success";
+	status?: any;
+	// status: "error" | "idle" | "loading" | "success";
 }) => {
-	const { updateApi, label, status, name, requiredMessage = "This field is required.", defaultValue, value } = props;
-	const [user, reload] = useAuth();
+	const { label, name, requiredMessage = "This field is required.", defaultValue, value, status } = props;
 
-	const [form] = Form.useForm();
+	const form = Form.useFormInstance();
 
 	const [_value, setValue] = useState(value ?? defaultValue);
 	const debouncedValue = useDebounce(_value, 500);
@@ -55,38 +44,15 @@ const AutoSendInput = <T = any,>(props: {
 		setValue((e.currentTarget as any).value);
 	};
 
-	const onFinish = async (values: any) => {
-		console.log("Submit:", values);
-		const updateData = { ...values };
-		if (!value) updateData.owner = user?._id; // only save "owner" when create new item
-
-		const result = await updateApi(updateData);
-		console.log("result :>> ", result);
-	};
-
-	const onFinishFailed = (errorInfo: any) => {
-		console.log("Failed:", errorInfo);
-	};
-
 	let icon;
-	if (status === "error") icon = <CloseOutlined />;
-	if (status === "loading") icon = <LoadingOutlined />;
-	if (status === "success") icon = <CheckOutlined color="green" />;
+	if (status && status[name] === "error") icon = <CloseOutlined />;
+	if (status && status[name] === "loading") icon = <LoadingOutlined />;
+	if (status && status[name] === "success") icon = <CheckOutlined color="green" />;
 
 	return (
-		<Form
-			layout="vertical"
-			name="edit"
-			form={form}
-			// initialValues={initialValues}
-			onFinish={onFinish}
-			onFinishFailed={onFinishFailed}
-			autoComplete="off"
-		>
-			<Form.Item label={label} name={name} rules={[{ required: true, message: `Please input your ${name}` }]}>
-				<Input suffix={icon} onChange={onChange} />
-			</Form.Item>
-		</Form>
+		<Form.Item label={label} name={name} rules={[{ required: true, message: `Please input your ${name}` }]}>
+			<Input suffix={icon} onChange={onChange} />
+		</Form.Item>
 	);
 };
 

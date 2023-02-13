@@ -43,7 +43,7 @@ const WorkspaceSetupPage = () => {
 					<Title value="Set up your first workspace!" />
 					<p>It's great to see you here, now create your first workspace to get started.</p>
 
-					<Form name="basic" initialValues={{ remember: true }} onFinish={onFinish} onFinishFailed={onFinishFailed} autoComplete="off">
+					<Form name="basic" onFinish={onFinish} onFinishFailed={onFinishFailed} autoComplete="off">
 						<Form.Item name="name" rules={[{ required: true, message: "Please input your workspace name!" }]}>
 							<Input className="text-center text-lg" onChange={onChange} />
 						</Form.Item>
