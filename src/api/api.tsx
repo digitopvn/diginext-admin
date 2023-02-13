@@ -300,20 +300,23 @@ export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, filter: any
 	return [mutation.mutateAsync, mutation.status];
 };
 
-export const useDeleteApi = <T,>(keys: any[], apiPath: string, filter: any = {}, options: ApiOptions = {}) => {
+export const useDeleteApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}) => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
-	const queryFilter = new URLSearchParams(filter).toString();
 
-	const mutation = useMutation<T, Error>({
-		mutationFn: () => {
+	const mutation = useMutation<T, Error, T>({
+		mutationFn: async (filter: any) => {
+			const queryFilter = new URLSearchParams(filter).toString();
 			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${queryFilter}`;
-			return axios.delete(apiURL, { ...options, headers });
+			const { data } = await axios.delete(apiURL, { ...options, headers });
+			return data;
 		},
 		onSuccess: (data) => {
 			// update the list in cache
+			queryClient.invalidateQueries({ queryKey: [keys[0], "list"] });
+			return data;
 		},
 	});
 

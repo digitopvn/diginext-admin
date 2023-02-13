@@ -1,5 +1,6 @@
 import {
 	BuildOutlined,
+	DeleteOutlined,
 	EditOutlined,
 	EyeOutlined,
 	GlobalOutlined,
@@ -8,7 +9,7 @@ import {
 	QrcodeOutlined,
 	RocketOutlined,
 } from "@ant-design/icons";
-import { Button, Space, Table, Tag, Tooltip } from "antd";
+import { Button, Popconfirm, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { isJSON } from "class-validator";
 import dayjs from "dayjs";
@@ -17,7 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
-import { useProjectListWithAppsApi } from "@/api/api-project";
+import { useProjectDeleteApi, useProjectListWithAppsApi } from "@/api/api-project";
 import type { IAppEnvironment } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -135,13 +136,21 @@ export const ProjectList = () => {
 	const { data } = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: projects, pagination } = data || {};
 	const { total_pages, total_items } = pagination || {};
-	console.log({ total_pages });
+
+	const { proceed: deleteApi, status: deleteApiStatus } = useProjectDeleteApi();
+
+	// console.log({ total_pages });
 	const openBuildList = (project: string, app: string, env: string) => {
 		setQuery({ lv1: "build", project, app, env });
 	};
 
 	const openReleaseList = (project: string, app: string, env: string) => {
 		setQuery({ lv1: "release", project, app, env });
+	};
+
+	const deleteProject = async (id: string) => {
+		const result = await deleteApi({ _id: id });
+		console.log("result :>> ", result);
 	};
 
 	// table pagination
@@ -160,7 +169,16 @@ export const ProjectList = () => {
 					<Tooltip title="Edit project">
 						<Button icon={<EditOutlined />} />
 					</Tooltip>
-					<Button icon={<PauseCircleOutlined />} />
+					{/* <Button icon={<PauseCircleOutlined />} /> */}
+					<Popconfirm
+						title="Are you sure to delete this project?"
+						description="Notes: all of the related apps will be also deleted."
+						onConfirm={() => deleteProject(p._id as string)}
+						okText="Yes"
+						cancelText="No"
+					>
+						<Button icon={<DeleteOutlined />} />
+					</Popconfirm>
 				</Space.Compact>
 			),
 			key: p._id,
