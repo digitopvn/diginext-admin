@@ -5,7 +5,6 @@ import {
 	EyeOutlined,
 	GlobalOutlined,
 	InfoCircleOutlined,
-	PauseCircleOutlined,
 	QrcodeOutlined,
 	RocketOutlined,
 } from "@ant-design/icons";
@@ -18,6 +17,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
+import { useAppDeleteApi, useAppEnvironmentDeleteApi } from "@/api/api-app";
 import { useProjectDeleteApi, useProjectListWithAppsApi } from "@/api/api-project";
 import type { IAppEnvironment } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
@@ -137,7 +137,9 @@ export const ProjectList = () => {
 	const { list: projects, pagination } = data || {};
 	const { total_pages, total_items } = pagination || {};
 
-	const [deleteApi, deleteApiStatus] = useProjectDeleteApi();
+	const [deleteProjectApi, deleteProjectApiStatus] = useProjectDeleteApi();
+	const [deleteAppApi, deleteAppApiStatus] = useAppDeleteApi();
+	const [deleteAppEnvApi, deleteAppEnvApiStatus] = useAppEnvironmentDeleteApi();
 
 	// console.log({ total_pages });
 	const openBuildList = (project: string, app: string, env: string) => {
@@ -149,8 +151,18 @@ export const ProjectList = () => {
 	};
 
 	const deleteProject = async (id: string) => {
-		const result = await deleteApi({ _id: id });
-		console.log("result :>> ", result);
+		const result = await deleteProjectApi({ _id: id });
+		console.log("[deleteProject] result :>> ", result);
+	};
+
+	const deleteApp = async (id: string) => {
+		const result = await deleteAppApi({ _id: id });
+		console.log("[deleteApp] result :>> ", result);
+	};
+
+	const deleteEnvironment = async (appId: string, env: string) => {
+		const result = await deleteAppEnvApi({ _id: appId, env });
+		console.log("[deleteEnvironment] result :>> ", result);
 	};
 
 	// table pagination
@@ -172,7 +184,9 @@ export const ProjectList = () => {
 					{/* <Button icon={<PauseCircleOutlined />} /> */}
 					<Popconfirm
 						title="Are you sure to delete this project?"
-						description="Notes: all of the related apps will be also deleted."
+						description={
+							<span className="text-red-500">Caution: all of the related apps & deployed environments will be also deleted.</span>
+						}
 						onConfirm={() => deleteProject(p._id as string)}
 						okText="Yes"
 						cancelText="No"
@@ -238,6 +252,19 @@ export const ProjectList = () => {
 										<Tooltip title="Modify environment variables (coming soon)" placement="topRight">
 											<Button icon={<QrcodeOutlined />} disabled />
 										</Tooltip>
+										<Popconfirm
+											title="Are you sure to delete this environment?"
+											description={
+												<span className="text-red-500">
+													Caution: this is permanent and cannot be rolled back (excepts re-deploying).
+												</span>
+											}
+											onConfirm={() => deleteEnvironment(app._id as string, envName)}
+											okText="Yes"
+											cancelText="No"
+										>
+											<Button icon={<DeleteOutlined />} />
+										</Popconfirm>
 									</Space.Compact>
 								) : (
 									<Space.Compact>
@@ -254,6 +281,19 @@ export const ProjectList = () => {
 										<Tooltip title="Modify environment variables (coming soon)" placement="topRight">
 											<Button icon={<QrcodeOutlined />} disabled />
 										</Tooltip>
+										<Popconfirm
+											title="Are you sure to delete this environment?"
+											description={
+												<span className="text-red-500">
+													Caution: this is permanent and cannot be rolled back (excepts re-deploying).
+												</span>
+											}
+											onConfirm={() => deleteEnvironment(app._id as string, envName)}
+											okText="Yes"
+											cancelText="No"
+										>
+											<Button icon={<DeleteOutlined />} />
+										</Popconfirm>
 									</Space.Compact>
 								);
 
@@ -272,7 +312,20 @@ export const ProjectList = () => {
 									<Tooltip title="Edit app">
 										<Button icon={<EditOutlined />} />
 									</Tooltip>
-									<Button icon={<PauseCircleOutlined />} />
+									{/* <Button icon={<PauseCircleOutlined />} /> */}
+									<Popconfirm
+										title="Are you sure to delete this app?"
+										description={
+											<span className="text-red-500">
+												Caution: all of the related deployed environments will be also deleted.
+											</span>
+										}
+										onConfirm={() => deleteApp(app._id as string)}
+										okText="Yes"
+										cancelText="No"
+									>
+										<Button icon={<DeleteOutlined />} />
+									</Popconfirm>
 								</Space.Compact>
 							),
 						};

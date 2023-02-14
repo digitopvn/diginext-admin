@@ -24,3 +24,7 @@ export const useAppUpdateApi = (options?: ApiOptions) => {
 export const useAppDeleteApi = () => {
 	return useDeleteApi<IApp>(["apps", "delete"], `/api/v1/app`);
 };
+
+export const useAppEnvironmentDeleteApi = () => {
+	return useDeleteApi<IApp | any>(["projects", "apps", "environment", "delete"], `/api/v1/app/environment`);
+};

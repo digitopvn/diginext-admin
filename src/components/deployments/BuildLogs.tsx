@@ -82,12 +82,14 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 		if (buildLog.indexOf("finished deploying") > -1) setStatus("success");
 		if (buildLog.indexOf(failedKeyword) > -1 || buildLog.indexOf("[error]") > -1) setStatus("failed");
 
-		//
+		// no need to connect to socket if the room is not available:
+		if (!SOCKET_ROOM) return () => false;
+
 		console.log(`[socket] connecting to "${SOCKET_ROOM}" room...`);
 		const socket = io(SOCKET_URL, { transports: ["websocket"] });
 
 		socket.on("connect", () => {
-			console.log("[socket] connected:", socket.connected); // false
+			console.log("[socket] connected:", socket.connected, `(ROOM: ${SOCKET_ROOM})`); // false
 
 			// Join to the room:
 			socket.emit("join", { room: SOCKET_ROOM });

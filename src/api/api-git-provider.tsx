@@ -1,4 +1,4 @@
-import { useCreateApi, useDeleteApi, useItemApi, useListApi, useUpdateApi } from "./api";
+import { useCreateApi, useDeleteApi, useItemApi, useItemSlugApi, useListApi, useUpdateApi } from "./api";
 import type { ApiOptions, IGitProvider } from "./api-types";
 
 export const useGitProviderListApi = (options?: ApiOptions) => {
@@ -10,11 +10,11 @@ export const useGitProviderApi = (id: string, options?: ApiOptions) => {
 };
 
 export const useGitProviderSlugApi = (slug: string, options?: ApiOptions) => {
-	return useItemApi<IGitProvider>(["gits", slug], `/api/v1/git`, slug, options);
+	return useItemSlugApi<IGitProvider>(["gits", slug], `/api/v1/git`, slug, options);
 };
 
-export const useGitProviderCreateApi = () => {
-	return useCreateApi<IGitProvider>(["gits"], `/api/v1/git`);
+export const useGitProviderCreateApi = (options?: ApiOptions) => {
+	return useCreateApi<IGitProvider>(["gits"], `/api/v1/git`, options);
 };
 
 export const useGitProviderUpdateApi = (options?: ApiOptions) => {
