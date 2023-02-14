@@ -5,20 +5,20 @@ export const useClusterListApi = (options?: ApiOptions) => {
 	return useListApi<ICluster>(["clusters", "list"], `/api/v1/cluster`, options);
 };
 
-export const useClusterApi = (id: string) => {
-	return useItemApi<ICluster>(["clusters", "id"], `/api/v1/cluster`, id);
+export const useClusterApi = (id: string, options?: ApiOptions) => {
+	return useItemApi<ICluster>(["clusters", "id"], `/api/v1/cluster`, id, options);
 };
 
-export const useClusterSlugApi = (options?: ApiOptions) => {
-	return useItemSlugApi<ICluster>(["clusters", "slug"], `/api/v1/cluster`, options);
+export const useClusterSlugApi = (slug: string, options?: ApiOptions) => {
+	return useItemSlugApi<ICluster>(["clusters", slug], `/api/v1/cluster`, slug, options);
 };
 
 export const useClusterCreateApi = () => {
 	return useCreateApi<ICluster>(["clusters", "create"], `/api/v1/cluster`);
 };
 
-export const useClusterUpdateApi = (filter: any, options?: ApiOptions) => {
-	return useUpdateApi<ICluster>(["clusters", "update"], `/api/v1/cluster`, filter, options);
+export const useClusterUpdateApi = (options?: ApiOptions) => {
+	return useUpdateApi<ICluster>(["clusters", "update"], `/api/v1/cluster`, options);
 };
 
 export const useClusterDeleteApi = () => {

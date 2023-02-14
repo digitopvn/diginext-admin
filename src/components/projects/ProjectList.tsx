@@ -137,7 +137,7 @@ export const ProjectList = () => {
 	const { list: projects, pagination } = data || {};
 	const { total_pages, total_items } = pagination || {};
 
-	const { proceed: deleteApi, status: deleteApiStatus } = useProjectDeleteApi();
+	const [deleteApi, deleteApiStatus] = useProjectDeleteApi();
 
 	// console.log({ total_pages });
 	const openBuildList = (project: string, app: string, env: string) => {

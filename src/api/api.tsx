@@ -59,21 +59,23 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 	});
 };
 
-export const useItemSlugApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}) => {
+export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, options: ApiOptions = {}) => {
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 
-	const { populate, filter } = options;
-	const populateParams = populate ? `populate=${populate}` : "";
-	const filterParams = filter ? new URLSearchParams(filter).toString() : "";
+	const { populate, filter = {} } = options;
+	filter.slug = slug;
 
-	const queryKey = [...keys];
-	if (filter.slug !== undefined && filter.slug !== null) queryKey.push(filter);
+	const populateParams = populate ? `populate=${populate}` : "";
+	const filterParams = new URLSearchParams(filter).toString();
+
+	// const queryKey = [...keys];
+	// if (filter) queryKey.push(filter);
 
 	return useQuery<T, Error>({
-		enabled: filter.slug !== undefined && filter.slug !== null,
-		queryKey,
+		enabled: slug !== undefined && slug !== null,
+		queryKey: keys,
 		queryFn: async () => {
 			const url = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${populateParams}`;
 			const { data } = await axios.get(url, { ...options, headers });
@@ -88,9 +90,9 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, options: ApiOpt
 					return { ...d, key: d._id };
 				})[0];
 			}
-			if (isString(data.data)) {
-				return data.data;
-			}
+
+			if (isString(data.data)) return data.data;
+
 			return data.data[0];
 		},
 	});
@@ -107,7 +109,7 @@ export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options
 	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 
 	return useQuery<T, Error>({
-		queryKey: [...keys, id],
+		queryKey: keys,
 		queryFn: () => getById(apiPath, id, { ...options, headers }),
 		enabled: !!id,
 	});
@@ -183,7 +185,7 @@ export type UseUpdateApi<T = any> = [
 	"error" | "idle" | "loading" | "success"
 ];
 
-export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, filter: any = {}, options: ApiOptions = {}): UseUpdateApi<T> => {
+export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, options: ApiOptions = {}): UseUpdateApi<T> => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
@@ -192,7 +194,7 @@ export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, filter: any
 	// console.log("useUpdateApi > keys :>> ", keys);
 	// console.log("useUpdateApi > filter :>> ", filter);
 
-	const { pagination = { page: 1, size: 20 }, populate, sort = "-createdAt" } = options;
+	const { pagination = { page: 1, size: 20 }, populate, sort = "-createdAt", filter } = options;
 	const paginationParams = new URLSearchParams(pagination as any).toString();
 	const populateParams = populate ? `populate=${populate}` : "";
 	const filterParams = filter ? new URLSearchParams(filter).toString() : "";
@@ -300,7 +302,11 @@ export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, filter: any
 	return [mutation.mutateAsync, mutation.status];
 };
 
-export const useDeleteApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}) => {
+export const useDeleteApi = <T,>(
+	keys: any[],
+	apiPath: string,
+	options: ApiOptions = {}
+): [UseMutateAsyncFunction<T, Error, T, unknown>, "error" | "idle" | "loading" | "success"] => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
@@ -320,6 +326,8 @@ export const useDeleteApi = <T,>(keys: any[], apiPath: string, options: ApiOptio
 		},
 	});
 
-	return { proceed: mutation.mutateAsync, status: mutation.status };
+	const { mutateAsync, status } = mutation;
+	// return { proceed: mutation.mutateAsync, status: mutation.status };
+	return [mutateAsync, status];
 	// return mutation;
 };

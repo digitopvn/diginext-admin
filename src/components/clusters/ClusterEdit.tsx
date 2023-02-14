@@ -22,8 +22,8 @@ const ClusterEdit = (props: ClusterEditProps = {}) => {
 	const [fieldsStatus, setFieldsStatus] = useState();
 
 	const [{ cluster_slug }] = useRouterQuery();
-	const { data: cluster } = useClusterSlugApi({ populate: "owner", filter: { slug: cluster_slug } });
-	const [updateApi, updateStatus] = useClusterUpdateApi({ id: cluster?._id });
+	const { data: cluster } = useClusterSlugApi(cluster_slug, { populate: "owner" });
+	const [updateApi, updateStatus] = useClusterUpdateApi({ filter: { id: cluster?._id } });
 	const [createApi, createStatus] = useClusterCreateApi();
 
 	console.log("cluster :>> ", cluster);

@@ -41,7 +41,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	// api
 	// console.log("build_slug :>> ", build_slug);
 
-	const { data: logData = "", isLoading } = useBuildLogsApi({ filter: { slug: slug ?? build_slug } });
+	const { data: logData = "", isLoading } = useBuildLogsApi(slug ?? build_slug);
 	// console.log({ logData });
 
 	const displayedData = stripAnsiCodes(logData);

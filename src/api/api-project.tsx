@@ -11,18 +11,18 @@ export const useProjectListWithAppsApi = (options?: ApiOptions) => {
 	return useListApi<IProject>(["projects", "list"], `/api/v1/project/with-apps`, options);
 };
 
-export const useProjectApi = (id: string) => {
-	return useItemApi<IProject>(["projects"], `/api/v1/project`, id);
+export const useProjectApi = (id: string, options?: ApiOptions) => {
+	return useItemApi<IProject>(["projects", id], `/api/v1/project`, id, options);
 };
 
 export const useProjectCreateApi = () => {
-	return useCreateApi<IProject>(["projects"], `/api/v1/project`);
+	return useCreateApi<IProject>(["projects", "create"], `/api/v1/project`);
 };
 
-export const useProjectUpdateApi = () => {
-	return useUpdateApi<IProject>(["projects"], `/api/v1/project`);
+export const useProjectUpdateApi = (options?: ApiOptions) => {
+	return useUpdateApi<IProject>(["projects", "update"], `/api/v1/project`, options);
 };
 
 export const useProjectDeleteApi = () => {
-	return useDeleteApi<IProject>(["projects"], `/api/v1/project`);
+	return useDeleteApi<IProject>(["projects", "delete"], `/api/v1/project`);
 };

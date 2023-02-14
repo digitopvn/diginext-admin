@@ -1,20 +1,24 @@
-import { useCreateApi, useDeleteApi, useItemApi, useListApi, useUpdateApi } from "./api";
+import { useCreateApi, useDeleteApi, useItemApi, useItemSlugApi, useListApi, useUpdateApi } from "./api";
 import type { ApiOptions, ITeam } from "./api-types";
 
 export const useTeamListApi = (options?: ApiOptions) => {
-	return useListApi<ITeam>(["teams"], `/api/v1/team`, options);
+	return useListApi<ITeam>(["teams", "list"], `/api/v1/team`, options);
 };
 
-export const useTeamApi = (id: string) => {
-	return useItemApi<ITeam>(["teams"], `/api/v1/team`, id);
+export const useTeamApi = (id: string, options?: ApiOptions) => {
+	return useItemApi<ITeam>(["teams", id], `/api/v1/team`, id, options);
 };
 
-export const useTeamCreateApi = () => {
-	return useCreateApi<ITeam>(["teams"], `/api/v1/team`);
+export const useTeamSlugApi = (slug: string, options?: ApiOptions) => {
+	return useItemSlugApi<ITeam>(["teams", slug], `/api/v1/team`, slug, options);
 };
 
-export const useTeamUpdateApi = () => {
-	return useUpdateApi<ITeam>(["teams"], `/api/v1/team`);
+export const useTeamCreateApi = (options?: ApiOptions) => {
+	return useCreateApi<ITeam>(["teams"], `/api/v1/team`, options);
+};
+
+export const useTeamUpdateApi = (options?: ApiOptions) => {
+	return useUpdateApi<ITeam>(["teams"], `/api/v1/team`, options);
 };
 
 export const useTeamDeleteApi = () => {
