@@ -1,9 +1,10 @@
 import { CheckOutlined, CloseOutlined, LoadingOutlined } from "@ant-design/icons";
-import { Button, Form, Space } from "antd";
-import React, { SyntheticEvent, useEffect, useState } from "react";
+import { Form, Input, Space } from "antd";
+import type { SyntheticEvent } from "react";
+import React, { useEffect, useState } from "react";
 import { useDebounce } from "usehooks-ts";
+
 import ManualSaveController from "./ManualSaveController";
-import { Input } from "antd";
 import type { SmartFormElementProps } from "./SmartFormTypes";
 
 const { TextArea } = Input;

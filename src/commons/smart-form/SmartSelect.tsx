@@ -1,11 +1,10 @@
 import { CheckOutlined, CloseOutlined, LoadingOutlined } from "@ant-design/icons";
-import { Form, Input, Select, Space } from "antd";
-import type { SyntheticEvent } from "react";
+import { Form, Select, Space } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDebounce } from "usehooks-ts";
-import ManualSaveController from "./ManualSaveController";
 
-import type { SmartFormElementProps, SmartSelectProps } from "./SmartFormTypes";
+import ManualSaveController from "./ManualSaveController";
+import type { SmartSelectProps } from "./SmartFormTypes";
 
 const SmartSelect = (props: SmartSelectProps) => {
 	const {

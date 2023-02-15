@@ -1,5 +1,5 @@
 import type { langNames } from "@uiw/codemirror-extensions-langs";
-import { CSSProperties, HTMLAttributes } from "react";
+import type { CSSProperties } from "react";
 
 export type SmartFormElementProps = {
 	className?: string;

@@ -3,15 +3,15 @@ import { isEmpty } from "lodash";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "@/api/api-auth";
+import { useCloudProviderListApi } from "@/api/api-cloud-provider";
 import { useClusterCreateApi, useClusterSlugApi, useClusterUpdateApi } from "@/api/api-cluster";
 import type { ICluster } from "@/api/api-types";
 import SmartCodeEditor from "@/commons/smart-form/SmartCodeEditor";
 import SmartInput from "@/commons/smart-form/SmartInput";
+import SmartSelect from "@/commons/smart-form/SmartSelect";
+import SmartTextArea from "@/commons/smart-form/SmartTextArea";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useDrawerProvider } from "@/providers/DrawerProvider";
-import SmartTextArea from "@/commons/smart-form/SmartTextArea";
-import SmartSelect from "@/commons/smart-form/SmartSelect";
-import { useCloudProviderListApi } from "@/api/api-cloud-provider";
 
 type ClusterEditProps = { data?: ICluster; isNew?: boolean };
 
@@ -162,7 +162,7 @@ const ClusterEdit = (props: ClusterEditProps = {}) => {
 				/>
 			</div>
 
-			<div className="fixed bottom-0 px-6 py-3 w-full" style={{ backgroundColor: colorBgContainer }}>
+			<div className="fixed bottom-0 w-full px-6 py-3" style={{ backgroundColor: colorBgContainer }}>
 				<Space>
 					<Form.Item>
 						<Button type="primary" htmlType="submit">

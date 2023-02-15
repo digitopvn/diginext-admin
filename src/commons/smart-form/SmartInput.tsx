@@ -3,8 +3,8 @@ import { Form, Input, Space } from "antd";
 import type { SyntheticEvent } from "react";
 import React, { useEffect, useState } from "react";
 import { useDebounce } from "usehooks-ts";
-import ManualSaveController from "./ManualSaveController";
 
+import ManualSaveController from "./ManualSaveController";
 import type { SmartFormElementProps } from "./SmartFormTypes";
 
 const SmartInput = (props: SmartFormElementProps) => {
