@@ -13,7 +13,8 @@ import type { ApiOptions, ApiPagination } from "./api-types";
 export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}) => {
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
-	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	headers["Cache-Control"] = "no-cache";
 
 	const { pagination = { page: 1, size: 20 }, populate, filter, sort = "-updatedAt,-createdAt" } = options;
 	const paginationParams = new URLSearchParams(pagination as any).toString();
@@ -24,10 +25,11 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 	const queryClient = useQueryClient();
 
 	const queryKeys = [...keys];
-	if (!isEmpty(filter)) queryKeys.push(filter);
+	queryKeys.push(!isEmpty(filter) ? filter : {});
 	if (!isEmpty(pagination)) queryKeys.push(pagination);
 
 	return useQuery<{ list: T[]; pagination: ApiPagination }, Error>({
+		refetchOnWindowFocus: false,
 		queryKey: queryKeys,
 		queryFn: async () => {
 			const { data } = await axios.get(
@@ -44,13 +46,13 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 			// for token is about to expired
 			if (token.access_token) setCookie("x-auth-cookie", token.access_token);
 
-			console.log("data :>> ", data);
-
+			// console.log("data :>> ", data);
 			return {
 				list:
 					data.data.map((d: any) => {
-						queryClient.setQueryData([...keys, d._id], d);
-						queryClient.setQueryData([...keys, { slug: d.slug }], d);
+						queryClient.setQueryData([keys[0], d._id], d);
+						queryClient.setQueryData([keys[0], d.slug], d);
+						queryClient.setQueryData([keys[0], { slug: d.slug }], d);
 						return { ...d, key: d._id };
 					}) || [],
 				pagination: { current_page, total_pages, total_items, page_size, next_page, prev_page },
@@ -62,7 +64,8 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, options: ApiOptions = {}) => {
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
-	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	headers["Cache-Control"] = "no-cache";
 
 	const { populate, filter = {} } = options;
 	filter.slug = slug;
@@ -106,7 +109,8 @@ const getById = async (apiPath: string, id: string, options: AxiosRequestConfig 
 export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options: ApiOptions = {}) => {
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
-	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	headers["Cache-Control"] = "no-cache";
 
 	return useQuery<T, Error>({
 		queryKey: keys,
@@ -123,7 +127,8 @@ export const useCreateApi = <T,>(
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
-	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	headers["Cache-Control"] = "no-cache";
 
 	const mutation = useMutation<T, Error, T>({
 		mutationFn: async (newData) => {
@@ -189,7 +194,8 @@ export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, options: Ap
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
-	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	headers["Cache-Control"] = "no-cache";
 
 	// console.log("useUpdateApi > keys :>> ", keys);
 	// console.log("useUpdateApi > filter :>> ", filter);
@@ -310,7 +316,8 @@ export const useDeleteApi = <T,>(
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
-	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	headers["Cache-Control"] = "no-cache";
 
 	const mutation = useMutation<T, Error, T>({
 		mutationFn: async (filter: any) => {

@@ -6,11 +6,11 @@ export const useClusterListApi = (options?: ApiOptions) => {
 };
 
 export const useClusterApi = (id: string, options?: ApiOptions) => {
-	return useItemApi<ICluster>(["clusters", "id"], `/api/v1/cluster`, id, options);
+	return useItemApi<ICluster>(["cluster", "id"], `/api/v1/cluster`, id, options);
 };
 
 export const useClusterSlugApi = (slug: string, options?: ApiOptions) => {
-	return useItemSlugApi<ICluster>(["clusters", slug], `/api/v1/cluster`, slug, options);
+	return useItemSlugApi<ICluster>(["cluster", slug], `/api/v1/cluster`, slug, options);
 };
 
 export const useClusterCreateApi = () => {

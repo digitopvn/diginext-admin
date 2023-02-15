@@ -1,12 +1,17 @@
 import { Form } from "antd";
+import { isEmpty } from "lodash";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "@/api/api-auth";
 import { useClusterCreateApi, useClusterSlugApi, useClusterUpdateApi } from "@/api/api-cluster";
 import type { ICluster } from "@/api/api-types";
-import AutoSendInput from "@/commons/auto-form/AutoSendInput";
+import SmartCodeEditor from "@/commons/smart-form/SmartCodeEditor";
+import SmartInput from "@/commons/smart-form/SmartInput";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useDrawerProvider } from "@/providers/DrawerProvider";
+import SmartTextArea from "@/commons/smart-form/SmartTextArea";
+import SmartSelect from "@/commons/smart-form/SmartSelect";
+import { useCloudProviderListApi } from "@/api/api-cloud-provider";
 
 type ClusterEditProps = { data?: ICluster; isNew?: boolean };
 
@@ -22,20 +27,27 @@ const ClusterEdit = (props: ClusterEditProps = {}) => {
 	const [fieldsStatus, setFieldsStatus] = useState();
 
 	const [{ cluster_slug }] = useRouterQuery();
-	const { data: cluster } = useClusterSlugApi(cluster_slug, { populate: "owner" });
+
+	// clusters
+	const { data: cluster } = useClusterSlugApi(cluster_slug, { populate: "owner,provider" });
 	const [updateApi, updateStatus] = useClusterUpdateApi({ filter: { id: cluster?._id } });
 	const [createApi, createStatus] = useClusterCreateApi();
+	// console.log("cluster :>> ", cluster);
 
-	console.log("cluster :>> ", cluster);
+	// providers
+	const { data: { list: providers = [] } = {} } = useCloudProviderListApi();
+	console.log("providers :>> ", providers);
+
 	const isNew = typeof cluster === "undefined";
 
 	const onFinish = async (values: any) => {
-		console.log(isNew ? "[NEW]" : "[EDIT]", "Submit:", values);
+		console.log(isNew ? "[NEW]" : "[UPDATE]", "Submit:", values);
 		const postData = { ...values };
 
 		let result: ICluster | undefined;
 		if (isNew) {
 			result = await createApi(postData);
+			console.log("[NEW] result :>> ", result);
 		} else {
 			const statuses: any = {};
 			Object.entries(postData).forEach(([field, value]) => {
@@ -47,11 +59,16 @@ const ClusterEdit = (props: ClusterEditProps = {}) => {
 				}
 			});
 
+			console.log("statuses :>> ", statuses);
 			setFieldsStatus(statuses);
 
-			result = await updateApi(postData);
+			if (!isEmpty(statuses)) {
+				result = await updateApi(postData);
+				console.log("[UPDATE] result :>> ", result);
+			} else {
+				console.log("[UPDATE] Skipped, nothing new to update.");
+			}
 		}
-		console.log("result :>> ", result);
 	};
 
 	const onFinishFailed = (errorInfo: any) => {
@@ -65,6 +82,7 @@ const ClusterEdit = (props: ClusterEditProps = {}) => {
 
 	useEffect(() => {
 		if (typeof fieldsStatus === "undefined") return;
+		// console.log("fieldsStatus :>> ", fieldsStatus);
 		const fields = Object.keys(fieldsStatus);
 		const statuses: any = {};
 		fields.forEach((field) => {
@@ -84,10 +102,48 @@ const ClusterEdit = (props: ClusterEditProps = {}) => {
 				onFinishFailed={onFinishFailed}
 				autoComplete="off"
 			>
-				<AutoSendInput label="Cluster name" name="name" value={cluster?.name} status={fieldsStatus} />
-				<AutoSendInput label="Short name" name="shortName" value={cluster?.shortName} status={fieldsStatus} />
-				{/* <AutoSendInput label="Primary domain" name="name" updateApi={updateApi} status={status} />
-				<AutoSendInput label="Provider" name="name" updateApi={updateApi} status={status} /> */}
+				<SmartInput label="Cluster name" name="name" value={cluster?.name} status={fieldsStatus} />
+				<SmartInput label="Short name" name="shortName" value={cluster?.shortName} status={fieldsStatus} />
+
+				<SmartSelect
+					style={{ width: 250 }}
+					label="Cloud Provider"
+					name="provider"
+					value={cluster?.provider?._id}
+					options={providers.map((provider) => {
+						return { label: provider.name || "", value: provider._id };
+					})}
+					status={fieldsStatus}
+				/>
+
+				{/* <SmartInput label="Primary domain" name="name" updateApi={updateApi} status={status} />
+				<SmartInput label="Provider" name="name" updateApi={updateApi} status={status} /> */}
+
+				<SmartCodeEditor
+					lang={["yaml"]}
+					label="KubeConfig (YAML)"
+					name="kubeConfig"
+					value={cluster?.kubeConfig}
+					initialValue={cluster?.kubeConfig}
+					status={fieldsStatus}
+				/>
+
+				<SmartTextArea
+					label="API Access Token"
+					name="apiAccessToken"
+					value={cluster?.apiAccessToken}
+					initialValue={cluster?.apiAccessToken}
+					status={fieldsStatus}
+				/>
+
+				<SmartCodeEditor
+					lang={["json"]}
+					label="Service Account (JSON)"
+					name="serviceAccount"
+					value={cluster?.serviceAccount}
+					initialValue={cluster?.serviceAccount}
+					status={fieldsStatus}
+				/>
 			</Form>
 		</div>
 	);
