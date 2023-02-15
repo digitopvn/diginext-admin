@@ -18,6 +18,7 @@ const SmartInput = (props: SmartFormElementProps) => {
 		value,
 		status,
 		autoSave = true,
+		isNew,
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -54,7 +55,7 @@ const SmartInput = (props: SmartFormElementProps) => {
 		// Only process update api if the value is different with the initial value...
 		if (debouncedValue === value) return;
 		// Triggers when "debouncedValue" changes
-		if (autoSave) submit();
+		if (autoSave && !isNew) submit();
 	}, [debouncedValue]);
 
 	let icon;
@@ -77,7 +78,7 @@ const SmartInput = (props: SmartFormElementProps) => {
 				<Input onChange={onChange} value={_value} />
 
 				{/* Display manual save controller if auto save is off */}
-				{!autoSave && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}
+				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}
 			</Space>
 		</Form.Item>
 	);

@@ -55,6 +55,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 		if (showDrawer) showDrawer({ title: "Edit", content: <EditPage /> }, { level: 1 });
 	};
 
+	const openCreatePage = () => {
+		if (showDrawer) showDrawer({ title: "Create", content: <EditPage /> }, { level: 1 });
+	};
+
 	useEffect(() => {
 		// console.log("lv1 :>> ", lv1);
 		switch (lv1) {
@@ -64,6 +68,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 
 			case "release":
 				openReleaseList();
+				break;
+
+			case "new":
+				openCreatePage();
 				break;
 
 			case "edit":

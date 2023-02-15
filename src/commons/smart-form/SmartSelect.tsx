@@ -20,6 +20,7 @@ const SmartSelect = (props: SmartSelectProps) => {
 		value,
 		status,
 		autoSave = true,
+		isNew,
 		options,
 	} = props;
 
@@ -29,10 +30,10 @@ const SmartSelect = (props: SmartSelectProps) => {
 	const debouncedValue = useDebounce(_value, 500);
 
 	// callbacks
-	const onChange = (e: SyntheticEvent) => {
-		const editorValue = (e.currentTarget as any).value;
-		form.setFieldValue(name, editorValue);
-		setValue(editorValue);
+	const onChange = (selectedValue: any) => {
+		const editorValue = selectedValue;
+		form.setFieldValue(name, selectedValue);
+		setValue(selectedValue);
 	};
 
 	const submit = () => form.submit();
@@ -57,7 +58,7 @@ const SmartSelect = (props: SmartSelectProps) => {
 		// Only process update api if the value is different with the initial value...
 		if (debouncedValue === value) return;
 		// Triggers when "debouncedValue" changes
-		if (autoSave) submit();
+		if (autoSave && !isNew) submit();
 	}, [debouncedValue]);
 
 	let icon;
@@ -80,7 +81,7 @@ const SmartSelect = (props: SmartSelectProps) => {
 				<Select className={className} style={style} value={_value} onChange={onChange} options={options} />
 
 				{/* Display manual save controller if auto save is off */}
-				{!autoSave && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}
+				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}
 			</Space>
 		</Form.Item>
 	);

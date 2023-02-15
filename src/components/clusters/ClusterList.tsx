@@ -1,10 +1,10 @@
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { Button, Space, Table } from "antd";
+import { Button, Popconfirm, Space, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import React, { useState } from "react";
 
-import { useClusterListApi } from "@/api/api-cluster";
+import { useClusterDeleteApi, useClusterListApi } from "@/api/api-cluster";
 import type { ICluster, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -62,7 +62,7 @@ const columns: ColumnsType<DataType> = [
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
 		onFilter: (value, record) => (record.owner ? ((record.owner as IUser).name || "").toLowerCase().indexOf(value.toString()) > -1 : true),
-		render: (value, record) => <>{(record.owner as IUser).name}</>,
+		render: (value, record) => <>{record.owner && (record.owner as IUser).name}</>,
 	},
 	{
 		title: "Created at",
@@ -98,7 +98,14 @@ export const ClusterList = () => {
 	const { total_items } = pagination || {};
 	console.log("clusters :>> ", clusters);
 
+	const [deleteApi] = useClusterDeleteApi();
+
 	const [query, { setQuery }] = useRouterQuery();
+
+	const deleteCluster = async (id: string) => {
+		const res = await deleteApi({ _id: id });
+		console.log("deleteCluster :>> ", res);
+	};
 
 	const displayedData =
 		clusters?.map((cluster) => {
@@ -110,7 +117,15 @@ export const ClusterList = () => {
 							icon={<EditOutlined />}
 							onClick={() => setQuery({ lv1: "edit", type: "cluster", cluster_slug: cluster.slug })}
 						></Button>
-						<Button icon={<DeleteOutlined />}></Button>
+						<Popconfirm
+							title="Are you sure to delete this cluster?"
+							description={<span className="text-red-500">Caution: this is permanent and cannot be rolled back.</span>}
+							onConfirm={() => deleteCluster(cluster._id as string)}
+							okText="Yes"
+							cancelText="No"
+						>
+							<Button icon={<DeleteOutlined />}></Button>
+						</Popconfirm>
 					</Space.Compact>
 				),
 			} as DataType;

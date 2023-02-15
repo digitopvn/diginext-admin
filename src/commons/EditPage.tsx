@@ -14,7 +14,7 @@ const EditPage = () => {
 			break;
 	}
 
-	return <div>{children}</div>;
+	return <div className="h-full">{children}</div>;
 };
 
 export default EditPage;

@@ -12,6 +12,7 @@ export type SmartFormElementProps = {
 	requiredMessage?: string;
 	status?: any;
 	autoSave?: boolean;
+	isNew?: boolean;
 	required?: boolean;
 	// status: "error" | "idle" | "loading" | "success";
 };

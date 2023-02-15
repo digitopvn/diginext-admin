@@ -154,9 +154,9 @@ export const useCreateApi = <T,>(
 		// console.log(`rolling back optimistic update with id ${context.id}`);
 		// },
 
-		// onSuccess: (newItem, variables, context) => {
-		// 	queryClient.setQueryData([...keys, (newItem as any)._id], newItem);
-		// },
+		onSuccess: (newItem, variables, context) => {
+			queryClient.invalidateQueries({ queryKey: [keys[0], "list"] });
+		},
 
 		// onSettled: (data, error, variables, context) => {
 		// Error or success... doesn't matter!

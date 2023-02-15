@@ -19,6 +19,7 @@ const SmartTextArea = (props: SmartFormElementProps) => {
 		value,
 		status,
 		autoSave = true,
+		isNew,
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -45,7 +46,7 @@ const SmartTextArea = (props: SmartFormElementProps) => {
 		// Only process update api if the value is different with the initial value...
 		if (debouncedValue === value) return;
 		// Triggers when "debouncedValue" changes
-		if (autoSave) submit();
+		if (autoSave && !isNew) submit();
 	}, [debouncedValue]);
 
 	let icon;
@@ -69,7 +70,7 @@ const SmartTextArea = (props: SmartFormElementProps) => {
 				<TextArea rows={3} onChange={onChange} value={_value} />
 
 				{/* Display manual save controller if auto save is off */}
-				{!autoSave && <ManualSaveController compact initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}
+				{!autoSave && !isNew && <ManualSaveController compact initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}
 			</Space>
 		</Form.Item>
 	);

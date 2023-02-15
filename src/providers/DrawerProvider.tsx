@@ -19,13 +19,18 @@ type DrawerVisibility = {
 };
 
 type IDrawerContext = {
-	drawerVisibility?: DrawerVisibility;
-	toggleDrawer?: (lv: "lv1" | "lv2", value?: boolean) => void;
-	showDrawer?: (params: DrawerContentParams, options?: DrawerOptions) => void;
-	closeDrawer?: (lv?: "lv1" | "lv2") => void;
+	drawerVisibility: DrawerVisibility;
+	toggleDrawer: (lv: "lv1" | "lv2", value?: boolean) => void;
+	showDrawer: (params: DrawerContentParams, options?: DrawerOptions) => void;
+	closeDrawer: (lv?: "lv1" | "lv2") => void;
 };
 
-export const DrawerContext = createContext<IDrawerContext>({});
+export const DrawerContext = createContext<IDrawerContext>({
+	drawerVisibility: { lv1: false, lv2: false },
+	toggleDrawer: (lv: "lv1" | "lv2", value?: boolean) => {},
+	showDrawer: (params: DrawerContentParams, options?: DrawerOptions) => {},
+	closeDrawer: (lv?: "lv1" | "lv2") => {},
+});
 
 export const DrawerProvider = (props: { children?: ReactNode } = {}) => {
 	const [drawerVisibility, setDrawerVisibility] = useState<DrawerVisibility>({ lv1: false, lv2: false });
@@ -88,7 +93,14 @@ export const DrawerProvider = (props: { children?: ReactNode } = {}) => {
 		<DrawerContext.Provider value={{ drawerVisibility, toggleDrawer, showDrawer, closeDrawer }}>
 			{props.children}
 			{/* LEVEL 1 */}
-			<Drawer title={content?.title} placement="right" onClose={onCloseLv1} open={drawerVisibility.lv1} size="large">
+			<Drawer
+				title={content?.title}
+				placement="right"
+				onClose={onCloseLv1}
+				open={drawerVisibility.lv1}
+				size="large"
+				bodyStyle={{ overflow: "hidden", padding: 0 }}
+			>
 				{content?.content}
 				{/* LEVEL 2 */}
 				<Drawer title={contentLv2?.title} placement="right" onClose={onCloseLv2} open={drawerVisibility.lv2} size="large">

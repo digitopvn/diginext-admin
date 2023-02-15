@@ -1,4 +1,4 @@
-import { Form } from "antd";
+import { Button, Form, Space, theme } from "antd";
 import { isEmpty } from "lodash";
 import { useEffect, useState } from "react";
 
@@ -40,6 +40,12 @@ const ClusterEdit = (props: ClusterEditProps = {}) => {
 
 	const isNew = typeof cluster === "undefined";
 
+	const {
+		token: { colorBgContainer },
+	} = theme.useToken();
+
+	const { closeDrawer } = useDrawerProvider();
+
 	const onFinish = async (values: any) => {
 		console.log(isNew ? "[NEW]" : "[UPDATE]", "Submit:", values);
 		const postData = { ...values };
@@ -48,6 +54,8 @@ const ClusterEdit = (props: ClusterEditProps = {}) => {
 		if (isNew) {
 			result = await createApi(postData);
 			console.log("[NEW] result :>> ", result);
+
+			closeDrawer();
 		} else {
 			const statuses: any = {};
 			Object.entries(postData).forEach(([field, value]) => {
@@ -92,20 +100,22 @@ const ClusterEdit = (props: ClusterEditProps = {}) => {
 	}, [updateStatus]);
 
 	return (
-		<div>
-			<Form
-				layout="vertical"
-				// name="edit"
-				// initialValues={initialValues}
-				form={form}
-				onFinish={onFinish}
-				onFinishFailed={onFinishFailed}
-				autoComplete="off"
-			>
-				<SmartInput label="Cluster name" name="name" value={cluster?.name} status={fieldsStatus} />
-				<SmartInput label="Short name" name="shortName" value={cluster?.shortName} status={fieldsStatus} />
+		<Form
+			className="h-full overflow-auto"
+			layout="vertical"
+			// name="edit"
+			// initialValues={initialValues}
+			form={form}
+			onFinish={onFinish}
+			onFinishFailed={onFinishFailed}
+			autoComplete="off"
+		>
+			<div className="p-6 pb-16">
+				<SmartInput label="Cluster name" name="name" value={cluster?.name} status={fieldsStatus} isNew={isNew} />
+				<SmartInput label="Short name" name="shortName" value={cluster?.shortName} status={fieldsStatus} isNew={isNew} />
 
 				<SmartSelect
+					isNew={isNew}
 					style={{ width: 250 }}
 					label="Cloud Provider"
 					name="provider"
@@ -116,8 +126,11 @@ const ClusterEdit = (props: ClusterEditProps = {}) => {
 					status={fieldsStatus}
 				/>
 
-				{/* <SmartInput label="Primary domain" name="name" updateApi={updateApi} status={status} />
-				<SmartInput label="Provider" name="name" updateApi={updateApi} status={status} /> */}
+				<SmartInput label="Primary IP" name="primaryIP" value={cluster?.primaryIP} status={fieldsStatus} isNew={isNew} />
+				<SmartInput label="Primary domain" name="primaryDomain" value={cluster?.primaryDomain} status={fieldsStatus} isNew={isNew} />
+				<SmartInput label="Project ID (Google)" name="projectID" value={cluster?.projectID} status={fieldsStatus} isNew={isNew} />
+				<SmartInput label="Region (Google)" name="region" value={cluster?.region} status={fieldsStatus} isNew={isNew} />
+				<SmartInput label="Zone (Google)" name="zone" value={cluster?.zone} status={fieldsStatus} isNew={isNew} />
 
 				<SmartCodeEditor
 					lang={["yaml"]}
@@ -126,9 +139,11 @@ const ClusterEdit = (props: ClusterEditProps = {}) => {
 					value={cluster?.kubeConfig}
 					initialValue={cluster?.kubeConfig}
 					status={fieldsStatus}
+					isNew={isNew}
 				/>
 
 				<SmartTextArea
+					isNew={isNew}
 					label="API Access Token"
 					name="apiAccessToken"
 					value={cluster?.apiAccessToken}
@@ -143,9 +158,23 @@ const ClusterEdit = (props: ClusterEditProps = {}) => {
 					value={cluster?.serviceAccount}
 					initialValue={cluster?.serviceAccount}
 					status={fieldsStatus}
+					isNew={isNew}
 				/>
-			</Form>
-		</div>
+			</div>
+
+			<div className="fixed bottom-0 px-6 py-3 w-full" style={{ backgroundColor: colorBgContainer }}>
+				<Space>
+					<Form.Item>
+						<Button type="primary" htmlType="submit">
+							Submit
+						</Button>
+					</Form.Item>
+					<Button type="primary" danger>
+						Discard
+					</Button>
+				</Space>
+			</div>
+		</Form>
 	);
 };
 

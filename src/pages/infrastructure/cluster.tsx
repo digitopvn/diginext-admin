@@ -5,6 +5,9 @@ import { PageTitle } from "@/commons/PageTitle";
 import { ClusterList } from "@/components/clusters/ClusterList";
 import { Main } from "@/templates/Main";
 import { Meta } from "@/templates/Meta";
+import { Button } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import { useRouterQuery } from "@/plugins/useRouterQuery";
 
 /**
  * Dashboard Page
@@ -12,11 +15,25 @@ import { Meta } from "@/templates/Meta";
 const ClusterListPage = () => {
 	const router = useRouter();
 
+	const [query, { setQuery }] = useRouterQuery();
 	return (
 		<AuthPage>
 			<Main meta={<Meta title="Clusters" description="List of your cloud providers." />}>
 				{/* Page title & desc here */}
-				<PageTitle title="Kubernetes Clusters" breadcrumbs={[{ name: "Infrastructure" }]} />
+				<PageTitle
+					title="Kubernetes Clusters"
+					breadcrumbs={[{ name: "Infrastructure" }]}
+					actions={[
+						<Button
+							key="workspace-setting-btn"
+							type="default"
+							icon={<PlusOutlined className="align-middle" />}
+							onClick={() => setQuery({ lv1: "new", type: "cluster" })}
+						>
+							New
+						</Button>,
+					]}
+				/>
 
 				{/* Page Content */}
 				<ClusterList />

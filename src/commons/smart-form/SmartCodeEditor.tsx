@@ -22,6 +22,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 		value,
 		status,
 		autoSave = false,
+		isNew,
 		lang = [],
 	} = props;
 
@@ -49,7 +50,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 		// Only process update api if the value is different with the initial value...
 		if (debouncedValue === value) return;
 		// Triggers when "debouncedValue" changes
-		if (autoSave) submit();
+		if (autoSave && !isNew) submit();
 	}, [debouncedValue]);
 
 	let icon;
@@ -79,7 +80,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 				/>
 
 				{/* Display manual save controller if auto save is off */}
-				{!autoSave && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}
+				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}
 			</Space>
 		</Form.Item>
 	);
