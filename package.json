@@ -7,13 +7,16 @@
 		"serve": "serve ./out",
 		"build": "cross-env NODE_ENV=production next build",
 		"build-stats": "cross-env ANALYZE=true npm run build",
-		"prerelease": "yarn semantic-release --no-ci && git add . && git commit -m 'docs(changelog): update change log before releasing' && git push origin prerelease",
-		"release-dev": "run-s clean build export-prod copy-prod",
-		"release": "mv .env.local env.bak && run-s clean build export-prod copy-prod && mv env.bak .env.local",
+		"prerelease": "yarn semantic-release --no-ci && yarn pkg-version && git add . && git commit -m 'docs(changelog): update change log before releasing' && git push origin prerelease",
+		"release": "run-s env-prod clean build export-prod copy-prod prerelease env-dev",
+		"pkg-version": "npm pkg set version=$(echo $(git describe --tags $(git rev-list --tags --max-count=1)) | cut -c2-)",
 		"export": "next export",
 		"export-prod": "NODE_ENV=production next export",
+		"export-to-cli": "run-s format env-prod clean build export-prod copy-prod env-dev",
 		"copy-prod": "ncp ./out ../diginext/public",
 		"clean": "rimraf .next out",
+		"env-dev": "mv env.bak .env.local",
+		"env-prod": "mv .env.local env.bak",
 		"lint": "next lint",
 		"format": "next lint --fix && prettier '**/*.{js,ts,tsx,json,yaml}' --write",
 		"check-types": "tsc --noEmit --pretty && tsc --project cypress --noEmit --pretty",
@@ -28,8 +31,13 @@
 	},
 	"dependencies": {
 		"@ant-design/icons": "^4.8.0",
+		"@codemirror/lint": "^6.1.0",
 		"@tanstack/react-query": "^4.20.4",
 		"@tanstack/react-query-devtools": "^4.20.4",
+		"@uiw/codemirror-extensions-basic-setup": "^4.19.9",
+		"@uiw/codemirror-extensions-langs": "^4.19.9",
+		"@uiw/codemirror-themes-all": "^4.19.9",
+		"@uiw/react-codemirror": "^4.19.9",
 		"antd": "^5.1.2",
 		"axios": "^1.2.2",
 		"class-validator": "^0.14.0",
@@ -45,6 +53,7 @@
 		"next-sitemap": "^3.1.32",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
+		"sanitize-html": "^2.9.0",
 		"socket.io-client": "^4.5.4",
 		"usehooks-ts": "^2.9.1"
 	},
@@ -65,6 +74,7 @@
 		"@types/lodash": "^4.14.191",
 		"@types/node": "^18.11.10",
 		"@types/react": "^18.0.26",
+		"@types/sanitize-html": "^2.8.0",
 		"@typescript-eslint/eslint-plugin": "^5.45.0",
 		"@typescript-eslint/parser": "^5.45.0",
 		"autoprefixer": "^10.4.13",
@@ -111,7 +121,8 @@
 	},
 	"release": {
 		"branches": [
-			"prerelease"
+			"prerelease",
+			"dev/goon"
 		],
 		"plugins": [
 			"@semantic-release/commit-analyzer",

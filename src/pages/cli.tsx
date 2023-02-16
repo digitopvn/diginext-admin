@@ -1,4 +1,5 @@
-import { Alert } from "antd";
+import { HomeOutlined } from "@ant-design/icons";
+import { Alert, Button } from "antd";
 import { isEmpty } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -23,13 +24,16 @@ const CliPage = () => {
 	// console.log("user :>> ", user);
 	const [joinApi] = useUserJoinWorkspaceApi();
 
-	const workspace = useWorkspace({ name: user?.workspaces[0].slug });
+	const _slug = user?.workspaces && user?.workspaces.length > 0 ? user?.workspaces[0].slug : undefined;
+	const workspace = useWorkspace({ name: _slug });
 	const { slug: workspaceSlug } = workspace || {};
-	// console.log("workspace :>> ", workspace);
+	// console.log("workspaceSlug :>> ", workspaceSlug);
 
 	const joinWorkspace = async (userId: string) => {
 		if (!workspaceSlug) return;
 		if (!workspace) return;
+
+		// console.log("userId :>> ", userId);
 
 		const joinedUser = await joinApi({
 			userId,
@@ -57,6 +61,9 @@ const CliPage = () => {
 						<div className="text-center">
 							<p>Copy & paste this ACCESS TOKEN into your command interface:</p>
 							<CopyCode value={!isEmpty(user) ? (user?.token as any).access_token : ""} />
+							<Button size="large" className="mt-2" href="/" icon={<HomeOutlined />}>
+								Dashboard
+							</Button>
 						</div>
 					) : (
 						<Alert message="Error" description={`This workspace does not exists.`} type="error" showIcon />

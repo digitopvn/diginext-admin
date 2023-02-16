@@ -16,7 +16,7 @@ export const AppConfig = {
 	description: "Welcome to an Admin Panel of Diginext.",
 	locale: "en",
 	tableConfig: {
-		defaultPageSize: 20,
+		defaultPageSize: 50,
 	},
 };
 

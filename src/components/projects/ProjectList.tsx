@@ -1,14 +1,14 @@
 import {
 	BuildOutlined,
+	DeleteOutlined,
 	EditOutlined,
 	EyeOutlined,
 	GlobalOutlined,
 	InfoCircleOutlined,
-	PauseCircleOutlined,
 	QrcodeOutlined,
 	RocketOutlined,
 } from "@ant-design/icons";
-import { Button, Space, Table, Tag, Tooltip } from "antd";
+import { Button, Popconfirm, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { isJSON } from "class-validator";
 import dayjs from "dayjs";
@@ -17,7 +17,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
-import { useProjectListWithAppsApi } from "@/api/api-project";
+import { useAppDeleteApi, useAppEnvironmentDeleteApi } from "@/api/api-app";
+import { useProjectDeleteApi, useProjectListWithAppsApi } from "@/api/api-project";
 import type { IAppEnvironment } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -134,14 +135,34 @@ export const ProjectList = () => {
 	// fetch projects
 	const { data } = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: projects, pagination } = data || {};
-	const { total_pages } = pagination || {};
+	const { total_pages, total_items } = pagination || {};
 
+	const [deleteProjectApi, deleteProjectApiStatus] = useProjectDeleteApi();
+	const [deleteAppApi, deleteAppApiStatus] = useAppDeleteApi();
+	const [deleteAppEnvApi, deleteAppEnvApiStatus] = useAppEnvironmentDeleteApi();
+
+	// console.log({ total_pages });
 	const openBuildList = (project: string, app: string, env: string) => {
 		setQuery({ lv1: "build", project, app, env });
 	};
 
 	const openReleaseList = (project: string, app: string, env: string) => {
 		setQuery({ lv1: "release", project, app, env });
+	};
+
+	const deleteProject = async (id: string) => {
+		const result = await deleteProjectApi({ _id: id });
+		console.log("[deleteProject] result :>> ", result);
+	};
+
+	const deleteApp = async (id: string) => {
+		const result = await deleteAppApi({ _id: id });
+		console.log("[deleteApp] result :>> ", result);
+	};
+
+	const deleteEnvironment = async (appId: string, env: string) => {
+		const result = await deleteAppEnvApi({ _id: appId, env });
+		console.log("[deleteEnvironment] result :>> ", result);
 	};
 
 	// table pagination
@@ -160,7 +181,18 @@ export const ProjectList = () => {
 					<Tooltip title="Edit project">
 						<Button icon={<EditOutlined />} />
 					</Tooltip>
-					<Button icon={<PauseCircleOutlined />} />
+					{/* <Button icon={<PauseCircleOutlined />} /> */}
+					<Popconfirm
+						title="Are you sure to delete this project?"
+						description={
+							<span className="text-red-500">Caution: all of the related apps & deployed environments will be also deleted.</span>
+						}
+						onConfirm={() => deleteProject(p._id as string)}
+						okText="Yes"
+						cancelText="No"
+					>
+						<Button icon={<DeleteOutlined />} />
+					</Popconfirm>
 				</Space.Compact>
 			),
 			key: p._id,
@@ -220,6 +252,19 @@ export const ProjectList = () => {
 										<Tooltip title="Modify environment variables (coming soon)" placement="topRight">
 											<Button icon={<QrcodeOutlined />} disabled />
 										</Tooltip>
+										<Popconfirm
+											title="Are you sure to delete this environment?"
+											description={
+												<span className="text-red-500">
+													Caution: this is permanent and cannot be rolled back (excepts re-deploying).
+												</span>
+											}
+											onConfirm={() => deleteEnvironment(app._id as string, envName)}
+											okText="Yes"
+											cancelText="No"
+										>
+											<Button icon={<DeleteOutlined />} />
+										</Popconfirm>
 									</Space.Compact>
 								) : (
 									<Space.Compact>
@@ -236,6 +281,19 @@ export const ProjectList = () => {
 										<Tooltip title="Modify environment variables (coming soon)" placement="topRight">
 											<Button icon={<QrcodeOutlined />} disabled />
 										</Tooltip>
+										<Popconfirm
+											title="Are you sure to delete this environment?"
+											description={
+												<span className="text-red-500">
+													Caution: this is permanent and cannot be rolled back (excepts re-deploying).
+												</span>
+											}
+											onConfirm={() => deleteEnvironment(app._id as string, envName)}
+											okText="Yes"
+											cancelText="No"
+										>
+											<Button icon={<DeleteOutlined />} />
+										</Popconfirm>
 									</Space.Compact>
 								);
 
@@ -254,7 +312,20 @@ export const ProjectList = () => {
 									<Tooltip title="Edit app">
 										<Button icon={<EditOutlined />} />
 									</Tooltip>
-									<Button icon={<PauseCircleOutlined />} />
+									{/* <Button icon={<PauseCircleOutlined />} /> */}
+									<Popconfirm
+										title="Are you sure to delete this app?"
+										description={
+											<span className="text-red-500">
+												Caution: all of the related deployed environments will be also deleted.
+											</span>
+										}
+										onConfirm={() => deleteApp(app._id as string)}
+										okText="Yes"
+										cancelText="No"
+									>
+										<Button icon={<DeleteOutlined />} />
+									</Popconfirm>
 								</Space.Compact>
 							),
 						};
@@ -276,7 +347,15 @@ export const ProjectList = () => {
 				dataSource={displayedProjects}
 				scroll={{ x: 1200 }}
 				sticky={{ offsetHeader: 48 }}
-				pagination={{ current: page, pageSize, total: total_pages }}
+				pagination={{
+					showSizeChanger: true,
+					current: page,
+					// defaultCurrent: page,
+					defaultPageSize: pageSize,
+					total: total_items,
+					// total: total_pages,
+					// , pageSize
+				}}
 				onChange={onTableChange}
 			/>
 			{/* <Drawer title={query.type === "build" ? "Builds" : "Releases"} placement="right" onClose={onClose} open={open} size="large">

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
-import { isArray, isEmpty } from "lodash";
+import { isArray, isEmpty, isString } from "lodash";
 import { useRouter } from "next/router";
 
 import { Config } from "@/utils/AppConfig";
@@ -13,9 +13,10 @@ import type { ApiOptions, ApiPagination } from "./api-types";
 export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}) => {
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
-	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	headers["Cache-Control"] = "no-cache";
 
-	const { pagination = { page: 1, size: 20 }, populate, filter, sort = "-createdAt" } = options;
+	const { pagination = { page: 1, size: 20 }, populate, filter, sort = "-updatedAt,-createdAt" } = options;
 	const paginationParams = new URLSearchParams(pagination as any).toString();
 	const populateParams = populate ? `populate=${populate}` : "";
 	const filterParams = filter ? new URLSearchParams(filter).toString() : "";
@@ -24,10 +25,11 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 	const queryClient = useQueryClient();
 
 	const queryKeys = [...keys];
-	if (!isEmpty(filter)) queryKeys.push(filter);
+	queryKeys.push(!isEmpty(filter) ? filter : {});
 	if (!isEmpty(pagination)) queryKeys.push(pagination);
 
 	return useQuery<{ list: T[]; pagination: ApiPagination }, Error>({
+		refetchOnWindowFocus: false,
 		queryKey: queryKeys,
 		queryFn: async () => {
 			const { data } = await axios.get(
@@ -44,13 +46,13 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 			// for token is about to expired
 			if (token.access_token) setCookie("x-auth-cookie", token.access_token);
 
-			console.log("data :>> ", data);
-
+			// console.log("data :>> ", data);
 			return {
 				list:
 					data.data.map((d: any) => {
-						queryClient.setQueryData([...keys, d._id], d);
-						queryClient.setQueryData([...keys, { slug: d.slug }], d);
+						queryClient.setQueryData([keys[0], d._id], d);
+						queryClient.setQueryData([keys[0], d.slug], d);
+						queryClient.setQueryData([keys[0], { slug: d.slug }], d);
 						return { ...d, key: d._id };
 					}) || [],
 				pagination: { current_page, total_pages, total_items, page_size, next_page, prev_page },
@@ -59,21 +61,24 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 	});
 };
 
-export const useItemSlugApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}) => {
+export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, options: ApiOptions = {}) => {
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
-	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	headers["Cache-Control"] = "no-cache";
 
-	const { populate, filter } = options;
+	const { populate, filter = {} } = options;
+	filter.slug = slug;
+
 	const populateParams = populate ? `populate=${populate}` : "";
-	const filterParams = filter ? new URLSearchParams(filter).toString() : "";
+	const filterParams = new URLSearchParams(filter).toString();
 
-	const queryKey = [...keys];
-	if (filter.slug !== undefined && filter.slug !== null) queryKey.push(filter);
+	// const queryKey = [...keys];
+	// if (filter) queryKey.push(filter);
 
 	return useQuery<T, Error>({
-		enabled: filter.slug !== undefined && filter.slug !== null,
-		queryKey,
+		enabled: slug !== undefined && slug !== null,
+		queryKey: keys,
 		queryFn: async () => {
 			const url = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${populateParams}`;
 			const { data } = await axios.get(url, { ...options, headers });
@@ -81,16 +86,17 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, options: ApiOpt
 			// for token is about to expired
 			const { token = {} } = data;
 			if (token.access_token) setCookie("x-auth-cookie", token.access_token);
-
 			// console.log("data :>> ", data);
 
-			const result = isArray(data.data)
-				? data.data.map((d: any) => {
-						return { ...d, key: d._id };
-				  })[0]
-				: data.data[0];
+			if (isArray(data.data)) {
+				return data.data.map((d: any) => {
+					return { ...d, key: d._id };
+				})[0];
+			}
 
-			return result;
+			if (isString(data.data)) return data.data;
+
+			return data.data[0];
 		},
 	});
 };
@@ -103,24 +109,24 @@ const getById = async (apiPath: string, id: string, options: AxiosRequestConfig 
 export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options: ApiOptions = {}) => {
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
-	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	headers["Cache-Control"] = "no-cache";
 
 	return useQuery<T, Error>({
-		queryKey: [...keys, id],
+		queryKey: keys,
 		queryFn: () => getById(apiPath, id, { ...options, headers }),
 		enabled: !!id,
 	});
 };
 
-export const useCreateApi = <T,>(
-	keys: any[],
-	apiPath: string,
-	options: AxiosRequestConfig = {}
-): [(data: T) => Promise<T> | undefined, "error" | "idle" | "loading" | "success"] => {
+export type UseCreateApi<T> = [(data: T) => Promise<T> | undefined, "error" | "idle" | "loading" | "success"];
+
+export const useCreateApi = <T,>(keys: any[], apiPath: string, options: AxiosRequestConfig = {}): UseCreateApi<T> => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
-	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	headers["Cache-Control"] = "no-cache";
 
 	const mutation = useMutation<T, Error, T>({
 		mutationFn: async (newData) => {
@@ -146,19 +152,19 @@ export const useCreateApi = <T,>(
 		// console.log(`rolling back optimistic update with id ${context.id}`);
 		// },
 
-		// onSuccess: (newItem, variables, context) => {
-		// 	queryClient.setQueryData([...keys, (newItem as any)._id], newItem);
-		// },
+		onSuccess: (newItem, variables, context) => {
+			queryClient.invalidateQueries({ queryKey: [keys[0], "list"] });
+		},
 
 		// onSettled: (data, error, variables, context) => {
 		// Error or success... doesn't matter!
 		// },
 	});
 
-	const proceed = mutation.mutateAsync;
-	const { status } = mutation;
+	// const proceed = mutation.mutateAsync;
+	const { mutateAsync, status } = mutation;
 
-	return [proceed, status];
+	return [mutateAsync, status];
 };
 
 type UpdateData = { id?: string; _id?: string; state?: string };
@@ -182,16 +188,17 @@ export type UseUpdateApi<T = any> = [
 	"error" | "idle" | "loading" | "success"
 ];
 
-export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, filter: any = {}, options: ApiOptions = {}): UseUpdateApi<T> => {
+export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, options: ApiOptions = {}): UseUpdateApi<T> => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
-	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	headers["Cache-Control"] = "no-cache";
 
 	// console.log("useUpdateApi > keys :>> ", keys);
 	// console.log("useUpdateApi > filter :>> ", filter);
 
-	const { pagination = { page: 1, size: 20 }, populate, sort = "-createdAt" } = options;
+	const { pagination = { page: 1, size: 20 }, populate, sort = "-createdAt", filter } = options;
 	const paginationParams = new URLSearchParams(pagination as any).toString();
 	const populateParams = populate ? `populate=${populate}` : "";
 	const filterParams = filter ? new URLSearchParams(filter).toString() : "";
@@ -277,7 +284,10 @@ export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, filter: any
 
 		// [3] - FINISH & SUCCESS!
 		onSuccess: (updateData, variables, context) => {
-			queryClient.invalidateQueries({ queryKey: keys });
+			// queryClient.setQueryData<T[]>(keys, (currentList) =>
+			// 	currentList?.map((item) => (previousData && (item as any)._id === previousData?._id ? previousData : item))
+			// );
+			queryClient.invalidateQueries({ queryKey: [keys[0], "list"] });
 			// queryClient.refetchQueries({ queryKey: keys });
 			// Boom baby!
 			// console.log("UPDATE > success > updateData :>> ", updateData);
@@ -296,23 +306,33 @@ export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, filter: any
 	return [mutation.mutateAsync, mutation.status];
 };
 
-export const useDeleteApi = <T,>(keys: any[], apiPath: string, filter: any = {}, options: ApiOptions = {}) => {
+export const useDeleteApi = <T,>(
+	keys: any[],
+	apiPath: string,
+	options: ApiOptions = {}
+): [UseMutateAsyncFunction<T, Error, T, unknown>, "error" | "idle" | "loading" | "success"] => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
-	const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
-	const queryFilter = new URLSearchParams(filter).toString();
+	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	headers["Cache-Control"] = "no-cache";
 
-	const mutation = useMutation<T, Error>({
-		mutationFn: () => {
+	const mutation = useMutation<T, Error, T>({
+		mutationFn: async (filter: any) => {
+			const queryFilter = new URLSearchParams(filter).toString();
 			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${queryFilter}`;
-			return axios.delete(apiURL, { ...options, headers });
+			const { data } = await axios.delete(apiURL, { ...options, headers });
+			return data;
 		},
 		onSuccess: (data) => {
 			// update the list in cache
+			queryClient.invalidateQueries({ queryKey: [keys[0], "list"] });
+			return data;
 		},
 	});
 
-	return { proceed: mutation.mutateAsync, status: mutation.status };
+	const { mutateAsync, status } = mutation;
+	// return { proceed: mutation.mutateAsync, status: mutation.status };
+	return [mutateAsync, status];
 	// return mutation;
 };

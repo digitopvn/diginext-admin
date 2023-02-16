@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 export const useRouterQuery = (): [any, { setQuery: (query?: any) => any; deleteQuery: (keys: string[]) => any; deleteAllQueryKeys: () => any }] => {
 	const router = useRouter();
 
-	const [routerQuery, setRouterQuery] = useState(router.query as any);
+	const routerPathQuery = router.asPath;
+	const urlParams = new URLSearchParams(router.asPath.split("?")[1]);
+	const params = Object.fromEntries(urlParams);
+
+	const [routerQuery, setRouterQuery] = useState(params);
 
 	const setQuery = (query: any = {}) => {
 		const newQuery = { ...routerQuery, ...query };
@@ -20,7 +24,6 @@ export const useRouterQuery = (): [any, { setQuery: (query?: any) => any; delete
 		});
 		setRouterQuery(newQuery);
 
-		const urlParams = new URLSearchParams(newQuery);
 		router.push(router.pathname, { query: newQuery });
 
 		return routerQuery;
@@ -34,7 +37,6 @@ export const useRouterQuery = (): [any, { setQuery: (query?: any) => any; delete
 	useEffect(() => {
 		if (!router.isReady) return;
 
-		const routerPathQuery = router.asPath;
 		if (routerPathQuery.indexOf("?") === -1) {
 			deleteAllQueryKeys();
 			return;
@@ -46,9 +48,6 @@ export const useRouterQuery = (): [any, { setQuery: (query?: any) => any; delete
 		 * Learn more: https://nextjs.org/docs/advanced-features/automatic-static-optimization
 		 * Below is the alternative solution! MAGIC!!!
 		 */
-		const urlParams = new URLSearchParams(routerPathQuery.split("?")[1]);
-		const params = Object.fromEntries(urlParams);
-
 		setRouterQuery(params);
 	}, [router.asPath, router.isReady]);
 

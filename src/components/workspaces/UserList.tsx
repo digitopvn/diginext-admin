@@ -127,7 +127,7 @@ export const UserList = () => {
 	const [page, setPage] = useState(1);
 	const { data } = useUserListApi({ populate: "roles,teams", pagination: { page, size: pageSize } });
 	const { list: users, pagination } = data || {};
-	const { total_pages } = pagination || {};
+	const { total_items } = pagination || {};
 	console.log("users :>> ", users);
 
 	const onTableChange = (_pagination: TablePaginationConfig) => {
@@ -158,7 +158,7 @@ export const UserList = () => {
 				dataSource={displayedUsers}
 				scroll={{ x: 1200 }}
 				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize, total: total_pages }}
+				pagination={{ pageSize, total: total_items }}
 				onChange={onTableChange}
 			/>
 		</div>

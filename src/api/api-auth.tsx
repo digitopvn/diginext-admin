@@ -21,19 +21,24 @@ export const login = (params: { redirectURL?: string } = {}) => {
 export const useAuthApi = (props: { access_token?: string } = {}) => {
 	const { access_token = getCookie("x-auth-cookie") } = props;
 	const router = useRouter();
-	const [query] = useRouterQuery();
+	// const [query] = useRouterQuery();
 
 	return useQuery({
 		staleTime: 2 * 60 * 1000, // 2 minutes
 		queryKey: ["auth"],
+		// enabled: typeof access_token !== "undefined",
 		queryFn: async () => {
+			const urlParams = new URLSearchParams(router.asPath.split("?")[1]);
+			const query = Object.fromEntries(urlParams);
 			const { access_token: queryToken } = query;
+
+			// console.log("queryToken :>> ", queryToken);
 			const token = access_token ?? getCookie("x-auth-cookie") ?? queryToken;
 
 			const headers = token ? { Authorization: `Bearer ${token}` } : {};
 			const { data } = await axios.get(`${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile`, { headers });
 
-			console.log(`${router.asPath} > queryFn :>> `, { data });
+			// console.log(`${router.asPath} > queryFn :>> `, { data });
 			return data;
 		},
 	});
@@ -60,11 +65,15 @@ export const useAuth = (props: { redirectUrl?: string } = {}) => {
 
 	useEffect(() => {
 		if (typeof status === "undefined") return;
+		if (isFetched === false) return;
 
 		setTimeout(() => {
 			const cookieToken = getCookie("x-auth-cookie");
 
-			if (!cookieToken) {
+			// console.log("cookieToken :>>", cookieToken);
+			// console.log("status :>>", status);
+
+			if (!cookieToken || !status) {
 				router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
 			} else {
 				reload();
@@ -84,7 +93,13 @@ export const AuthPage = (props: { children?: ReactNode } = {}) => {
 
 	const { workspaces = [] } = user || {};
 
-	const workspace = useWorkspace({ name: workspaces[0]?.slug });
+	const workspaceSlug = workspaces[0]?.slug;
+	const workspace = useWorkspace({ name: workspaceSlug });
+
+	// useEffect(() => {
+	// 	if (!workspaces) return;
+	// 	if (workspaces.length === 0) router.push(`/workspace/setup`);
+	// }, [workspaces]);
 
 	if (isLoading)
 		return (

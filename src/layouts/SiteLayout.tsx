@@ -3,8 +3,8 @@ import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 
-import EditPage from "@/commons/EditPage";
 import { MenuSider } from "@/commons/MenuSider";
+import NewEditPage from "@/commons/NewEditPage";
 import { PageFooter } from "@/commons/PageFooter";
 import { SiteHeader } from "@/commons/SiteHeader";
 import { BuildList } from "@/components/deployments/BuildList";
@@ -52,7 +52,11 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 	};
 
 	const openEditPage = () => {
-		if (showDrawer) showDrawer({ title: "Edit", content: <EditPage /> }, { level: 1 });
+		if (showDrawer) showDrawer({ title: "Edit", content: <NewEditPage /> }, { level: 1 });
+	};
+
+	const openCreatePage = () => {
+		if (showDrawer) showDrawer({ title: "Create", content: <NewEditPage /> }, { level: 1 });
 	};
 
 	useEffect(() => {
@@ -64,6 +68,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 
 			case "release":
 				openReleaseList();
+				break;
+
+			case "new":
+				openCreatePage();
 				break;
 
 			case "edit":
@@ -89,7 +97,8 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 	}, [lv1, lv2, project, app, env]);
 
 	useEffect(() => {
-		if (drawerVisibility?.lv1 === false) deleteQuery(["lv1", "project", "app", "release"]);
+		if (drawerVisibility?.lv1 === false)
+			deleteQuery(["lv1", "project", "app", "release", "type", "cluster_slug", "framework_slug", "git_provider_slug", "registry_slug"]);
 	}, [drawerVisibility?.lv1]);
 
 	useEffect(() => {

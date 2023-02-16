@@ -45,6 +45,7 @@
 				"no-plusplus": "off",
 				"no-underscore-dangle": "off",
 				"no-console": "off",
+				"no-control-regex": "off",
 				// react
 				"react/destructuring-assignment": "off", // Vscode doesn't support automatically destructuring, it's a pain to add a new variable
 				"react/require-default-props": "off", // Allow non-defined react props as undefined

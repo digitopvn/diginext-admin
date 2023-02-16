@@ -1,9 +1,11 @@
+import { LoadingOutlined } from "@ant-design/icons";
 import { App, theme, Timeline } from "antd";
 import dayjs from "dayjs";
 import parser from "html-react-parser";
 import { isEmpty } from "lodash";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import sanitizeHtml from "sanitize-html";
 
 import { useBuildLogsApi } from "@/api/api-build";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -19,16 +21,11 @@ dayjs.extend(localizedFormat);
 
 const { useApp } = App;
 
-interface DataType {
-	id?: string;
-	key?: React.Key;
-	children?: DataType[];
-}
-
 const failedKeyword = "command failed with exit code 1";
 
 // eslint-disable-next-line no-control-regex
-const stripAnsiCodes = (str: any) => `${str}`.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, "") as string;
+const stripAnsiCodes = (str: any) =>
+	sanitizeHtml(`${str}`.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, ""));
 
 export const BuildLogs = ({ slug }: { slug?: string }) => {
 	const router = useRouter();
@@ -38,13 +35,16 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	const { build_slug } = query;
 
 	// api
+	// console.log("build_slug :>> ", build_slug);
 
-	const { data: logData = "", isLoading } = useBuildLogsApi({ filter: { slug: slug ?? build_slug } });
-	console.log({ logData });
+	const { data: logData = "", isLoading } = useBuildLogsApi(slug ?? build_slug);
+	// console.log({ logData });
 
 	const displayedData = stripAnsiCodes(logData);
+	// console.log("displayedData :>> ", displayedData);
 
 	const lines: any[] = displayedData.split("\n").map((line: any, i: number) => line.toString());
+	// console.log("lines :>> ", lines);
 
 	// socket
 
@@ -62,7 +62,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	// effects
 
 	useEffect(() => {
-		console.log("lines :>> ", lines);
+		// console.log("lines :>> ", lines);
 		if (isEmpty(logData)) return;
 		setMessages(lines);
 	}, [lines.length]);
@@ -78,20 +78,25 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 		if (buildLog.indexOf("finished deploying") > -1) setStatus("success");
 		if (buildLog.indexOf(failedKeyword) > -1 || buildLog.indexOf("[error]") > -1) setStatus("failed");
 
-		//
+		// no need to connect to socket if the room is not available:
+		if (!SOCKET_ROOM) return () => false;
+
+		console.log(`[socket] connecting to "${SOCKET_ROOM}" room...`);
 		const socket = io(SOCKET_URL, { transports: ["websocket"] });
 
 		socket.on("connect", () => {
-			console.log("connected:", socket.connected); // false
+			console.log("[socket] connected:", socket.connected, `(ROOM: ${SOCKET_ROOM})`);
 
 			// Join to the room:
 			socket.emit("join", { room: SOCKET_ROOM });
 
 			// Listen on the server:
 			socket.on("message", ({ action, message }: { action: string; message: string }) => {
+				console.log("[socket] message:", { action, message });
+
 				// print out the message
 				if (message) {
-					setMessages((oldMsgs) => [...oldMsgs, message]);
+					setMessages((oldMsgs) => [...oldMsgs, stripAnsiCodes(message)]);
 
 					// if build failed keyword detected -> mark as BUILD FAILED
 					if (message?.toLowerCase().indexOf(failedKeyword) > -1 || message?.toLowerCase().indexOf("[error]") > -1) {
@@ -110,20 +115,34 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 		});
 
 		socket.on("disconnect", () => {
+			console.log("[socket] disconnected !");
 			setMessages((oldMsgs) => [...oldMsgs, "Disconnected with build server."]);
 		});
 
 		return () => {
-			socket.disconnect();
+			if (socket.connected) {
+				console.log("[socket] disconnecting...");
+				socket.disconnect();
+			}
 			setMessages([]);
 		};
-	}, []);
+	}, [logData, SOCKET_ROOM]);
 
 	return (
 		<div style={{ color: colorText }}>
+			{status === "failed" && <h2 className="text-xl text-red-600">Build lỗi rồi má ơi!</h2>}
+			{status === "success" && <h2 className="text-xl text-green-600">Build thành công rồi, đỉnh quá idol ơi!</h2>}
+
 			<Timeline>
+				{status === "in_progress" && (
+					<Timeline.Item key={`message-spin`} dot={<LoadingOutlined />}>
+						Building...
+					</Timeline.Item>
+				)}
+
 				{messages
 					.filter((m) => m !== "")
+					.reverse()
 					.map((message, index) =>
 						`${message}`.toLowerCase().indexOf("error") > -1 ? (
 							<Timeline.Item key={`message-${index}`} className="text-red-600">
@@ -134,9 +153,6 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 						)
 					)}
 			</Timeline>
-
-			{status === "failed" && <h2 className="text-xl text-red-600">Build lỗi rồi má ơi!</h2>}
-			{status === "success" && <h2 className="text-xl text-green-600">Build thành công rồi, đỉnh quá idol ơi!</h2>}
 		</div>
 	);
 };
