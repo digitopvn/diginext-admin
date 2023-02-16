@@ -53,6 +53,7 @@
 		"next-sitemap": "^3.1.32",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
+		"sanitize-html": "^2.9.0",
 		"socket.io-client": "^4.5.4",
 		"usehooks-ts": "^2.9.1"
 	},
@@ -73,6 +74,7 @@
 		"@types/lodash": "^4.14.191",
 		"@types/node": "^18.11.10",
 		"@types/react": "^18.0.26",
+		"@types/sanitize-html": "^2.8.0",
 		"@typescript-eslint/eslint-plugin": "^5.45.0",
 		"@typescript-eslint/parser": "^5.45.0",
 		"autoprefixer": "^10.4.13",

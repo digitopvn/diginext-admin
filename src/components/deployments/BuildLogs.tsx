@@ -2,6 +2,7 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { App, theme, Timeline } from "antd";
 import dayjs from "dayjs";
 import parser from "html-react-parser";
+import sanitizeHtml from "sanitize-html";
 import { isEmpty } from "lodash";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -29,7 +30,8 @@ interface DataType {
 const failedKeyword = "command failed with exit code 1";
 
 // eslint-disable-next-line no-control-regex
-const stripAnsiCodes = (str: any) => `${str}`.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, "") as string;
+const stripAnsiCodes = (str: any) =>
+	sanitizeHtml(`${str}`.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, ""));
 
 export const BuildLogs = ({ slug }: { slug?: string }) => {
 	const router = useRouter();
