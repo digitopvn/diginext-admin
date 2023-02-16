@@ -3,8 +3,8 @@ import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 
-import NewEditPage from "@/commons/NewEditPage";
 import { MenuSider } from "@/commons/MenuSider";
+import NewEditPage from "@/commons/NewEditPage";
 import { PageFooter } from "@/commons/PageFooter";
 import { SiteHeader } from "@/commons/SiteHeader";
 import { BuildList } from "@/components/deployments/BuildList";

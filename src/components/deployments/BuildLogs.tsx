@@ -2,10 +2,10 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { App, theme, Timeline } from "antd";
 import dayjs from "dayjs";
 import parser from "html-react-parser";
-import sanitizeHtml from "sanitize-html";
 import { isEmpty } from "lodash";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import sanitizeHtml from "sanitize-html";
 
 import { useBuildLogsApi } from "@/api/api-build";
 import { useRouterQuery } from "@/plugins/useRouterQuery";

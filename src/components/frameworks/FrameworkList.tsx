@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined, PauseCircleOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Button, Popconfirm, Space, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
@@ -7,8 +7,8 @@ import React, { useState } from "react";
 import { useFrameworkDeleteApi, useFrameworkListApi } from "@/api/api-framework";
 import type { IFramework, IGitProvider, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
-import { AppConfig } from "@/utils/AppConfig";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
+import { AppConfig } from "@/utils/AppConfig";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");

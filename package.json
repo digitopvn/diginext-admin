@@ -12,7 +12,7 @@
 		"pkg-version": "npm pkg set version=$(echo $(git describe --tags $(git rev-list --tags --max-count=1)) | cut -c2-)",
 		"export": "next export",
 		"export-prod": "NODE_ENV=production next export",
-		"export-to-cli": "run-s env-prod clean format build export-prod copy-prod env-dev",
+		"export-to-cli": "run-s format env-prod clean build export-prod copy-prod env-dev",
 		"copy-prod": "ncp ./out ../diginext/public",
 		"clean": "rimraf .next out",
 		"env-dev": "mv env.bak .env.local",
