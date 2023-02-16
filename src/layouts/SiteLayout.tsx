@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 
-import EditPage from "@/commons/EditPage";
+import NewEditPage from "@/commons/NewEditPage";
 import { MenuSider } from "@/commons/MenuSider";
 import { PageFooter } from "@/commons/PageFooter";
 import { SiteHeader } from "@/commons/SiteHeader";
@@ -52,11 +52,11 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 	};
 
 	const openEditPage = () => {
-		if (showDrawer) showDrawer({ title: "Edit", content: <EditPage /> }, { level: 1 });
+		if (showDrawer) showDrawer({ title: "Edit", content: <NewEditPage /> }, { level: 1 });
 	};
 
 	const openCreatePage = () => {
-		if (showDrawer) showDrawer({ title: "Create", content: <EditPage /> }, { level: 1 });
+		if (showDrawer) showDrawer({ title: "Create", content: <NewEditPage /> }, { level: 1 });
 	};
 
 	useEffect(() => {

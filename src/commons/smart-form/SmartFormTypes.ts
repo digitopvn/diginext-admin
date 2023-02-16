@@ -9,11 +9,13 @@ export type SmartFormElementProps = {
 	defaultValue?: any;
 	initialValue?: any;
 	label?: string;
+	postLabel?: any;
 	requiredMessage?: string;
 	status?: any;
 	autoSave?: boolean;
 	isNew?: boolean;
 	required?: boolean;
+	placeholder?: string;
 	// status: "error" | "idle" | "loading" | "success";
 };
 

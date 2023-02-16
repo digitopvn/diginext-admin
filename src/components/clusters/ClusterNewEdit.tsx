@@ -13,9 +13,9 @@ import SmartTextArea from "@/commons/smart-form/SmartTextArea";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useDrawerProvider } from "@/providers/DrawerProvider";
 
-type ClusterEditProps = { data?: ICluster; isNew?: boolean };
+type ClusterNewEditProps = { data?: ICluster; isNew?: boolean };
 
-const ClusterEdit = (props: ClusterEditProps = {}) => {
+const ClusterNewEdit = (props: ClusterNewEditProps = {}) => {
 	const { data } = props;
 
 	const [user, reload] = useAuth();
@@ -164,7 +164,7 @@ const ClusterEdit = (props: ClusterEditProps = {}) => {
 
 			<div className="fixed bottom-0 w-full px-6 py-3" style={{ backgroundColor: colorBgContainer }}>
 				<Space>
-					<Form.Item>
+					<Form.Item style={{ marginBottom: 0 }}>
 						<Button type="primary" htmlType="submit">
 							Submit
 						</Button>
@@ -178,4 +178,4 @@ const ClusterEdit = (props: ClusterEditProps = {}) => {
 	);
 };
 
-export default ClusterEdit;
+export default ClusterNewEdit;

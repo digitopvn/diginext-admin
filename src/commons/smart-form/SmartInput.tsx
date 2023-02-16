@@ -10,6 +10,7 @@ import type { SmartFormElementProps } from "./SmartFormTypes";
 const SmartInput = (props: SmartFormElementProps) => {
 	const {
 		label,
+		postLabel,
 		name,
 		required = false,
 		requiredMessage = `Please input your ${label}`,
@@ -19,6 +20,7 @@ const SmartInput = (props: SmartFormElementProps) => {
 		status,
 		autoSave = true,
 		isNew,
+		placeholder,
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -66,16 +68,19 @@ const SmartInput = (props: SmartFormElementProps) => {
 	return (
 		<Form.Item
 			label={
-				<Space size="small">
-					{label}
-					{icon}
-				</Space>
+				<Space.Compact direction="vertical">
+					<Space size="small">
+						{label}
+						{icon}
+					</Space>
+					{postLabel}
+				</Space.Compact>
 			}
 			name={name}
 			rules={[{ required, message: requiredMessage }]}
 		>
 			<Space direction="vertical" className="w-full">
-				<Input onChange={onChange} value={_value} />
+				<Input placeholder={placeholder} onChange={onChange} value={_value} />
 
 				{/* Display manual save controller if auto save is off */}
 				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}

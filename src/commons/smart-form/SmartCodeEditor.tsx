@@ -13,6 +13,7 @@ import type { SmartCodeEditorProps, SmartFormElementProps } from "./SmartFormTyp
 const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) => {
 	const {
 		label,
+		postLabel,
 		name,
 		required = false,
 		requiredMessage = `Please input your ${label}`,
@@ -77,6 +78,8 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 					onChange={onChange}
 					value={_value}
 				/>
+
+				{postLabel}
 
 				{/* Display manual save controller if auto save is off */}
 				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}

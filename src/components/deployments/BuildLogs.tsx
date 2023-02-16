@@ -21,12 +21,6 @@ dayjs.extend(localizedFormat);
 
 const { useApp } = App;
 
-interface DataType {
-	id?: string;
-	key?: React.Key;
-	children?: DataType[];
-}
-
 const failedKeyword = "command failed with exit code 1";
 
 // eslint-disable-next-line no-control-regex
@@ -91,13 +85,15 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 		const socket = io(SOCKET_URL, { transports: ["websocket"] });
 
 		socket.on("connect", () => {
-			console.log("[socket] connected:", socket.connected, `(ROOM: ${SOCKET_ROOM})`); // false
+			console.log("[socket] connected:", socket.connected, `(ROOM: ${SOCKET_ROOM})`);
 
 			// Join to the room:
 			socket.emit("join", { room: SOCKET_ROOM });
 
 			// Listen on the server:
 			socket.on("message", ({ action, message }: { action: string; message: string }) => {
+				console.log("[socket] message:", { action, message });
+
 				// print out the message
 				if (message) {
 					setMessages((oldMsgs) => [...oldMsgs, stripAnsiCodes(message)]);
@@ -119,14 +115,18 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 		});
 
 		socket.on("disconnect", () => {
+			console.log("[socket] disconnected !");
 			setMessages((oldMsgs) => [...oldMsgs, "Disconnected with build server."]);
 		});
 
 		return () => {
-			if (socket.connected) socket.disconnect();
+			if (socket.connected) {
+				console.log("[socket] disconnecting...");
+				socket.disconnect();
+			}
 			setMessages([]);
 		};
-	}, [logData]);
+	}, [logData, SOCKET_ROOM]);
 
 	return (
 		<div style={{ color: colorText }}>

@@ -224,7 +224,7 @@ export interface IGitProvider extends IGeneral {
 }
 
 export interface IFramework extends IGeneral {
-	name: string;
+	name?: string;
 
 	host?: string;
 

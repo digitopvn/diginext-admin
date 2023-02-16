@@ -12,6 +12,7 @@ const { TextArea } = Input;
 const SmartTextArea = (props: SmartFormElementProps) => {
 	const {
 		label,
+		postLabel,
 		name,
 		required = false,
 		requiredMessage = `Please input your ${label}`,
@@ -69,6 +70,8 @@ const SmartTextArea = (props: SmartFormElementProps) => {
 			{/* <Input suffix={icon} onChange={onChange} /> */}
 			<Space direction="vertical" className="w-full">
 				<TextArea rows={3} onChange={onChange} value={_value} />
+
+				{postLabel}
 
 				{/* Display manual save controller if auto save is off */}
 				{!autoSave && !isNew && <ManualSaveController compact initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}

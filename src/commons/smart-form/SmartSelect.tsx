@@ -11,6 +11,7 @@ const SmartSelect = (props: SmartSelectProps) => {
 		className,
 		style,
 		label,
+		postLabel,
 		name,
 		required = false,
 		requiredMessage = `Please input your ${label}`,
@@ -78,6 +79,8 @@ const SmartSelect = (props: SmartSelectProps) => {
 		>
 			<Space direction="horizontal" className="w-full">
 				<Select className={className} style={style} value={_value} onChange={onChange} options={options} />
+
+				{postLabel}
 
 				{/* Display manual save controller if auto save is off */}
 				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}
