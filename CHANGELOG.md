@@ -1,3 +1,30 @@
+# [1.1.0](https://github.com/digitopvn/diginext-admin/compare/v1.0.2...v1.1.0) (2023-02-16)
+
+
+### Bug Fixes
+
+* **api hooks:** add slug query hooks ([82d5ad0](https://github.com/digitopvn/diginext-admin/commit/82d5ad083baa5040842ce19a0b8b9c02134b61b5))
+* **auth:** redirect to login if expired ([c34b69d](https://github.com/digitopvn/diginext-admin/commit/c34b69dea8542ef6207b78ba50ac4ee0d16c77cf))
+* **build logs:** fix unable to view real time logs ([58a677b](https://github.com/digitopvn/diginext-admin/commit/58a677bbb13ee3aca6b10301587976358cb45ac0))
+* **list pages:** fix pagination issues of all list pages ([d5a59c5](https://github.com/digitopvn/diginext-admin/commit/d5a59c5b48eca6fd81c89e0af20872f11ba80891))
+* **log detail:** fix empty content of log detail modal ([69302f2](https://github.com/digitopvn/diginext-admin/commit/69302f2c4c76a8903f4c777f3f0cec37a808777d))
+* **login:** fixed issue of login to workspace for the first time ([bd86492](https://github.com/digitopvn/diginext-admin/commit/bd8649251f894cf011ceadadbe404b8281987393))
+* **login:** fixed login redirect ([437e3aa](https://github.com/digitopvn/diginext-admin/commit/437e3aa850346dc8cf4e1c3812537b63d1f39e82))
+* **logs:** add sanitize html to log message to improve security ([76fc98b](https://github.com/digitopvn/diginext-admin/commit/76fc98bf63393ac1f2f03348bbcfb592e52da443))
+* **project:** fix pagination issue of project list page ([3bc9d74](https://github.com/digitopvn/diginext-admin/commit/3bc9d74c3ac894792e52b821f18e7e92165cd813))
+* **smart form:** create new data with object paths ([4996203](https://github.com/digitopvn/diginext-admin/commit/4996203812461b6001994d32cd17cf4e90df565c))
+
+
+### Features
+
+* **cluster:** create new cluster ([b3b7776](https://github.com/digitopvn/diginext-admin/commit/b3b777602a9766629437020c2979877dd91533a1))
+* **container registry:** add crud to container registry ([0cc5be3](https://github.com/digitopvn/diginext-admin/commit/0cc5be37d368d64d3f1b90150ae2bf78493326bf))
+* **delete:** delete project, app, environment ([c84a807](https://github.com/digitopvn/diginext-admin/commit/c84a8074c70d3ef217449f13383745cd3b8ea94f))
+* **framework:** add crud to framework ([932edf5](https://github.com/digitopvn/diginext-admin/commit/932edf5649b2c2b840135659fe1a43587756a524))
+* **project page:** feature to delete project and its related apps ([fedec3c](https://github.com/digitopvn/diginext-admin/commit/fedec3cadcc0f07d1cf67fe2636dca850876fd41))
+* **smart form:** add smart input, text area, select, code editor ([3076c18](https://github.com/digitopvn/diginext-admin/commit/3076c181f46a53ea6a059084c490607846879437))
+* **smart form:** add super smart form component ([92ab524](https://github.com/digitopvn/diginext-admin/commit/92ab5249482fa3992725fa69b930a70ea4dd052b))
+
 ## [1.0.2](https://github.com/digitopvn/diginext-admin/compare/v1.0.1...v1.0.2) (2023-01-15)
 
 
