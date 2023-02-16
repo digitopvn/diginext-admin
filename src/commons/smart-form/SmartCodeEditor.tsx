@@ -25,6 +25,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 		isNew,
 		lang = [],
 		height = "350px",
+		disabled = false,
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -78,6 +79,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 					extensions={[...lang.map((_lang) => langs[_lang]()), basicSetup({})]}
 					onChange={onChange}
 					value={_value}
+					editable={!disabled}
 				/>
 
 				{postLabel}

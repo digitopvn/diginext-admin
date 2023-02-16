@@ -38,9 +38,9 @@ const ClusterNewEdit = (props: ClusterNewEditProps = {}) => {
 		{ type: "input", label: "Project ID (Google)", name: "projectID", placeholder: "my-project-id" },
 		{ type: "input", label: "Region (Google)", name: "region", placeholder: "asia-southeast1" },
 		{ type: "input", label: "Zone (Google)", name: "zone", placeholder: "asia-southeast1-a" },
-		{ type: "code-editor", label: "KubeConfig (YAML)", name: "kubeConfig" },
+		{ type: "code-editor", lang: ["yaml"], label: "KubeConfig (YAML)", name: "kubeConfig" },
 		{ type: "textarea", label: "API Access Token", name: "apiAccessToken" },
-		{ type: "code-editor", label: "Service Account (JSON)", name: "serviceAccount" },
+		{ type: "code-editor", lang: ["json"], label: "Service Account (JSON)", name: "serviceAccount" },
 	];
 
 	return <SmartForm name="cluster" api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />;

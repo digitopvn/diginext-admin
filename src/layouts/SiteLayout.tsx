@@ -98,7 +98,7 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 
 	useEffect(() => {
 		if (drawerVisibility?.lv1 === false)
-			deleteQuery(["lv1", "project", "app", "release", "type", "cluster_slug", "framework_slug", "git_provider_slug"]);
+			deleteQuery(["lv1", "project", "app", "release", "type", "cluster_slug", "framework_slug", "git_provider_slug", "registry_slug"]);
 	}, [drawerVisibility?.lv1]);
 
 	useEffect(() => {

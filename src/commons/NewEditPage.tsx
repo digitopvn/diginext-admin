@@ -1,6 +1,7 @@
 import ClusterNewEdit from "@/components/clusters/ClusterNewEdit";
 import FrameworkNewEdit from "@/components/frameworks/FrameworkNewEdit";
 import GitProviderNewEdit from "@/components/gits/GitProviderNewEdit";
+import ContainerRegistryNewEdit from "@/components/registries/ContainerRegistryNewEdit";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 
 const NewEditPage = () => {
@@ -18,6 +19,10 @@ const NewEditPage = () => {
 
 		case "git-provider":
 			children = <GitProviderNewEdit />;
+			break;
+
+		case "registry":
+			children = <ContainerRegistryNewEdit />;
 			break;
 
 		default:

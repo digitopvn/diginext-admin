@@ -22,12 +22,14 @@ const SmartSelect = (props: SmartFormElementProps) => {
 		autoSave = true,
 		isNew,
 		options,
+		disabled = false,
 	} = props;
 
 	const form = Form.useFormInstance();
 
 	const [_value, setValue] = useState(value ?? defaultValue);
 	const debouncedValue = useDebounce(_value, 500);
+	console.log("_value :>> ", _value);
 
 	// callbacks
 	const onChange = (selectedValue: any) => {
@@ -50,6 +52,8 @@ const SmartSelect = (props: SmartFormElementProps) => {
 
 	// update the value immediatly:
 	useEffect(() => {
+		console.log("value :>> ", value);
+
 		form.setFieldValue(name, value);
 		setValue(value);
 	}, [value]);
@@ -78,7 +82,7 @@ const SmartSelect = (props: SmartFormElementProps) => {
 			rules={[{ required, message: requiredMessage }]}
 		>
 			<Space direction="horizontal" className="w-full">
-				<Select className={className} style={style} value={_value} onChange={onChange} options={options} />
+				<Select className={className} style={style} value={_value} onChange={onChange} options={options} disabled={disabled} />
 
 				{postLabel}
 

@@ -22,6 +22,7 @@ const SmartTextArea = (props: SmartFormElementProps) => {
 		status,
 		autoSave = true,
 		isNew,
+		disabled = false,
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -69,7 +70,7 @@ const SmartTextArea = (props: SmartFormElementProps) => {
 		>
 			{/* <Input suffix={icon} onChange={onChange} /> */}
 			<Space direction="vertical" className="w-full">
-				<TextArea rows={3} onChange={onChange} value={_value} />
+				<TextArea rows={3} onChange={onChange} value={_value} disabled={disabled} />
 
 				{postLabel}
 

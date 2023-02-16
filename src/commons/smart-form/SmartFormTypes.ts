@@ -19,6 +19,7 @@ export type SmartFormElementProps = {
 	isNew?: boolean;
 	required?: boolean;
 	placeholder?: string;
+	disabled?: boolean;
 	/**
 	 * Programming Language of the `<SmartCodeEditor />` component
 	 */
@@ -28,6 +29,7 @@ export type SmartFormElementProps = {
 	 * Options of the `<SmartSelect />` component
 	 */
 	options?: { value: any; label: string }[];
+	selectedKey?: string;
 };
 
 export type SmartCodeEditorProps = SmartFormElementProps & {

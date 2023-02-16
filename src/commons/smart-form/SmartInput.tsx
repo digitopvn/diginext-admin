@@ -21,6 +21,7 @@ const SmartInput = (props: SmartFormElementProps) => {
 		autoSave = true,
 		isNew,
 		placeholder,
+		disabled = false,
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -80,7 +81,7 @@ const SmartInput = (props: SmartFormElementProps) => {
 			rules={[{ required, message: requiredMessage }]}
 		>
 			<Space direction="vertical" className="w-full">
-				<Input placeholder={placeholder} onChange={onChange} value={_value} />
+				<Input placeholder={placeholder} onChange={onChange} value={_value} disabled={disabled} />
 
 				{/* Display manual save controller if auto save is off */}
 				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}
