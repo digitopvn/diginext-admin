@@ -3,19 +3,17 @@ import _, { isEmpty } from "lodash";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "@/api/api-auth";
-import { useFrameworkCreateApi, useFrameworkSlugApi, useFrameworkUpdateApi } from "@/api/api-framework";
-import { useGitProviderListApi } from "@/api/api-git-provider";
-import type { IFramework } from "@/api/api-types";
+import { useGitProviderCreateApi, useGitProviderSlugApi, useGitProviderUpdateApi } from "@/api/api-git-provider";
+import type { IGitProvider } from "@/api/api-types";
 import SmartInput from "@/commons/smart-form/SmartInput";
-import SmartSelect from "@/commons/smart-form/SmartSelect";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useDrawerProvider } from "@/providers/DrawerProvider";
 
 const { Text } = Typography;
 
-type FrameworkNewEditProps = { data?: IFramework; isNew?: boolean };
+type GitProviderNewEditProps = { data?: IGitProvider; isNew?: boolean };
 
-const FrameworkNewEdit = (props: FrameworkNewEditProps = {}) => {
+const GitProviderNewEdit = (props: GitProviderNewEditProps = {}) => {
 	const { data } = props;
 
 	const [user, reload] = useAuth();
@@ -23,22 +21,18 @@ const FrameworkNewEdit = (props: FrameworkNewEditProps = {}) => {
 	const { drawerVisibility } = useDrawerProvider();
 	const [, { deleteAllQueryKeys }] = useRouterQuery();
 
-	const [form] = Form.useForm<IFramework>();
+	const [form] = Form.useForm<IGitProvider>();
 	const [fieldsStatus, setFieldsStatus] = useState();
 
-	const [{ framework_slug }] = useRouterQuery();
-
-	// frameworks
-	const { data: framework } = useFrameworkSlugApi(framework_slug, { populate: "owner,git" });
-	const [updateApi, updateStatus] = useFrameworkUpdateApi({ filter: { id: framework?._id } });
-	const [createApi, createStatus] = useFrameworkCreateApi();
-	// console.log("framework :>> ", framework);
+	const [{ git_provider_slug }] = useRouterQuery();
 
 	// gitProviders
-	const { data: { list: gitProviders = [] } = {} } = useGitProviderListApi();
-	console.log("gitProviders :>> ", gitProviders);
+	const { data: gitProvider } = useGitProviderSlugApi(git_provider_slug, { populate: "owner" });
+	const [updateApi, updateStatus] = useGitProviderUpdateApi({ filter: { id: gitProvider?._id } });
+	const [createApi, createStatus] = useGitProviderCreateApi();
+	// console.log("gitProvider :>> ", gitProvider);
 
-	const isNew = typeof framework === "undefined";
+	const isNew = typeof gitProvider === "undefined";
 
 	const {
 		token: { colorBgContainer },
@@ -50,7 +44,7 @@ const FrameworkNewEdit = (props: FrameworkNewEditProps = {}) => {
 		console.log(isNew ? "[NEW]" : "[UPDATE]", "Submit:", values);
 		const postData = { ...values };
 
-		let result: IFramework | undefined;
+		let result: IGitProvider | undefined;
 		if (isNew) {
 			Object.entries(postData).forEach(([field, value]) => {
 				if (field.indexOf(".") > -1) {
@@ -58,7 +52,6 @@ const FrameworkNewEdit = (props: FrameworkNewEditProps = {}) => {
 					_.set(postData, field, value);
 				}
 			});
-
 			result = await createApi(postData);
 			console.log("[NEW] result :>> ", result);
 
@@ -66,7 +59,7 @@ const FrameworkNewEdit = (props: FrameworkNewEditProps = {}) => {
 		} else {
 			const statuses: any = {};
 			Object.entries(postData).forEach(([field, value]) => {
-				if (framework && value !== (framework as any)[field]) {
+				if (gitProvider && value !== (gitProvider as any)[field]) {
 					statuses[field] = "loading";
 				} else {
 					delete statuses[field];
@@ -92,7 +85,7 @@ const FrameworkNewEdit = (props: FrameworkNewEditProps = {}) => {
 
 	// clear URL query when closing the drawer
 	// useEffect(() => {
-	// 	if (drawerVisibility?.lv1 === false) deleteQuery(["type", "framework_slug"]);
+	// 	if (drawerVisibility?.lv1 === false) deleteQuery(["type", "gitProvider_slug"]);
 	// }, [drawerVisibility?.lv1]);
 
 	useEffect(() => {
@@ -118,50 +111,33 @@ const FrameworkNewEdit = (props: FrameworkNewEditProps = {}) => {
 			autoComplete="off"
 		>
 			<div className="p-6 pb-16">
-				<SmartInput
-					label="Framework name"
-					name="name"
-					placeholder="My Starter Template"
-					value={framework?.name}
-					status={fieldsStatus}
-					isNew={isNew}
-				/>
+				<SmartInput label="Name" name="name" placeholder="Github" value={gitProvider?.name} status={fieldsStatus} isNew={isNew} />
 
-				<SmartSelect
-					label="Git Provider"
-					name="git"
-					value={framework?.git?._id}
-					style={{ width: 250 }}
-					options={gitProviders.map((gitProvider) => {
-						return { label: gitProvider.name || "", value: gitProvider._id };
-					})}
+				<SmartInput label="Host" name="host" placeholder="github.com" value={gitProvider?.host} status={fieldsStatus} isNew={isNew} />
+
+				<SmartInput
+					label="Workspace"
+					name="gitWorkspace"
+					placeholder="your-team-workspace-here"
+					value={gitProvider?.gitWorkspace}
 					status={fieldsStatus}
 					isNew={isNew}
 				/>
 
 				<SmartInput
-					label="Repository HTTPS URL"
-					name="repoURL"
-					placeholder="https://github.com/user/repo.git"
-					value={framework?.repoURL}
+					label="Workspace URL"
+					name="repo.url"
+					value={gitProvider?.repo?.url}
+					placeholder="https://github.com/your-team-workspace-here"
 					status={fieldsStatus}
 					isNew={isNew}
 				/>
 
 				<SmartInput
-					label="Repository SSH URL"
-					name="repoSSH"
-					placeholder="git@github.com:user/repo.git"
-					value={framework?.repoSSH}
-					status={fieldsStatus}
-					isNew={isNew}
-				/>
-
-				<SmartInput
-					label="Main branch"
-					name="mainBranch"
-					value={framework?.mainBranch}
-					placeholder="main"
+					label="Workspace SSH Prefix"
+					name="repo.sshPrefix"
+					value={gitProvider?.repo?.sshPrefix}
+					placeholder="git@github.com:your-team-workspace-here"
 					status={fieldsStatus}
 					isNew={isNew}
 				/>
@@ -187,4 +163,4 @@ const FrameworkNewEdit = (props: FrameworkNewEditProps = {}) => {
 	);
 };
 
-export default FrameworkNewEdit;
+export default GitProviderNewEdit;

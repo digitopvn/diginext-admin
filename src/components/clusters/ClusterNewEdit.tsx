@@ -1,5 +1,5 @@
-import { Button, Form, Space, theme } from "antd";
-import { isEmpty } from "lodash";
+import { Button, Form, Popconfirm, Space, theme } from "antd";
+import _, { isEmpty } from "lodash";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "@/api/api-auth";
@@ -21,7 +21,7 @@ const ClusterNewEdit = (props: ClusterNewEditProps = {}) => {
 	const [user, reload] = useAuth();
 
 	const { drawerVisibility } = useDrawerProvider();
-	const [, { deleteQuery }] = useRouterQuery();
+	const [, { deleteAllQueryKeys }] = useRouterQuery();
 
 	const [form] = Form.useForm<ICluster>();
 	const [fieldsStatus, setFieldsStatus] = useState();
@@ -52,6 +52,13 @@ const ClusterNewEdit = (props: ClusterNewEditProps = {}) => {
 
 		let result: ICluster | undefined;
 		if (isNew) {
+			Object.entries(postData).forEach(([field, value]) => {
+				if (field.indexOf(".") > -1) {
+					delete postData[field];
+					_.set(postData, field, value);
+				}
+			});
+
 			result = await createApi(postData);
 			console.log("[NEW] result :>> ", result);
 
@@ -162,18 +169,22 @@ const ClusterNewEdit = (props: ClusterNewEditProps = {}) => {
 				/>
 			</div>
 
-			<div className="fixed bottom-0 w-full px-6 py-3" style={{ backgroundColor: colorBgContainer }}>
-				<Space>
-					<Form.Item style={{ marginBottom: 0 }}>
-						<Button type="primary" htmlType="submit">
-							Submit
-						</Button>
-					</Form.Item>
-					<Button type="primary" danger>
-						Discard
-					</Button>
-				</Space>
-			</div>
+			{isNew && (
+				<div className="fixed bottom-0 w-full px-6 py-3" style={{ backgroundColor: colorBgContainer }}>
+					<Space>
+						<Form.Item style={{ marginBottom: 0 }}>
+							<Button type="primary" htmlType="submit">
+								Submit
+							</Button>
+						</Form.Item>
+						<Popconfirm title="Are you sure?" onConfirm={() => deleteAllQueryKeys()} okText="Yes" cancelText="No">
+							<Button type="primary" danger>
+								Discard
+							</Button>
+						</Popconfirm>
+					</Space>
+				</div>
+			)}
 		</Form>
 	);
 };
