@@ -24,6 +24,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 		autoSave = false,
 		isNew,
 		lang = [],
+		height = "350px",
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -72,7 +73,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 			{/* <Input suffix={icon} onChange={onChange} /> */}
 			<Space direction="vertical" className="w-full">
 				<CodeMirror
-					height="400px"
+					height={height}
 					theme={abcdef}
 					extensions={[...lang.map((_lang) => langs[_lang]()), basicSetup({})]}
 					onChange={onChange}

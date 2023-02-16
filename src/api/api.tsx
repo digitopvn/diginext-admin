@@ -119,11 +119,9 @@ export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options
 	});
 };
 
-export const useCreateApi = <T,>(
-	keys: any[],
-	apiPath: string,
-	options: AxiosRequestConfig = {}
-): [(data: T) => Promise<T> | undefined, "error" | "idle" | "loading" | "success"] => {
+export type UseCreateApi<T> = [(data: T) => Promise<T> | undefined, "error" | "idle" | "loading" | "success"];
+
+export const useCreateApi = <T,>(keys: any[], apiPath: string, options: AxiosRequestConfig = {}): UseCreateApi<T> => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");

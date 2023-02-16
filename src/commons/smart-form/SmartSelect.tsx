@@ -4,9 +4,9 @@ import React, { useEffect, useState } from "react";
 import { useDebounce } from "usehooks-ts";
 
 import ManualSaveController from "./ManualSaveController";
-import type { SmartSelectProps } from "./SmartFormTypes";
+import type { SmartFormElementProps } from "./SmartFormTypes";
 
-const SmartSelect = (props: SmartSelectProps) => {
+const SmartSelect = (props: SmartFormElementProps) => {
 	const {
 		className,
 		style,
