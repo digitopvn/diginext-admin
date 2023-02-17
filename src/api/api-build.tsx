@@ -28,3 +28,7 @@ export const useBuildDeleteApi = () => {
 export const useBuildLogsApi = (slug: string, options?: ApiOptions) => {
 	return useItemSlugApi<any>(["builds", "logs", slug], `/api/v1/build/logs`, slug, options);
 };
+
+export const useBuildStopApi = (options?: ApiOptions) => {
+	return useUpdateApi<IBuild>(["builds", "stop"], `/api/v1/build/stop`, options);
+};

@@ -1,9 +1,8 @@
 import { LoadingOutlined } from "@ant-design/icons";
-import { App, theme, Timeline } from "antd";
+import { theme, Timeline } from "antd";
 import dayjs from "dayjs";
 import parser from "html-react-parser";
 import { isEmpty } from "lodash";
-import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import sanitizeHtml from "sanitize-html";
 
@@ -19,8 +18,6 @@ const relativeTime = require("dayjs/plugin/relativeTime");
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
-const { useApp } = App;
-
 const failedKeyword = "command failed with exit code 1";
 
 // eslint-disable-next-line no-control-regex
@@ -28,9 +25,6 @@ const stripAnsiCodes = (str: any) =>
 	sanitizeHtml(`${str}`.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, ""));
 
 export const BuildLogs = ({ slug }: { slug?: string }) => {
-	const router = useRouter();
-	const root = useApp();
-
 	const [query] = useRouterQuery();
 	const { build_slug } = query;
 

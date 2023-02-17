@@ -26,13 +26,13 @@ const Main = (props: IMainProps) => {
 				algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
 			}}
 		>
-			<Compose components={[LayoutProvider, DrawerProvider]}>
-				<App>
+			<App>
+				<Compose components={[LayoutProvider, DrawerProvider]}>
 					<SiteLayout meta={props.meta} useSidebar={useSidebar}>
 						{props.children}
 					</SiteLayout>
-				</App>
-			</Compose>
+				</Compose>
+			</App>
 		</ConfigProvider>
 	);
 };
