@@ -146,7 +146,7 @@ export const BuildList = () => {
 
 	const [stopBuildApi, stopBuildStatus] = useBuildStopApi();
 
-	const { data } = useBuildListApi({ populate: "owner", pagination: { page, size: pageSize }, filter });
+	const { data } = useBuildListApi({ sort: "-createdAt", populate: "owner", pagination: { page, size: pageSize }, filter });
 	const { list: builds, pagination } = data || {};
 	const { total_items } = pagination || {};
 

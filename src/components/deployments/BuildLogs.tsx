@@ -1,4 +1,4 @@
-import { LoadingOutlined } from "@ant-design/icons";
+import { CloseCircleOutlined, LoadingOutlined } from "@ant-design/icons";
 import { theme, Timeline } from "antd";
 import dayjs from "dayjs";
 import parser from "html-react-parser";
@@ -125,28 +125,24 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	return (
 		<div style={{ color: colorText }}>
 			{status === "failed" && <h2 className="text-xl text-red-600">Build lỗi rồi má ơi!</h2>}
+
 			{status === "success" && <h2 className="text-xl text-green-600">Build thành công rồi, đỉnh quá idol ơi!</h2>}
 
-			<Timeline>
-				{status === "in_progress" && (
-					<Timeline.Item key={`message-spin`} dot={<LoadingOutlined />}>
-						Building...
-					</Timeline.Item>
-				)}
-
-				{messages
+			<Timeline
+				items={messages
 					.filter((m) => m !== "")
 					.reverse()
-					.map((message, index) =>
-						`${message}`.toLowerCase().indexOf("error") > -1 ? (
-							<Timeline.Item key={`message-${index}`} className="text-red-600">
-								{parser(`${message}`)}
-							</Timeline.Item>
-						) : (
-							<Timeline.Item key={`message-${index}`}>{parser(`${message}`)}</Timeline.Item>
-						)
-					)}
-			</Timeline>
+					.map((message, index) => {
+						if (status === "in_progress") return { dot: <LoadingOutlined />, children: "Building..." };
+						if (`${message}`.toLowerCase().indexOf("error") > -1)
+							return {
+								dot: <CloseCircleOutlined className="text-red-600" />,
+								children: <span className="text-red-600">{parser(`${message}`)}</span>,
+							};
+
+						return { children: parser(`${message}`) };
+					})}
+			/>
 		</div>
 	);
 };
