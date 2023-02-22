@@ -124,6 +124,12 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 
 	return (
 		<div style={{ color: colorText }}>
+			{status === "failed" && (
+				<h3 className="text-xl text-blue-600">
+					<LoadingOutlined /> Building...
+				</h3>
+			)}
+
 			{status === "failed" && <h2 className="text-xl text-red-600">Build lỗi rồi má ơi!</h2>}
 
 			{status === "success" && <h2 className="text-xl text-green-600">Build thành công rồi, đỉnh quá idol ơi!</h2>}
@@ -133,7 +139,6 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 					.filter((m) => m !== "")
 					.reverse()
 					.map((message, index) => {
-						if (status === "in_progress") return { dot: <LoadingOutlined />, children: "Building..." };
 						if (`${message}`.toLowerCase().indexOf("error") > -1)
 							return {
 								dot: <CloseCircleOutlined className="text-red-600" />,
