@@ -56,7 +56,7 @@ export class Config {
 	}
 
 	static get NEXT_PUBLIC_BASE_URL() {
-		return trimEnd(process.env.NEXT_PUBLIC_BASE_URL || "", "/") || "/";
+		return typeof window !== "undefined" ? window.location.origin : trimEnd(process.env.NEXT_PUBLIC_BASE_URL || "", "/") || "/";
 	}
 
 	static get DISABLE_INPECT_MEMORY() {

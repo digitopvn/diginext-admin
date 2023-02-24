@@ -216,7 +216,8 @@ export const ProjectList = () => {
 								type: envName !== "prod" ? "env" : "env-prod",
 								status: "N/A",
 								url: envData.domains ? `https://${envData.domains[0]}` : "",
-								prereleaseUrl: envName === "prod" ? `https://${p.slug}-${app.slug}.prerelease.diginext.site`.toLowerCase() : "",
+								prereleaseUrl:
+									envName === "prod" ? envData.prereleaseUrl ?? `https://${app.slug}.prerelease.diginext.site`.toLowerCase() : "",
 								...(envData as any),
 							};
 

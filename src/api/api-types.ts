@@ -318,6 +318,20 @@ export interface IContainerRegistry extends IGeneral {
 	workspace?: IWorkspace | string;
 }
 
+export interface KubeEnvironmentVariable {
+	name: string;
+	value: string;
+}
+
+export interface DiginextEnvironmentVariable {
+	name: string;
+	value: string;
+	/**
+	 * @default "string"
+	 */
+	type?: "string" | "secret";
+}
+
 export interface IAppEnvironment {
 	/**
 	 * Container registry slug
@@ -381,6 +395,26 @@ export interface IAppEnvironment {
 	ssl?: "letsencrypt" | "custom" | "none";
 	tlsSecret?: string;
 	cliVersion?: string;
+	/**
+	 * Content of namespace YAML file
+	 */
+	namespaceYaml?: string;
+	/**
+	 * Content of deployment YAML file
+	 */
+	deploymentYaml?: string;
+	/**
+	 * Content of prerelease deployment YAML file
+	 */
+	prereleaseDeploymentYaml?: string;
+	/**
+	 * Prerelease endpoint URL
+	 */
+	prereleaseUrl?: string;
+	/**
+	 * Collection array of environment variables
+	 */
+	envVars?: KubeEnvironmentVariable[];
 }
 
 export interface ICloudProvider extends IGeneral {
