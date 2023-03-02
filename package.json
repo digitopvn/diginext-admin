@@ -13,7 +13,7 @@
 		"export": "next export",
 		"export-prod": "NODE_ENV=production next export",
 		"export-to-cli": "npm run format && npm run env-prod && npm run clean && npm run build && npm run export-prod && npm run copy-prod && npm run env-dev",
-		"copy-prod": "ncp ./out ../diginext/public",
+		"copy-prod": "cp ../diginext/public/swagger.json ../diginext/swagger.json && exit 0 && rimraf ../diginext/public && ncp ./out ../diginext/public && cp ../diginext/swagger.json ../diginext/public/swagger.json && exit 0",
 		"clean": "rimraf .next out",
 		"env-dev": "mv env.bak .env.local",
 		"env-prod": "mv .env.local env.bak",
