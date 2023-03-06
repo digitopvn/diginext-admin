@@ -48,7 +48,10 @@ export class Config {
 	}
 
 	static get NEXT_PUBLIC_API_BASE_URL() {
-		return trimEnd(process.env.NEXT_PUBLIC_API_BASE_URL || "", "/") || "/";
+		if (typeof process.env.NEXT_PUBLIC_API_BASE_URL === "undefined") {
+			return typeof window !== "undefined" ? window.location.origin : "/";
+		}
+		return trimEnd(process.env.NEXT_PUBLIC_API_BASE_URL, "/");
 	}
 
 	static get NEXT_PUBLIC_DOMAIN() {
