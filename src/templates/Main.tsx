@@ -2,6 +2,7 @@ import { App, ConfigProvider, theme } from "antd";
 import type { ReactNode } from "react";
 import { useDarkMode } from "usehooks-ts";
 
+import GtagScript from "@/commons/measure/GtagScript";
 import { SiteLayout } from "@/layouts/SiteLayout";
 import Compose from "@/providers/Compose";
 import DrawerProvider from "@/providers/DrawerProvider";
@@ -33,6 +34,9 @@ const Main = (props: IMainProps) => {
 					</SiteLayout>
 				</Compose>
 			</App>
+
+			{/* Tracking Code */}
+			<GtagScript gaIds={["G-QC4124805Q"]} />
 		</ConfigProvider>
 	);
 };
