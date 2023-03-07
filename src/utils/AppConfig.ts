@@ -48,10 +48,13 @@ export class Config {
 	}
 
 	static get NEXT_PUBLIC_API_BASE_URL() {
-		if (process.env.NEXT_PUBLIC_ENV === "production") {
-			return typeof window !== "undefined" ? window.location.origin : "/";
+		if (typeof window !== "undefined") {
+			if (window.location.origin.indexOf("localhost") > -1) {
+				return "http://api.localhost:6969";
+			}
+			return window.location.origin;
 		}
-		return "http://api.localhost:6969";
+		return "/";
 	}
 
 	static get NEXT_PUBLIC_DOMAIN() {
