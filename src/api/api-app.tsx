@@ -1,5 +1,5 @@
 import { useCreateApi, useDeleteApi, useItemApi, useItemSlugApi, useListApi, useUpdateApi } from "./api";
-import type { ApiOptions, IApp } from "./api-types";
+import type { ApiOptions, IApp, KubeEnvironmentVariable } from "./api-types";
 
 export const useAppListApi = (options?: ApiOptions) => {
 	return useListApi<IApp>(["apps", "list"], `/api/v1/app`, options);
@@ -25,6 +25,10 @@ export const useAppDeleteApi = () => {
 	return useDeleteApi<IApp>(["apps", "delete"], `/api/v1/app`);
 };
 
-export const useAppEnvironmentDeleteApi = () => {
-	return useDeleteApi<IApp | any>(["projects", "apps", "environment", "delete"], `/api/v1/app/environment`);
+export const useAppEnvVarsCreateApi = (options?: ApiOptions) => {
+	return useCreateApi<KubeEnvironmentVariable[] | any>(["env_vars"], `/api/v1/app/environment/variables`, options);
+};
+
+export const useAppEnvVarsDeleteApi = (options?: ApiOptions) => {
+	return useDeleteApi<KubeEnvironmentVariable[] | any>(["env_vars", "delete"], `/api/v1/app/environment/variables`, options);
 };

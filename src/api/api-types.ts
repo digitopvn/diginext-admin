@@ -1,6 +1,8 @@
 import type { AxiosRequestConfig } from "axios";
 
-export type ApiOptions = AxiosRequestConfig & { pagination?: IPaginationOptions; populate?: string; filter?: any; sort?: string };
+export type ApiOptions = AxiosRequestConfig & { pagination?: IPaginationOptions; populate?: string; filter?: any; sort?: string; staleTime?: number };
+
+export type ApiStatus = "error" | "loading" | "success" | "idle";
 
 export type ApiPagination = {
 	current_page: number;
@@ -550,7 +552,12 @@ export interface ICluster extends IGeneral {
 }
 
 export interface IApp extends IGeneral {
+	/**
+	 * @deprecated
+	 */
 	environment?: { [key: string]: IAppEnvironment };
+	deployEnvironment?: { [key: string]: IAppEnvironment };
+
 	git?: string;
 	latestBuild?: string;
 	name?: string;

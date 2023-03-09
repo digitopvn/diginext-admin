@@ -10,16 +10,14 @@ import {
 } from "@ant-design/icons";
 import { Button, Popconfirm, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import { isJSON } from "class-validator";
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
-import { useAppDeleteApi, useAppEnvironmentDeleteApi } from "@/api/api-app";
+import { useAppDeleteApi, useAppEnvVarsDeleteApi } from "@/api/api-app";
 import { useProjectDeleteApi, useProjectListWithAppsApi } from "@/api/api-project";
-import type { IAppEnvironment } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { AppConfig } from "@/utils/AppConfig";
@@ -139,7 +137,7 @@ export const ProjectList = () => {
 
 	const [deleteProjectApi, deleteProjectApiStatus] = useProjectDeleteApi();
 	const [deleteAppApi, deleteAppApiStatus] = useAppDeleteApi();
-	const [deleteAppEnvApi, deleteAppEnvApiStatus] = useAppEnvironmentDeleteApi();
+	const [deleteAppEnvApi, deleteAppEnvApiStatus] = useAppEnvVarsDeleteApi();
 
 	// console.log({ total_pages });
 	const openBuildList = (project: string, app: string, env: string) => {
@@ -148,6 +146,10 @@ export const ProjectList = () => {
 
 	const openReleaseList = (project: string, app: string, env: string) => {
 		setQuery({ lv1: "release", project, app, env });
+	};
+
+	const openEnvVarsEdit = (project: string, app: string, env: string) => {
+		setQuery({ lv1: "env_vars", project, app, env });
 	};
 
 	const deleteProject = async (id: string) => {
@@ -200,11 +202,10 @@ export const ProjectList = () => {
 			status: "N/A",
 			children: p.apps
 				? p.apps.map((app) => {
-						const environmentNames = Object.keys(app.environment ?? {});
-						const environments: DataType[] = environmentNames.map((envName) => {
-							const envStr = app.environment ? (app.environment[envName] as string) : "[]";
+						const envList = Object.keys(app.deployEnvironment ?? {});
+						const environments: DataType[] = envList.map((envName) => {
 							// console.log("envStr :>> ", envStr);
-							const envData = isJSON(envStr) ? (JSON.parse(envStr) as IAppEnvironment) : {};
+							const deployEnvironment = (app.deployEnvironment || {})[envName] || {};
 
 							const record: any = {
 								name: envName.toUpperCase(),
@@ -215,10 +216,12 @@ export const ProjectList = () => {
 								appSlug: app.slug,
 								type: envName !== "prod" ? "env" : "env-prod",
 								status: "N/A",
-								url: envData.domains ? `https://${envData.domains[0]}` : "",
+								url: deployEnvironment.domains ? `https://${deployEnvironment.domains[0]}` : "",
 								prereleaseUrl:
-									envName === "prod" ? envData.prereleaseUrl ?? `https://${app.slug}.prerelease.diginext.site`.toLowerCase() : "",
-								...(envData as any),
+									envName === "prod"
+										? deployEnvironment.prereleaseUrl ?? `https://${app.slug}.prerelease.diginext.site`.toLowerCase()
+										: "",
+								...(deployEnvironment as any),
 							};
 
 							record.actions =
@@ -250,8 +253,11 @@ export const ProjectList = () => {
 												onClick={() => openReleaseList(record.projectSlug, record.appSlug, envName)}
 											/>
 										</Tooltip>
-										<Tooltip title="Modify environment variables (coming soon)" placement="topRight">
-											<Button icon={<QrcodeOutlined />} disabled />
+										<Tooltip title="Modify environment variables" placement="topRight">
+											<Button
+												icon={<QrcodeOutlined />}
+												onClick={() => openEnvVarsEdit(record.projectSlug, record.appSlug, envName)}
+											/>
 										</Tooltip>
 										<Popconfirm
 											title="Are you sure to delete this environment?"
@@ -279,8 +285,11 @@ export const ProjectList = () => {
 												onClick={() => openBuildList(record.projectSlug, record.appSlug, record.id)}
 											/>
 										</Tooltip>
-										<Tooltip title="Modify environment variables (coming soon)" placement="topRight">
-											<Button icon={<QrcodeOutlined />} disabled />
+										<Tooltip title="Modify environment variables" placement="topRight">
+											<Button
+												icon={<QrcodeOutlined />}
+												onClick={() => openEnvVarsEdit(record.projectSlug, record.appSlug, envName)}
+											/>
 										</Tooltip>
 										<Popconfirm
 											title="Are you sure to delete this environment?"

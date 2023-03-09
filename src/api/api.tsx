@@ -31,6 +31,7 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 	return useQuery<{ list: T[]; pagination: ApiPagination }, Error>({
 		refetchOnWindowFocus: false,
 		queryKey: queryKeys,
+		staleTime: options?.staleTime,
 		queryFn: async () => {
 			const { data } = await axios.get(
 				`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${sortParams}&${populateParams}&${paginationParams}`,
@@ -73,12 +74,10 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, o
 	const populateParams = populate ? `populate=${populate}` : "";
 	const filterParams = new URLSearchParams(filter).toString();
 
-	// const queryKey = [...keys];
-	// if (filter) queryKey.push(filter);
-
 	return useQuery<T, Error>({
 		enabled: slug !== undefined && slug !== null,
 		queryKey: keys,
+		staleTime: options?.staleTime,
 		queryFn: async () => {
 			const url = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${populateParams}`;
 			const { data } = await axios.get(url, { ...options, headers });
@@ -116,21 +115,26 @@ export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options
 		queryKey: keys,
 		queryFn: () => getById(apiPath, id, { ...options, headers }),
 		enabled: !!id,
+		staleTime: options?.staleTime,
 	});
 };
 
 export type UseCreateApi<T> = [(data: T) => Promise<T> | undefined, "error" | "idle" | "loading" | "success"];
 
-export const useCreateApi = <T,>(keys: any[], apiPath: string, options: AxiosRequestConfig = {}): UseCreateApi<T> => {
+export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}): UseCreateApi<T> => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
+	const { populate, sort, pagination, filter } = options;
+	const filterParams = filter ? `${new URLSearchParams(filter).toString()}&` : "";
+	const populateParams = populate ? `populate=${populate}` : "";
+	const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}${populateParams}`;
+
 	const mutation = useMutation<T, Error, T>({
 		mutationFn: async (newData) => {
-			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}`;
 			const { data } = await axios.post(apiURL, newData, { ...options, headers });
 			return data.data;
 		},
@@ -139,29 +143,15 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: AxiosReq
 			// A mutation is about to happen!
 			// Cancel current queries
 			await queryClient.cancelQueries({ queryKey: keys });
-
-			// Add optimistic todo to todos list
-			// queryClient.setQueryData<T[]>(keys, (currentList) => (currentList ? [...currentList, updateData] : [updateData]));
-
-			// Return context with the optimistic todo
 			return newData;
 		},
 
-		// onError: (error, variables, context) => {
-		// An error happened!
-		// console.log(`rolling back optimistic update with id ${context.id}`);
-		// },
-
 		onSuccess: (newItem, variables, context) => {
 			queryClient.invalidateQueries({ queryKey: [keys[0], "list"] });
+			queryClient.invalidateQueries({ queryKey: [keys[0], (newItem as any)?.slug] });
 		},
-
-		// onSettled: (data, error, variables, context) => {
-		// Error or success... doesn't matter!
-		// },
 	});
 
-	// const proceed = mutation.mutateAsync;
 	const { mutateAsync, status } = mutation;
 
 	return [mutateAsync, status];
@@ -199,14 +189,14 @@ export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, options: Ap
 	// console.log("useUpdateApi > filter :>> ", filter);
 
 	const { pagination = { page: 1, size: 20 }, populate, sort = "-createdAt", filter } = options;
+	const filterParams = filter ? `${new URLSearchParams(filter).toString()}&` : "";
+	const sortParams = `sort=${sort}&`;
+	const populateParams = populate ? `populate=${populate}&` : "";
 	const paginationParams = new URLSearchParams(pagination as any).toString();
-	const populateParams = populate ? `populate=${populate}` : "";
-	const filterParams = filter ? new URLSearchParams(filter).toString() : "";
-	const sortParams = `sort=${sort}`;
-	const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${sortParams}&${populateParams}&${paginationParams}`;
+	const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}${sortParams}${populateParams}${paginationParams}`;
 
 	const mutation = useMutation<T & UpdateData, Error, any, { id?: string; previousData?: any }>({
-		// [2] START
+		// [1] START
 		mutationFn: async (updateData) => {
 			// console.log("UPDATE > start > filter :>> ", filter);
 
@@ -215,91 +205,9 @@ export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, options: Ap
 			return data.data as T & UpdateData;
 		},
 
-		// [1] PREPARE: Run before "mutiationFn"
-		// onMutate: async (updateData) => {
-		// 	// A mutation is about to happen!
-		// 	// Cancel current queries
-		// 	await queryClient.cancelQueries({ queryKey: keys });
-
-		// 	let toBeUpdatedItem: T | undefined;
-
-		// 	const { id } = filter;
-
-		// 	// save previous data to roll it back if any errors
-		// 	console.log("UPDATE > prepare > keys :>> ", keys);
-		// 	const cachedList = queryClient.getQueryData<T & UpdateData[]>(keys);
-		// 	console.log("UPDATE > prepare > cachedList :>> ", cachedList);
-		// 	const previousData = cachedList?.find((item) => (item as any)._id === id);
-		// 	console.log("UPDATE > prepare > previousData :>> ", previousData);
-
-		// 	// Add optimistic item to the list
-		// 	queryClient.setQueryData<T[]>(keys, (currentList) => {
-		// 		console.log("UPDATE > prepare > currentList :>> ", currentList);
-		// 		return currentList?.map((item) => {
-		// 			return (item as any)._id === id ? ({ ...item, updateData } as T) : item;
-		// 		});
-		// 	});
-
-		// 	// add state: loading
-		// 	if (toBeUpdatedItem) {
-		// 		(toBeUpdatedItem as any).state = "loading";
-
-		// 		// Update optimistic item
-		// 		queryClient.setQueryData<T>([...keys, (toBeUpdatedItem as any)._id], (currentData) => {
-		// 			return toBeUpdatedItem;
-		// 		});
-		// 	}
-
-		// 	console.log("UPDATE > prepare > toBeUpdatedItem :>> ", toBeUpdatedItem);
-
-		// 	return { id, previousData };
-		// },
-
-		// // [3] - FINISH & ERROR!
-		// onError: (error, variables, context) => {
-		// 	// An error happened -> rolling back optimistic update!
-		// 	console.log(`rolling back optimistic update with id ${context?.id}`);
-
-		// 	const { previousData } = context || {};
-
-		// 	// roll back item
-		// 	// queryClient.setQueryData<T>([keys, (previousData as any)._id], () => previousData);
-
-		// 	// Add optimistic item to the list
-		// 	queryClient.setQueryData<T[]>(keys, (currentList) =>
-		// 		currentList?.map((item) => (previousData && (item as any)._id === previousData?._id ? previousData : item))
-		// 	);
-
-		// 	// roll back item
-		// 	// add state: failed
-		// 	if (previousData) {
-		// 		(previousData as any).state = "failed";
-
-		// 		// Update optimistic item
-		// 		queryClient.setQueryData<T>([...keys, (previousData as any)._id], () => previousData);
-		// 	}
-
-		// 	console.log("UPDATE > error > previousData :>> ", previousData);
-		// },
-
-		// [3] - FINISH & SUCCESS!
+		// [2] - FINISH & SUCCESS!
 		onSuccess: (updateData, variables, context) => {
-			// queryClient.setQueryData<T[]>(keys, (currentList) =>
-			// 	currentList?.map((item) => (previousData && (item as any)._id === previousData?._id ? previousData : item))
-			// );
 			queryClient.invalidateQueries({ queryKey: [keys[0], "list"] });
-			// queryClient.refetchQueries({ queryKey: keys });
-			// Boom baby!
-			// console.log("UPDATE > success > updateData :>> ", updateData);
-		},
-
-		// [3] - FINISH !
-		onSettled: (updateData, error, variables, context) => {
-			// Error or success... doesn't matter!
-			// console.log("UPDATE > error > updateData :>> ", updateData);
-			// if (updateData) {
-			// 	updateData.state = "loading";
-			// }
 		},
 	});
 

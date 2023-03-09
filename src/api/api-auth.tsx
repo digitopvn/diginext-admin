@@ -21,10 +21,9 @@ export const login = (params: { redirectURL?: string } = {}) => {
 export const useAuthApi = (props: { access_token?: string } = {}) => {
 	const { access_token = getCookie("x-auth-cookie") } = props;
 	const router = useRouter();
-	// const [query] = useRouterQuery();
 
 	return useQuery({
-		staleTime: 2 * 60 * 1000, // 2 minutes
+		staleTime: 5 * 60 * 1000, // 5 minutes
 		queryKey: ["auth"],
 		// enabled: typeof access_token !== "undefined",
 		queryFn: async () => {
@@ -38,7 +37,6 @@ export const useAuthApi = (props: { access_token?: string } = {}) => {
 			const headers = token ? { Authorization: `Bearer ${token}` } : {};
 			const { data } = await axios.get(`${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile`, { headers });
 
-			// console.log(`${router.asPath} > queryFn :>> `, { data });
 			return data;
 		},
 	});
