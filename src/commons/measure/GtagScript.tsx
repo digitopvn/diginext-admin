@@ -12,7 +12,7 @@ const GtagScript = (props: GtagScriptProps) => {
 
 	return (
 		<>
-			{`<!-- Global site tag (gtag.js) - Google Analytics -->`}
+			{/* <!-- Global site tag (gtag.js) - Google Analytics --> */}
 			<Script src={`https://www.googletagmanager.com/gtag/js?id=${gaIds[0]}`} strategy="afterInteractive" />
 			<Script id="google-analytics" strategy="afterInteractive">
 				{`
