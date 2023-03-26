@@ -1,23 +1,33 @@
 import { CopyOutlined } from "@ant-design/icons";
-import { Button, Typography } from "antd";
+import { Button, Input, Space, Typography } from "antd";
 import { isEmpty } from "lodash";
 import type { ReactElement } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
 
-const CopyCode = (props: { children?: ReactElement | ReactElement[]; value: string }) => {
-	const { children, value } = props;
+const CopyCode = (props: { children?: ReactElement | ReactElement[]; value: string; mode?: "block" | "inline" }) => {
+	const { children, value, mode = "block" } = props;
 	const [copiedValue, copy] = useCopyToClipboard();
 
 	return (
-		<div className="text-center">
-			{/* <div className="mb-2 max-w-xs break-all rounded-lg border border-solid border-gray-600 py-2 px-4"></div> */}
-			<Typography.Paragraph>
-				<pre>{value}</pre>
-			</Typography.Paragraph>
-			<Button type="primary" danger={!isEmpty(copiedValue)} size="large" onClick={() => copy(value)} icon={<CopyOutlined />}>
-				{copiedValue ? "Copied" : "Copy"}
-			</Button>
-		</div>
+		<>
+			{mode === "block" ? (
+				<div className="text-center">
+					<Typography.Paragraph>
+						<pre>{value}</pre>
+					</Typography.Paragraph>
+					<Button type="primary" danger={!isEmpty(copiedValue)} size="large" onClick={() => copy(value)} icon={<CopyOutlined />}>
+						{copiedValue ? "Copied" : "Copy"}
+					</Button>
+				</div>
+			) : (
+				<Space.Compact>
+					<Input className="flex-none" disabled value={value} />
+					<Button type="primary" danger={!isEmpty(copiedValue)} size="large" onClick={() => copy(value)} icon={<CopyOutlined />}>
+						{copiedValue ? "Copied" : "Copy"}
+					</Button>
+				</Space.Compact>
+			)}
+		</>
 	);
 };
 

@@ -51,6 +51,28 @@ export interface IPaginationOptions {
 	limit?: number;
 }
 
+export interface WorkspaceApiAccessToken {
+	/**
+	 *
+	 */
+	name: string;
+
+	/**
+	 *
+	 */
+	slug?: string;
+
+	/**
+	 *
+	 */
+	token: string;
+
+	/**
+	 *
+	 */
+	roles?: IRole[];
+}
+
 export interface IWorkspace extends IGeneral {
 	/**
 	 * Workspace name
@@ -79,6 +101,11 @@ export interface IWorkspace extends IGeneral {
 	 * @remarks This can be populated to {User} data
 	 */
 	owner?: IUser | string;
+
+	/**
+	 * List of this workspace's API Access Token
+	 */
+	apiAccessTokens?: WorkspaceApiAccessToken[];
 }
 
 export interface IRole extends IGeneral {
