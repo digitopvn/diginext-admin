@@ -1,5 +1,5 @@
 import type { UseQueryResult } from "@tanstack/react-query";
-import { Button, Form, Popconfirm, Space, theme } from "antd";
+import { App, Button, Form, Popconfirm, Space, theme } from "antd";
 import _, { isEmpty } from "lodash";
 import { useEffect, useState } from "react";
 
@@ -24,8 +24,12 @@ export type SmartFormProps<T> = {
 	configs?: SmartFormElementProps[];
 };
 
+const { useApp } = App;
+
 const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 	const { name, configs = [] } = props;
+
+	const root = useApp();
 
 	const { data: item } = props.api?.useSlugApi || {};
 
@@ -60,10 +64,16 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 				}
 			});
 
+			// TODO: refactor createApi -> {data,message}
 			if (createApi) result = await createApi(postData);
-			console.log("[NEW] result :>> ", result);
 
-			closeDrawer();
+			if (result) {
+				console.log("[NEW] result :>> ", result);
+				closeDrawer();
+			} else {
+				// TODO: show error message
+				root.notification.error({ message: "Something is wrong..." });
+			}
 		} else {
 			const statuses: any = {};
 			Object.entries(postData).forEach(([field, value]) => {

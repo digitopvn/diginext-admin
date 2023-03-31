@@ -60,7 +60,7 @@ const CliPage = () => {
 					{!isEmpty(workspace) ? (
 						<div className="text-center">
 							<p>Copy & paste this ACCESS TOKEN into your command interface:</p>
-							<CopyCode value={!isEmpty(user) ? (user?.token as any).access_token : ""} />
+							<CopyCode value={!isEmpty(user) ? (user?.token as any)?.access_token : ""} />
 							<Button size="large" className="mt-2" href="/" icon={<HomeOutlined />}>
 								Dashboard
 							</Button>

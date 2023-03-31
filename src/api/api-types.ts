@@ -167,11 +167,23 @@ export interface IProviderInfo {
 	access_token?: string;
 }
 
+export interface AccessTokenInfo {
+	access_token: string;
+	expiredTimestamp: number;
+	expiredDate: Date;
+	expiredDateGTM7: string;
+}
+
 export interface IUser extends IGeneral {
 	/**
 	 * User name
 	 */
 	name?: string;
+
+	/**
+	 * User's type
+	 */
+	type?: "user" | "service_account" | "api_key_user";
 
 	/**
 	 * Unique username of a user
@@ -207,7 +219,7 @@ export interface IUser extends IGeneral {
 	/**
 	 * User token
 	 */
-	token?: any;
+	token?: AccessTokenInfo;
 
 	/**
 	 * User's roles
@@ -224,6 +236,8 @@ export interface IUser extends IGeneral {
 	 */
 	workspaces?: IWorkspace[];
 }
+
+export interface IServiceAccount extends IUser {}
 
 export interface IGitProvider extends IGeneral {
 	name?: string;

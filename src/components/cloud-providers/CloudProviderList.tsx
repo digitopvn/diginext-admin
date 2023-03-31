@@ -1,5 +1,4 @@
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { Button, Space, Table } from "antd";
+import { Button, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import React, { useState } from "react";
@@ -51,12 +50,12 @@ const columns: ColumnsType<DataType> = [
 		filters: [{ text: "goon", value: "goon" }],
 		onFilter: (value, record) => record.shortName.indexOf(value.toString()) > -1,
 	},
-	{
-		title: "Clusters",
-		dataIndex: "clusters",
-		key: "clusters",
-		width: 30,
-	},
+	// {
+	// 	title: "Clusters",
+	// 	dataIndex: "clusters",
+	// 	key: "clusters",
+	// 	width: 30,
+	// },
 	{
 		title: "Created at",
 		dataIndex: "createdAt",
@@ -73,18 +72,18 @@ const columns: ColumnsType<DataType> = [
 		render: (value) => <DateDisplay date={value} />,
 		sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
 	},
-	{
-		title: "Action",
-		key: "action",
-		width: 50,
-		fixed: "right",
-		render: () => (
-			<Space.Compact>
-				<Button icon={<EditOutlined />}></Button>
-				<Button icon={<DeleteOutlined />}></Button>
-			</Space.Compact>
-		),
-	},
+	// {
+	// 	title: "Action",
+	// 	key: "action",
+	// 	width: 50,
+	// 	fixed: "right",
+	// 	render: () => (
+	// 		<Space.Compact>
+	// 			<Button icon={<EditOutlined />}></Button>
+	// 			<Button icon={<DeleteOutlined />}></Button>
+	// 		</Space.Compact>
+	// 	),
+	// },
 ];
 
 // const data: DataType[] = [];
@@ -103,7 +102,7 @@ const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const CloudProviderList = () => {
 	const [page, setPage] = useState(1);
-	const { data } = useCloudProviderListApi({ populate: "owner,clusters", pagination: { page, size: pageSize } });
+	const { data } = useCloudProviderListApi({ pagination: { page, size: pageSize } });
 	const { list: cloudProviders, pagination } = data || {};
 	const { total_items } = pagination || {};
 	console.log("cloudProviders :>> ", cloudProviders);
@@ -120,8 +119,8 @@ export const CloudProviderList = () => {
 				key: provider._id ?? i.toString(),
 				name: provider.name ?? "",
 				shortName: provider.shortName ?? "",
-				clusters: (provider.clusters as ICluster[]) ?? [],
-				owner: provider.owner as IUser,
+				// clusters: (provider.clusters as ICluster[]) ?? [],
+				// owner: provider.owner as IUser,
 				updatedAt: dayjs(provider.updatedAt).format("LLL"),
 				createdAt: dayjs(provider.createdAt).format("LLL"),
 			};
