@@ -8,7 +8,7 @@ import sanitizeHtml from "sanitize-html";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import isURL from "validator/lib/isURL";
 
-import { useBuildLogsApi } from "@/api/api-build";
+import { useBuildSlugApi } from "@/api/api-build";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { Config } from "@/utils/AppConfig";
 
@@ -32,8 +32,8 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 
 	// api
 	// console.log("build_slug :>> ", build_slug);
-
-	const { data: logData = "", isLoading } = useBuildLogsApi(slug ?? build_slug);
+	const { data: build } = useBuildSlugApi(build_slug);
+	const logData = build?.logs || "";
 	// console.log({ logData });
 
 	const displayedData = stripAnsiCodes(logData);
@@ -65,15 +65,14 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	}, [lines.length]);
 
 	useEffect(() => {
-		const buildLog = logData.toString().toLowerCase();
+		const buildLog = logData?.toString().toLowerCase() || "";
 
 		// check whether the build was finished yet or not...
-		if (buildLog.indexOf("finished deploying") > -1 || buildLog.indexOf(failedKeyword) > -1 || buildLog.indexOf("[error]") > -1)
-			setIsFinished(true);
+		if (build?.status === "failed" || build?.status === "success") setIsFinished(true);
 
 		// display result...
-		if (buildLog.indexOf("finished deploying") > -1) setStatus("success");
-		if (buildLog.indexOf(failedKeyword) > -1 || buildLog.indexOf("[error]") > -1) setStatus("failed");
+		if (build?.status === "success") setStatus("success");
+		if (build?.status === "failed") setStatus("failed");
 
 		// no need to connect to socket if the room is not available:
 		if (!SOCKET_ROOM) return () => false;
@@ -102,6 +101,11 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 					}
 				}
 
+				if (action === "failed") {
+					setStatus("failed");
+					setIsFinished(true);
+				}
+
 				// if build success keyword detected -> mark as BUILD SUCCEED
 				if (action === "end") {
 					socket.disconnect();
@@ -123,7 +127,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 			}
 			setMessages([]);
 		};
-	}, [logData, SOCKET_ROOM]);
+	}, [build?.status, logData, SOCKET_ROOM]);
 
 	return (
 		<div style={{ color: colorText }}>

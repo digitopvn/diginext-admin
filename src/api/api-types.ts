@@ -661,6 +661,7 @@ export interface IBuild extends IGeneral {
 	slug?: string;
 	env?: string;
 	branch?: string;
+	logs?: string;
 	createdBy?: string;
 	status?: "start" | "building" | "failed" | "success";
 	projectSlug?: string;
