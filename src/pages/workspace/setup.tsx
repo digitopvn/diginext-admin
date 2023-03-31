@@ -22,10 +22,11 @@ const WorkspaceSetupPage = () => {
 	const onFinish = async (values: any) => {
 		console.log("Submit:", values);
 		const result = await createWorkspace({ ...values, owner: user?._id });
+		const workspace = result?.data;
 
 		await reload();
 
-		Router.push(isDev() ? `${Config.NEXT_PUBLIC_BASE_URL}` : `https://${result?.slug}.${Config.NEXT_PUBLIC_DOMAIN}`);
+		Router.push(isDev() ? `${Config.NEXT_PUBLIC_BASE_URL}` : `https://${workspace?.slug}.${Config.NEXT_PUBLIC_DOMAIN}`);
 	};
 
 	const onFinishFailed = (errorInfo: any) => {

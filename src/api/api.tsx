@@ -1,5 +1,5 @@
-import type { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { App } from "antd";
 import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
@@ -8,9 +8,12 @@ import { useRouter } from "next/router";
 
 import { Config } from "@/utils/AppConfig";
 
-import type { ApiOptions, ApiPagination } from "./api-types";
+import type { ApiOptions, ApiPagination, ApiResponse } from "./api-types";
+
+const { useApp } = App;
 
 export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}) => {
+	const root = useApp();
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
@@ -28,24 +31,24 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 	queryKeys.push(!isEmpty(filter) ? filter : {});
 	if (!isEmpty(pagination)) queryKeys.push(pagination);
 
-	return useQuery<{ list: T[]; pagination: ApiPagination }, Error>({
+	return useQuery<any, Error, { list: T[]; pagination: ApiPagination; messages: string; status: number }>({
 		refetchOnWindowFocus: false,
 		queryKey: queryKeys,
 		staleTime: options?.staleTime,
 		queryFn: async () => {
-			const { data } = await axios.get(
+			const { data } = await axios.get<ApiResponse<T[]>>(
 				`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${sortParams}&${populateParams}&${paginationParams}`,
-				{
-					...options,
-					headers,
-				}
+				{ ...options, headers }
 			);
 
+			if (!data.status && !isEmpty(data.messages)) {
+				data.messages.map((message) => root.notification.error({ message }));
+			}
+
 			const { current_page, total_pages, total_items, page_size, next_page, prev_page, ...rest } = data;
-			const { token = {} } = rest;
 
 			// for token is about to expired
-			if (token.access_token) setCookie("x-auth-cookie", token.access_token);
+			if (data.token?.access_token) setCookie("x-auth-cookie", data.token?.access_token);
 
 			// console.log("data :>> ", data);
 			return {
@@ -57,12 +60,15 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 						return { ...d, key: d._id };
 					}) || [],
 				pagination: { current_page, total_pages, total_items, page_size, next_page, prev_page },
+				messages: data.messages,
+				status: data.status,
 			};
 		},
 	});
 };
 
 export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, options: ApiOptions = {}) => {
+	const root = useApp();
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
@@ -80,11 +86,14 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, o
 		staleTime: options?.staleTime,
 		queryFn: async () => {
 			const url = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${populateParams}`;
-			const { data } = await axios.get(url, { ...options, headers });
+			const { data } = await axios.get<ApiResponse<T[]>>(url, { ...options, headers });
+
+			if (!data.status && !isEmpty(data.messages)) {
+				data.messages.map((message) => root.notification.error({ message: "Failed.", description: message }));
+			}
 
 			// for token is about to expired
-			const { token = {} } = data;
-			if (token.access_token) setCookie("x-auth-cookie", token.access_token);
+			if (data.token?.access_token) setCookie("x-auth-cookie", data.token?.access_token);
 			// console.log("data :>> ", data);
 
 			if (isArray(data.data)) {
@@ -93,35 +102,43 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, o
 				})[0];
 			}
 
-			if (isString(data.data)) return data.data;
+			if (isString(data.data)) return { status: data.status, data: data.data, messages: data.messages };
 
-			return data.data[0];
+			return { status: data.status, data: data.data[0], messages: data.messages };
 		},
 	});
 };
 
-const getById = async (apiPath: string, id: string, options: AxiosRequestConfig = {}) => {
-	const { data } = await axios.get(`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?id=${id}`, options);
+const getById = async <T,>(apiPath: string, id: string, options: AxiosRequestConfig = {}) => {
+	const { data } = await axios.get<ApiResponse<T>>(`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?id=${id}`, options);
 	return data;
 };
 
 export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options: ApiOptions = {}) => {
+	const root = useApp();
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
-	return useQuery<T, Error>({
+	return useQuery<ApiResponse<T>, Error>({
 		queryKey: keys,
-		queryFn: () => getById(apiPath, id, { ...options, headers }),
+		queryFn: async () => {
+			const data = await getById<T>(apiPath, id, { ...options, headers });
+			if (!data.status && !isEmpty(data.messages)) {
+				data.messages.map((message) => root.notification.error({ message: "Failed.", description: message }));
+			}
+			return data;
+		},
 		enabled: !!id,
 		staleTime: options?.staleTime,
 	});
 };
 
-export type UseCreateApi<T> = [(data: T) => Promise<T> | undefined, "error" | "idle" | "loading" | "success"];
+export type UseCreateApi<T> = [(data: T) => Promise<ApiResponse<T>> | undefined, "error" | "idle" | "loading" | "success"];
 
 export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}): UseCreateApi<T> => {
+	const root = useApp();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
@@ -133,10 +150,19 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptio
 	const populateParams = populate ? `populate=${populate}` : "";
 	const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}${populateParams}`;
 
-	const mutation = useMutation<T, Error, T>({
+	const mutation = useMutation<ApiResponse<T>, Error, T>({
 		mutationFn: async (newData) => {
-			const { data } = await axios.post(apiURL, newData, { ...options, headers });
-			return data.data;
+			const { data } = await axios.post<ApiResponse<T>>(apiURL, newData, { ...options, headers });
+
+			if (!data.status) {
+				if (!isEmpty(data.messages)) {
+					data.messages.map((message) => root.notification.error({ message: "Failed.", description: message }));
+				} else {
+					root.notification.error({ message: "Something is wrong..." });
+				}
+			}
+
+			return data;
 		},
 
 		onMutate: async (newData) => {
@@ -153,7 +179,6 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptio
 	});
 
 	const { mutateAsync, status } = mutation;
-
 	return [mutateAsync, status];
 };
 
@@ -165,20 +190,10 @@ const updateById = async (apiPath: string, id: string, updateData: any, options:
 	return data;
 };
 
-export type UseUpdateApi<T = any> = [
-	UseMutateAsyncFunction<
-		T,
-		Error,
-		any,
-		{
-			id?: string | undefined;
-			previousData?: any;
-		}
-	>,
-	"error" | "idle" | "loading" | "success"
-];
+export type UseUpdateApi<T> = [(data: T) => Promise<ApiResponse<T>> | undefined, "error" | "idle" | "loading" | "success"];
 
-export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, options: ApiOptions = {}): UseUpdateApi<T> => {
+export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, options: ApiOptions = {}): UseUpdateApi<T | R> => {
+	const root = useApp();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
@@ -195,14 +210,21 @@ export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, options: Ap
 	const paginationParams = new URLSearchParams(pagination as any).toString();
 	const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}${sortParams}${populateParams}${paginationParams}`;
 
-	const mutation = useMutation<T & UpdateData, Error, any, { id?: string; previousData?: any }>({
+	const mutation = useMutation<ApiResponse<T>, Error, T | R, { id?: string; previousData?: any }>({
 		// [1] START
 		mutationFn: async (updateData) => {
 			// console.log("UPDATE > start > filter :>> ", filter);
+			const { data } = await axios.patch<ApiResponse<T>>(apiURL, updateData, { ...options, headers });
 
-			const { data } = await axios.patch(apiURL, updateData, { ...options, headers });
-
-			return data.data as T & UpdateData;
+			// show error message ONLY if status is failure
+			if (!data.status) {
+				if (!isEmpty(data.messages)) {
+					data.messages.map((message) => root.notification.error({ message: "Failed.", description: message }));
+				} else {
+					root.notification.error({ message: "Something is wrong..." });
+				}
+			}
+			return data;
 		},
 
 		// [2] - FINISH & SUCCESS!
@@ -214,22 +236,32 @@ export const useUpdateApi = <T = any,>(keys: any[], apiPath: string, options: Ap
 	return [mutation.mutateAsync, mutation.status];
 };
 
-export const useDeleteApi = <T,>(
-	keys: any[],
-	apiPath: string,
-	options: ApiOptions = {}
-): [UseMutateAsyncFunction<T, Error, T, unknown>, "error" | "idle" | "loading" | "success"] => {
+export type UseDeleteApi<T> = [(data: T) => Promise<ApiResponse<T>> | undefined, "error" | "idle" | "loading" | "success"];
+
+export const useDeleteApi = <T = any,>(keys: any[], apiPath: string, options: ApiOptions = {}): UseDeleteApi<T> => {
+	const root = useApp();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
-	const mutation = useMutation<T, Error, T>({
-		mutationFn: async (filter: any) => {
-			const queryFilter = new URLSearchParams(filter).toString();
-			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${queryFilter}`;
-			const { data } = await axios.delete(apiURL, { ...options, headers });
+	const { filter } = options;
+	const filterParams = filter ? `${new URLSearchParams(filter).toString()}` : "";
+	const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}`;
+
+	const mutation = useMutation<ApiResponse<T>, Error, T>({
+		mutationFn: async (input) => {
+			const { data } = await axios.delete<ApiResponse<T>>(apiURL, { ...options, headers, data: input });
+
+			if (!data.status) {
+				if (!isEmpty(data.messages)) {
+					data.messages.map((message) => root.notification.error({ message: "Failed.", description: message }));
+				} else {
+					root.notification.error({ message: "Something is wrong..." });
+				}
+			}
+
 			return data;
 		},
 		onSuccess: (data) => {

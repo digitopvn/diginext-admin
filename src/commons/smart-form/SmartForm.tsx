@@ -4,6 +4,7 @@ import _, { isEmpty } from "lodash";
 import { useEffect, useState } from "react";
 
 import type { UseCreateApi, UseUpdateApi } from "@/api/api";
+import type { ApiResponse } from "@/api/api-types";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useDrawerProvider } from "@/providers/DrawerProvider";
 
@@ -55,7 +56,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 		console.log(isNew ? "[NEW]" : "[UPDATE]", "Submit:", values);
 		const postData = { ...values };
 
-		let result: T | undefined;
+		let result: ApiResponse<T> | undefined;
 		if (isNew) {
 			Object.entries(postData).forEach(([field, value]) => {
 				if (field.indexOf(".") > -1) {
@@ -64,15 +65,13 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 				}
 			});
 
-			// TODO: refactor createApi -> {data,message}
 			if (createApi) result = await createApi(postData);
+			console.log("[NEW] result :>> ", result);
 
-			if (result) {
-				console.log("[NEW] result :>> ", result);
+			// if success
+			if (result?.status) {
+				root.notification.success({ message: "Congrats!", description: `Item has been created successfully.` });
 				closeDrawer();
-			} else {
-				// TODO: show error message
-				root.notification.error({ message: "Something is wrong..." });
 			}
 		} else {
 			const statuses: any = {};
@@ -91,6 +90,11 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 			if (!isEmpty(statuses)) {
 				if (updateApi) result = await updateApi(postData);
 				console.log("[UPDATE] result :>> ", result);
+
+				// if success
+				if (result?.status) {
+					closeDrawer();
+				}
 			} else {
 				console.log("[UPDATE] Skipped, nothing new to update.");
 			}

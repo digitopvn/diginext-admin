@@ -72,7 +72,7 @@ const EnvVarsNewEdit = () => {
 		if (createApi) result = await createApi(postData);
 		console.log("[CREATE_ENV_VARS] result :>> ", result);
 
-		if (!isEmpty(result)) setEnvVars(result);
+		if (result?.status) setEnvVars(result?.data);
 
 		// closeDrawer();
 	};

@@ -167,17 +167,21 @@ export const BuildList = () => {
 		}
 
 		try {
-			const release = await releaseCreateFromBuildApi({ build: buildId } as IRelease);
+			const createRes = await releaseCreateFromBuildApi({ build: buildId } as IRelease);
 
-			root.notification.success({
-				message: `Congrats, the release has been created successfully!`,
-				description: (
-					<>
-						You can now preview it on <a href={`https://${release?.prereleaseUrl}`}>PRE-RELEASE</a> endpoint.
-					</>
-				),
-				placement: "top",
-			});
+			if (createRes?.status) {
+				const release = createRes?.data;
+				root.notification.success({
+					message: `Congrats, the release has been created successfully!`,
+					description: (
+						<>
+							You can now preview it on <a href={`https://${release?.prereleaseUrl}`}>PRE-RELEASE</a> endpoint.
+						</>
+					),
+					placement: "top",
+				});
+				return;
+			}
 		} catch (e) {
 			console.error(`Could not process releasing this build:`, e);
 
@@ -193,7 +197,7 @@ export const BuildList = () => {
 		const result = await stopBuildApi({ slug });
 		console.log("[BuildList] stopBuild :>> ", result);
 
-		if (!result.status) {
+		if (!result?.status) {
 			root.notification.error({
 				message: `Failed to proceed.`,
 				description: `Could not stop this build due to server issue. Please try again later.`,

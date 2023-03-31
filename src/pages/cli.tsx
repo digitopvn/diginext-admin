@@ -35,10 +35,12 @@ const CliPage = () => {
 
 		// console.log("userId :>> ", userId);
 
-		const joinedUser = await joinApi({
+		const joinRes = await joinApi({
 			userId,
 			workspace: workspaceSlug,
 		});
+
+		const joinedUser = joinRes?.data;
 		console.log("joinedUser :>> ", joinedUser);
 	};
 

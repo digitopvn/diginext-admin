@@ -1,6 +1,14 @@
 import type { AxiosRequestConfig } from "axios";
 
-export type ApiOptions = AxiosRequestConfig & { pagination?: IPaginationOptions; populate?: string; filter?: any; sort?: string; staleTime?: number };
+export type ApiFilter = Record<string, any> | URLSearchParams | undefined;
+
+export type ApiOptions = AxiosRequestConfig & {
+	pagination?: IPaginationOptions;
+	populate?: string;
+	filter?: ApiFilter;
+	sort?: string;
+	staleTime?: number;
+};
 
 export type ApiStatus = "error" | "loading" | "success" | "idle";
 
@@ -12,6 +20,20 @@ export type ApiPagination = {
 	next_page?: number;
 	prev_page?: number;
 };
+
+export interface AccessTokenInfo {
+	access_token: string;
+	expiredTimestamp: number;
+	expiredDate: Date;
+	expiredDateGTM7: string;
+}
+
+export interface ApiResponse<T = any> extends ApiPagination {
+	status: number;
+	data: T;
+	messages: string[];
+	token?: AccessTokenInfo;
+}
 
 export interface IGeneral {
 	/**
@@ -165,13 +187,6 @@ export interface IProviderInfo {
 	name: string;
 	user_id?: string;
 	access_token?: string;
-}
-
-export interface AccessTokenInfo {
-	access_token: string;
-	expiredTimestamp: number;
-	expiredDate: Date;
-	expiredDateGTM7: string;
 }
 
 export interface IUser extends IGeneral {
