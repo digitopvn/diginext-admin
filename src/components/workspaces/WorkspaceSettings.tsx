@@ -16,20 +16,20 @@ export const WorkspaceSettings = () => {
 	const workspace = useWorkspace();
 	console.log("workspace :>> ", workspace);
 
-	const { data: { list: apiKeys = [] } = { list: [] } } = useApiKeyListApi({ filter: { activeWorkspace: workspace?._id } });
+	const { data: { list: apiKeys = [] } = { list: [] } } = useApiKeyListApi();
 	console.log("apiKeys :>> ", apiKeys);
 
 	return (
 		<div className="px-4 py-6">
 			<Typography.Title>{workspace?.name}</Typography.Title>
-			<h2>API Access Tokens</h2>
+			{/* <h2>API Access Tokens</h2> */}
 			<List
 				dataSource={apiKeys}
 				renderItem={({ name, email, token: { access_token } = { access_token: "" } }, index) => (
 					<Card title={name}>
 						{/* <Typography.Text>{email}</Typography.Text> */}
 						<div key={`api-key-${access_token}`}>
-							API_ACCESS_TOKEN: <CopyCode type="password" mode="inline" value={access_token} />
+							<CopyCode type="password" mode="inline" value={access_token} />
 						</div>
 					</Card>
 				)}

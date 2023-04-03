@@ -20,6 +20,7 @@ export type SmartFormElementProps = {
 	required?: boolean;
 	placeholder?: string;
 	disabled?: boolean;
+	onChange?: (value: any) => void;
 	/**
 	 * Programming Language of the `<SmartCodeEditor />` component
 	 */

@@ -166,13 +166,18 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 						case "select": {
 							let { selectedKey } = field;
 							if (typeof selectedKey === "undefined") selectedKey = "_id";
+							console.log("item :>> ", item);
+							console.log("fiefield.options :>> ", field.options);
+							console.log("selectedKey :>> ", selectedKey);
 
+							const selectedValue = _.get(item, selectedKey ? `${selectedKey}` : field.name);
+							console.log("selectedValue :>> ", selectedValue);
 							return (
 								<SmartSelect
 									key={`${name}-${field.name}`}
 									{...field}
 									style={{ minWidth: 300, ...field?.style }}
-									value={item && _.get(item, selectedKey === "" ? field.name : `${field.name}.${selectedKey}`)}
+									value={selectedValue}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>

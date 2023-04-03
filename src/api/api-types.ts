@@ -130,9 +130,34 @@ export interface IWorkspace extends IGeneral {
 	apiAccessTokens?: WorkspaceApiAccessToken[];
 }
 
+export type IRouteScope = "all" | "workspace" | "team" | "project" | "app";
+
+export type IRoutePermission = "full" | "own" | "create" | "read" | "update" | "delete";
+
+export interface RoleRoute {
+	/**
+	 * Route path
+	 * @example /api/v1/healthz
+	 */
+	route: string;
+	/**
+	 * @default ["full"]
+	 */
+	permissions: IRoutePermission[];
+	/**
+	 * (TBC)
+	 * @default all
+	 * @example all
+	 */
+	scope?: IRouteScope;
+}
+
 export interface IRole extends IGeneral {
 	name?: string;
 	image?: string;
+	type?: string;
+
+	routes?: RoleRoute[];
 
 	/**
 	 * ID of the project

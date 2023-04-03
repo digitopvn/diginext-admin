@@ -21,6 +21,6 @@ export const useRoleUpdateApi = (options?: ApiOptions) => {
 	return useUpdateApi<IRole>(["roles"], `/api/v1/role`, options);
 };
 
-export const useRoleDeleteApi = (filter: any) => {
+export const useRoleDeleteApi = (filter?: any) => {
 	return useDeleteApi<IRole>(["roles"], `/api/v1/role`);
 };

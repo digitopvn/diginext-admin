@@ -1,12 +1,13 @@
-import { DeleteOutlined, EditOutlined, StopOutlined } from "@ant-design/icons";
-import { Button, Space, Table } from "antd";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { Button, Popconfirm, Space, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import React, { useState } from "react";
 
-import type { IRole, ITeam } from "@/api/api-types";
-import { useUserListApi } from "@/api/api-user";
+import type { IUser } from "@/api/api-types";
+import { useUserDeleteApi, useUserListApi } from "@/api/api-user";
 import { DateDisplay } from "@/commons/DateDisplay";
+import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { AppConfig } from "@/utils/AppConfig";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
@@ -15,16 +16,10 @@ const relativeTime = require("dayjs/plugin/relativeTime");
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
-interface DataType {
-	key: React.Key;
-	id: string;
-	name: string;
-	username?: string;
-	email?: string;
-	roles?: IRole[];
-	teams?: ITeam[];
-	createdAt?: string;
-	updatedAt?: string;
+interface DataType extends IUser {
+	key?: React.Key;
+	id?: string;
+	actions?: any;
 }
 
 const columns: ColumnsType<DataType> = [
@@ -36,21 +31,21 @@ const columns: ColumnsType<DataType> = [
 		fixed: "left",
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => record.name.indexOf(value.toString()) > -1,
+		onFilter: (value, record) => (record.name ? record.name.indexOf(value.toString()) > -1 : true),
 	},
 	{
 		title: "User name",
-		dataIndex: "username",
-		key: "username",
+		dataIndex: "slug",
+		key: "slug",
 		width: 50,
+		filterSearch: true,
+		filters: [{ text: "goon", value: "goon" }],
 		render: (value) => (
 			<Button type="link" style={{ padding: 0 }}>
 				{value}
 			</Button>
 		),
-		filterSearch: true,
-		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.username ? record.username.indexOf(value.toString()) > -1 : true),
+		onFilter: (value, record) => (record.slug ? record.slug.indexOf(value.toString()) > -1 : true),
 	},
 	{
 		title: "Email",
@@ -65,17 +60,18 @@ const columns: ColumnsType<DataType> = [
 		width: 40,
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
+		render: (value) => <>{value[0]?.name}</>,
 		// onFilter: (value, record) => record.roles ? record.roles.indexOf(value.toString()) > -1,
 	},
-	{
-		title: "Teams",
-		dataIndex: "teams",
-		key: "teams",
-		width: 40,
-		filterSearch: true,
-		filters: [{ text: "goon", value: "goon" }],
-		// onFilter: (value, record) => record.teams.indexOf(value.toString()) > -1,
-	},
+	// {
+	// 	title: "Teams",
+	// 	dataIndex: "teams",
+	// 	key: "teams",
+	// 	width: 40,
+	// 	filterSearch: true,
+	// 	filters: [{ text: "goon", value: "goon" }],
+	// 	// onFilter: (value, record) => record.teams.indexOf(value.toString()) > -1,
+	// },
 	{
 		title: "Updated at",
 		dataIndex: "updatedAt",
@@ -97,13 +93,7 @@ const columns: ColumnsType<DataType> = [
 		key: "action",
 		width: 50,
 		fixed: "right",
-		render: () => (
-			<Space.Compact>
-				<Button icon={<EditOutlined />}></Button>
-				<Button icon={<DeleteOutlined />}></Button>
-				<Button icon={<StopOutlined />}></Button>
-			</Space.Compact>
-		),
+		render: (value, record) => record.actions,
 	},
 ];
 
@@ -126,36 +116,50 @@ const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 export const UserList = () => {
 	const [page, setPage] = useState(1);
 	const { data } = useUserListApi({ populate: "roles,teams", pagination: { page, size: pageSize } });
-	const { list: users, pagination } = data || {};
+	const { list, pagination } = data || {};
 	const { total_items } = pagination || {};
-	console.log("users :>> ", users);
+	console.log("users :>> ", list);
+
+	const [deleteApi] = useUserDeleteApi();
+	const [query, { setQuery }] = useRouterQuery();
+
+	const deleteItem = async (id: string) => {
+		const res = await deleteApi({ _id: id });
+		console.log("deleteItem :>> ", res);
+	};
 
 	const onTableChange = (_pagination: TablePaginationConfig) => {
 		const { current } = _pagination;
 		if (current) setPage(current);
 	};
 
-	const displayedUsers: DataType[] =
-		users?.map((u, i) => {
+	const displayedList: DataType[] =
+		list?.map((item, i) => {
 			return {
-				id: u._id ?? `user-${i}`,
-				key: u._id ?? `user-${i}`,
-				name: u.name ?? `User #${i}`,
-				username: u.slug ?? "",
-				email: u.email ?? "",
-				roles: (u.roles as IRole[]) || [],
-				teams: (u.teams as ITeam[]) || [],
-				updatedAt: u.updatedAt,
-				createdAt: u.createdAt,
+				...item,
+				actions: (
+					<Space.Compact>
+						<Button icon={<EditOutlined />} onClick={() => setQuery({ lv1: "edit", type: "user", user: item.slug })}></Button>
+						<Popconfirm
+							title="Are you sure to delete this item?"
+							description={<span className="text-red-500">Caution: this is permanent and cannot be rolled back.</span>}
+							onConfirm={() => deleteItem(item._id as string)}
+							okText="Yes"
+							cancelText="No"
+						>
+							<Button icon={<DeleteOutlined />}></Button>
+						</Popconfirm>
+					</Space.Compact>
+				),
 			};
 		}) || [];
-	console.log("displayedUsers :>> ", displayedUsers);
+	console.log("displayedUsers :>> ", displayedList);
 
 	return (
 		<div>
 			<Table
 				columns={columns}
-				dataSource={displayedUsers}
+				dataSource={displayedList}
 				scroll={{ x: 1200 }}
 				sticky={{ offsetHeader: 48 }}
 				pagination={{ pageSize, total: total_items }}

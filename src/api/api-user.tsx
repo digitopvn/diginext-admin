@@ -33,3 +33,7 @@ type UserJoinWorkspaceParams = {
 export const useUserJoinWorkspaceApi = (options?: ApiOptions) => {
 	return useUpdateApi<UserJoinWorkspaceParams, IUser>(["users"], `/api/v1/user/join-workspace`, options);
 };
+
+export const useUserAssignRoleApi = (options?: ApiOptions) => {
+	return useUpdateApi<{ roleId: string }, IUser>(["users"], `/api/v1/user/assign-role`, options);
+};

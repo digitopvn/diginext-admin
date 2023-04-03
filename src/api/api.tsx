@@ -42,7 +42,9 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 			);
 
 			if (!data.status && !isEmpty(data.messages)) {
-				data.messages.map((message) => root.notification.error({ message }));
+				data.messages.forEach((message) => {
+					if (message) root.notification.error({ message: "Failed.", description: message });
+				});
 			}
 
 			const { current_page, total_pages, total_items, page_size, next_page, prev_page, ...rest } = data;
@@ -89,7 +91,9 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, o
 			const { data } = await axios.get<ApiResponse<T[]>>(url, { ...options, headers });
 
 			if (!data.status && !isEmpty(data.messages)) {
-				data.messages.map((message) => root.notification.error({ message: "Failed.", description: message }));
+				data.messages.forEach((message) => {
+					if (message) root.notification.error({ message: "Failed.", description: message });
+				});
 			}
 
 			// for token is about to expired
@@ -126,7 +130,9 @@ export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options
 		queryFn: async () => {
 			const data = await getById<T>(apiPath, id, { ...options, headers });
 			if (!data.status && !isEmpty(data.messages)) {
-				data.messages.map((message) => root.notification.error({ message: "Failed.", description: message }));
+				data.messages.forEach((message) => {
+					if (message) root.notification.error({ message: "Failed.", description: message });
+				});
 			}
 			return data;
 		},
@@ -156,7 +162,9 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptio
 
 			if (!data.status) {
 				if (!isEmpty(data.messages)) {
-					data.messages.map((message) => root.notification.error({ message: "Failed.", description: message }));
+					data.messages.forEach((message) => {
+						if (message) root.notification.error({ message: "Failed.", description: message });
+					});
 				} else {
 					root.notification.error({ message: "Something is wrong..." });
 				}
@@ -219,7 +227,9 @@ export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, opt
 			// show error message ONLY if status is failure
 			if (!data.status) {
 				if (!isEmpty(data.messages)) {
-					data.messages.map((message) => root.notification.error({ message: "Failed.", description: message }));
+					data.messages.forEach((message) => {
+						if (message) root.notification.error({ message: "Failed.", description: message });
+					});
 				} else {
 					root.notification.error({ message: "Something is wrong..." });
 				}
@@ -246,17 +256,20 @@ export const useDeleteApi = <T = any,>(keys: any[], apiPath: string, options: Ap
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
-	const { filter } = options;
-	const filterParams = filter ? `${new URLSearchParams(filter).toString()}` : "";
-	const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}`;
+	// const { filter } = options;
 
 	const mutation = useMutation<ApiResponse<T>, Error, T>({
-		mutationFn: async (input) => {
-			const { data } = await axios.delete<ApiResponse<T>>(apiURL, { ...options, headers, data: input });
+		mutationFn: async (filter) => {
+			const filterParams = filter ? `${new URLSearchParams(filter).toString()}` : "";
+			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}`;
+			const { data } = await axios.delete<ApiResponse<T>>(apiURL, { ...options, headers });
 
 			if (!data.status) {
 				if (!isEmpty(data.messages)) {
-					data.messages.map((message) => root.notification.error({ message: "Failed.", description: message }));
+					data.messages.forEach((message) => {
+						console.log("message :>> ", message);
+						if (message) root.notification.error({ message: "Failed.", description: message });
+					});
 				} else {
 					root.notification.error({ message: "Something is wrong..." });
 				}
