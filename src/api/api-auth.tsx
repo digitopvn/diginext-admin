@@ -13,6 +13,8 @@ import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useWorkspace } from "@/providers/useWorkspace";
 import { Config } from "@/utils/AppConfig";
 
+import type { IUser } from "./api-types";
+
 export const login = (params: { redirectURL?: string } = {}) => {
 	const redirectURL = params.redirectURL ?? Config.NEXT_PUBLIC_API_BASE_URL;
 	window.location.href = `${Config.NEXT_PUBLIC_API_BASE_URL}/auth/google?redirect_url=${redirectURL}`;
@@ -53,8 +55,10 @@ export const useAuth = (props: { redirectUrl?: string } = {}) => {
 	// const [user, setUser] = useState<IUser>();
 	// const [isSettled, setIsSettled] = useState<boolean>(false);
 
-	const { data: response, isError, isFetched, isLoading, isSuccess } = useAuthApi({ access_token: access_token as string });
-	const { status, data: user } = response || {};
+	const authActions = useAuthApi({ access_token: access_token as string });
+	const { data: response, isError, isFetched, isLoading, isSuccess } = authActions;
+	const { status, data } = response || {};
+	const user = response?.data as IUser;
 	const queryClient = useQueryClient();
 
 	const reload = async () => {
@@ -79,7 +83,7 @@ export const useAuth = (props: { redirectUrl?: string } = {}) => {
 		}, 200);
 	}, [status]);
 
-	return [user, { reload, isError, isLoading, isFetched, isSuccess, status }];
+	return [user, authActions] as [IUser, typeof authActions];
 };
 
 export const AuthPage = (props: { children?: ReactNode } = {}) => {

@@ -275,6 +275,11 @@ export interface IUser extends IGeneral {
 	 * List of workspace IDs which this user is a member
 	 */
 	workspaces?: IWorkspace[];
+
+	/**
+	 * Active workspace ID which the user is logging into
+	 */
+	activeWorkspace?: IWorkspace;
 }
 
 export interface IServiceAccount extends IUser {}

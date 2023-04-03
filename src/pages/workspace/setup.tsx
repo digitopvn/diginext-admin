@@ -15,7 +15,7 @@ import { Config, isDev } from "@/utils/AppConfig";
 const WorkspaceSetupPage = () => {
 	const [wsName, setWsName] = useState("");
 	const onChange = (e: SyntheticEvent) => setWsName((e.currentTarget as any).value);
-	const [user, reload] = useAuth();
+	const [user, { refetch }] = useAuth();
 
 	const [createWorkspace, status] = useWorkspaceCreateApi();
 
@@ -24,7 +24,7 @@ const WorkspaceSetupPage = () => {
 		const result = await createWorkspace({ ...values, owner: user?._id });
 		const workspace = result?.data;
 
-		await reload();
+		await refetch();
 
 		Router.push(isDev() ? `${Config.NEXT_PUBLIC_BASE_URL}` : `https://${workspace?.slug}.${Config.NEXT_PUBLIC_DOMAIN}`);
 	};

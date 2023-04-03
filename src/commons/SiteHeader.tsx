@@ -60,7 +60,7 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 									<p className="mb-0">{user?.email}</p>
 								</div>
 								<Space.Compact direction="vertical" className="w-full">
-									<Button>Profile</Button>
+									<Button href="/profile">Profile</Button>
 									<Button href="/logout">Sign out</Button>
 								</Space.Compact>
 							</Space>
