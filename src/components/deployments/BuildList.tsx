@@ -49,7 +49,7 @@ const columns: ColumnsType<IBuild & DataType> = [
 		render: (value, record) => (
 			<>
 				<p>
-					<Link href={{ pathname: `/build/[...slugs]`, query: { slugs: [record.slug as string] } }}>
+					<Link href={`/build/logs?build_slug=${record.slug}`}>
 						<strong>{value}</strong>
 					</Link>
 				</p>
@@ -167,7 +167,7 @@ export const BuildList = () => {
 		}
 
 		try {
-			const createRes = await releaseCreateFromBuildApi({ build: buildId } as IRelease);
+			const createRes = await releaseCreateFromBuildApi({ build: buildId, env } as IRelease);
 
 			if (createRes?.status) {
 				const release = createRes?.data;
