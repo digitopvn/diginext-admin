@@ -26,6 +26,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 		lang = [],
 		height = "350px",
 		disabled = false,
+		visible = true,
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -70,6 +71,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 			}
 			name={name}
 			rules={[{ required, message: requiredMessage }]}
+			style={{ display: visible ? "block" : "none" }}
 		>
 			{/* <Input suffix={icon} onChange={onChange} /> */}
 			<Space direction="vertical" className="w-full">

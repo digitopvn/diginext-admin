@@ -39,7 +39,7 @@ const UserNewEdit = (props: UserNewEditProps = {}) => {
 			label: "Role",
 			name: "roles",
 			style: { width: 250 },
-			selectedKey: "roles.0._id", // the magic is here 😅...
+			displayKey: "roles.0._id", // the magic is here 😅...
 			// value: userRole?._id,
 			options: roles.map((role) => {
 				return { label: role.name || "", value: role._id };

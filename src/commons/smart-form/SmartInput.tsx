@@ -22,6 +22,7 @@ const SmartInput = (props: SmartFormElementProps) => {
 		isNew,
 		placeholder,
 		disabled = false,
+		visible = true,
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -79,6 +80,7 @@ const SmartInput = (props: SmartFormElementProps) => {
 			}
 			name={name}
 			rules={[{ required, message: requiredMessage }]}
+			style={{ display: visible ? "block" : "none" }}
 		>
 			<Space direction="vertical" className="w-full">
 				<Input placeholder={placeholder} onChange={onChange} value={_value} disabled={disabled} />

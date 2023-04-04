@@ -24,6 +24,7 @@ const SmartSelect = (props: SmartFormElementProps) => {
 		options,
 		onChange,
 		disabled = false,
+		visible = true,
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -81,6 +82,7 @@ const SmartSelect = (props: SmartFormElementProps) => {
 			}
 			name={name}
 			rules={[{ required, message: requiredMessage }]}
+			style={{ display: visible ? "block" : "none" }}
 		>
 			<Space direction="horizontal" className="w-full">
 				<Select className={className} style={style} value={_value} onChange={_onChange} options={options} disabled={disabled} />

@@ -164,14 +164,14 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 							);
 
 						case "select": {
-							let { selectedKey } = field;
-							if (typeof selectedKey === "undefined") selectedKey = "_id";
-							console.log("item :>> ", item);
-							console.log("fiefield.options :>> ", field.options);
-							console.log("selectedKey :>> ", selectedKey);
+							let { displayKey } = field;
+							if (typeof displayKey === "undefined") displayKey = "name";
+							// console.log("item :>> ", item);
+							// console.log("fiefield.options :>> ", field.options);
+							// console.log("selectedKey :>> ", selectedKey);
 
-							const selectedValue = _.get(item, selectedKey ? `${selectedKey}` : field.name);
-							console.log("selectedValue :>> ", selectedValue);
+							const selectedValue = _.get(item, displayKey ? `${displayKey}` : field.name);
+							// console.log("selectedValue :>> ", selectedValue);
 							return (
 								<SmartSelect
 									key={`${name}-${field.name}`}

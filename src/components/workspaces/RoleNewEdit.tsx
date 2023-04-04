@@ -20,7 +20,15 @@ const RoleNewEdit = (props: RoleNewEditProps = {}) => {
 	// const { data: { list: providers = [] } = {} } = useCloudProviderListApi();
 	// console.log("providers :>> ", providers);
 
-	const smartFormConfigs: SmartFormElementProps[] = [{ type: "input", label: "Name", name: "name", placeholder: "Role's name" }];
+	const smartFormConfigs: SmartFormElementProps[] = [
+		{
+			type: "input",
+			label: "Name",
+			name: "name",
+			placeholder: "Role's name",
+			disabled: typeof role === "undefined" || typeof role.type === "undefined" || ["administrator", "moderator", "member"].includes(role.type),
+		},
+	];
 
 	return <SmartForm name="registry" api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />;
 };

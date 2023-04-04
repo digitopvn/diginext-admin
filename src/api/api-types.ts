@@ -561,6 +561,11 @@ export interface ICluster extends IGeneral {
 	slug?: string;
 
 	/**
+	 * Flag to check cluster's accessibility
+	 */
+	isVerified?: boolean;
+
+	/**
 	 * Cluster short name (to access via `kubectl context`)
 	 */
 	shortName?: string;

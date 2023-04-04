@@ -23,6 +23,7 @@ const SmartTextArea = (props: SmartFormElementProps) => {
 		autoSave = true,
 		isNew,
 		disabled = false,
+		visible = true,
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -67,6 +68,7 @@ const SmartTextArea = (props: SmartFormElementProps) => {
 			}
 			name={name}
 			rules={[{ required, message: requiredMessage }]}
+			style={{ display: visible ? "block" : "none" }}
 		>
 			{/* <Input suffix={icon} onChange={onChange} /> */}
 			<Space direction="vertical" className="w-full">
