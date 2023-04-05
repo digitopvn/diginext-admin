@@ -224,7 +224,7 @@ export const BuildList = () => {
 						<Button icon={<EyeOutlined />} href={`https://${build.image}`} target="_blank" />
 					</Tooltip>
 					{build.env === "prod" && (
-						<Tooltip title="Roll out this build">
+						<Tooltip title="Create a release from this build">
 							<Button icon={<RocketOutlined />} onClick={() => releaseBuild(build._id?.toString())} />
 						</Tooltip>
 					)}
@@ -246,7 +246,7 @@ export const BuildList = () => {
 			<Table
 				columns={columns}
 				dataSource={displayedBuilds}
-				scroll={{ x: 600 }}
+				scroll={{ x: 550 }}
 				sticky={{ offsetHeader: 0 }}
 				pagination={{ current: page, pageSize, total: total_items }}
 				onChange={onTableChange}

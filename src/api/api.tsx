@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { App } from "antd";
+import { notification } from "antd";
 import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
@@ -10,10 +10,8 @@ import { Config } from "@/utils/AppConfig";
 
 import type { ApiOptions, ApiPagination, ApiResponse } from "./api-types";
 
-const { useApp } = App;
-
 export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}) => {
-	const root = useApp();
+	const [noti] = notification.useNotification();
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
@@ -43,7 +41,7 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 
 			if (!data.status && !isEmpty(data.messages)) {
 				data.messages.forEach((message) => {
-					if (message) root.notification.error({ message: "Failed.", description: message });
+					if (message) noti.error({ message: "Failed.", description: message });
 				});
 			}
 
@@ -70,7 +68,8 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 };
 
 export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, options: ApiOptions = {}) => {
-	const root = useApp();
+	const [noti] = notification.useNotification();
+
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
@@ -92,7 +91,7 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, o
 
 			if (!data.status && !isEmpty(data.messages)) {
 				data.messages.forEach((message) => {
-					if (message) root.notification.error({ message: "Failed.", description: message });
+					if (message) noti.error({ message: "Failed.", description: message });
 				});
 			}
 
@@ -119,7 +118,7 @@ const getById = async <T,>(apiPath: string, id: string, options: AxiosRequestCon
 };
 
 export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options: ApiOptions = {}) => {
-	const root = useApp();
+	const [noti] = notification.useNotification();
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
@@ -131,7 +130,7 @@ export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options
 			const data = await getById<T>(apiPath, id, { ...options, headers });
 			if (!data.status && !isEmpty(data.messages)) {
 				data.messages.forEach((message) => {
-					if (message) root.notification.error({ message: "Failed.", description: message });
+					if (message) noti.error({ message: "Failed.", description: message });
 				});
 			}
 			return data;
@@ -144,7 +143,7 @@ export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options
 export type UseCreateApi<T> = [(data: T) => Promise<ApiResponse<T>> | undefined, "error" | "idle" | "loading" | "success"];
 
 export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}): UseCreateApi<T> => {
-	const root = useApp();
+	const [noti] = notification.useNotification();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
@@ -163,10 +162,10 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptio
 			if (!data.status) {
 				if (!isEmpty(data.messages)) {
 					data.messages.forEach((message) => {
-						if (message) root.notification.error({ message: "Failed.", description: message });
+						if (message) noti.error({ message: "Failed.", description: message });
 					});
 				} else {
-					root.notification.error({ message: "Something is wrong..." });
+					noti.error({ message: "Something is wrong..." });
 				}
 			}
 
@@ -201,7 +200,7 @@ const updateById = async (apiPath: string, id: string, updateData: any, options:
 export type UseUpdateApi<T> = [(data: T) => Promise<ApiResponse<T>> | undefined, "error" | "idle" | "loading" | "success"];
 
 export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, options: ApiOptions = {}): UseUpdateApi<T | R> => {
-	const root = useApp();
+	const [noti] = notification.useNotification();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
@@ -228,10 +227,10 @@ export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, opt
 			if (!data.status) {
 				if (!isEmpty(data.messages)) {
 					data.messages.forEach((message) => {
-						if (message) root.notification.error({ message: "Failed.", description: message });
+						if (message) noti.error({ message: "Failed.", description: message });
 					});
 				} else {
-					root.notification.error({ message: "Something is wrong..." });
+					noti.error({ message: "Something is wrong..." });
 				}
 			}
 			return data;
@@ -249,7 +248,7 @@ export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, opt
 export type UseDeleteApi<T> = [(data: T) => Promise<ApiResponse<T>> | undefined, "error" | "idle" | "loading" | "success"];
 
 export const useDeleteApi = <T = any,>(keys: any[], apiPath: string, options: ApiOptions = {}): UseDeleteApi<T> => {
-	const root = useApp();
+	const [noti] = notification.useNotification();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
@@ -268,10 +267,10 @@ export const useDeleteApi = <T = any,>(keys: any[], apiPath: string, options: Ap
 				if (!isEmpty(data.messages)) {
 					data.messages.forEach((message) => {
 						console.log("message :>> ", message);
-						if (message) root.notification.error({ message: "Failed.", description: message });
+						if (message) noti.error({ message: "Failed.", description: message });
 					});
 				} else {
-					root.notification.error({ message: "Something is wrong..." });
+					noti.error({ message: "Something is wrong..." });
 				}
 			}
 

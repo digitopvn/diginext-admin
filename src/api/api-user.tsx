@@ -27,7 +27,13 @@ export const useUserDeleteApi = () => {
 
 // Add an user to a workspace
 type UserJoinWorkspaceParams = {
+	/**
+	 * User ID
+	 */
 	userId: string;
+	/**
+	 * Workspace slug
+	 */
 	workspace: string;
 };
 export const useUserJoinWorkspaceApi = (options?: ApiOptions) => {
