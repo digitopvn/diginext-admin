@@ -1,4 +1,4 @@
-import { useCreateApi, useDeleteApi, useItemApi, useItemSlugApi, useListApi, useUpdateApi } from "./api";
+import { useApi, useCreateApi, useDeleteApi, useItemApi, useItemSlugApi, useListApi, useUpdateApi } from "./api";
 import type { ApiOptions, IGitProvider } from "./api-types";
 
 export const useGitProviderListApi = (options?: ApiOptions) => {
@@ -23,4 +23,8 @@ export const useGitProviderUpdateApi = (options?: ApiOptions) => {
 
 export const useGitProviderDeleteApi = () => {
 	return useDeleteApi<IGitProvider>(["gits"], `/api/v1/git`);
+};
+
+export const useGitPublicKeyApi = () => {
+	return useApi<{ publicKey: string }>(["public-key"], `/api/v1/git/public-key`);
 };

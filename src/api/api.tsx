@@ -112,6 +112,28 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, o
 	});
 };
 
+export const useApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}) => {
+	const [noti] = notification.useNotification();
+	const router = useRouter();
+	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+	headers["Cache-Control"] = "no-cache";
+	console.log(apiPath, "> headers :>> ", headers);
+
+	return useQuery<ApiResponse<T>, Error>({
+		queryKey: keys,
+		queryFn: async () => {
+			const { data } = await axios.get<ApiResponse<T>>(`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}`, { ...options, headers });
+			if (!data.status && !isEmpty(data.messages)) {
+				data.messages.forEach((message) => {
+					if (message) noti.error({ message: "Failed.", description: message });
+				});
+			}
+			return data;
+		},
+	});
+};
+
 const getById = async <T,>(apiPath: string, id: string, options: AxiosRequestConfig = {}) => {
 	const { data } = await axios.get<ApiResponse<T>>(`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?id=${id}`, options);
 	return data;

@@ -61,6 +61,7 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 								</div>
 								<Space.Compact direction="vertical" className="w-full">
 									<Button href="/profile">Profile</Button>
+									<Button href="/workspace/select">Switch workspace</Button>
 									<Button href="/logout">Sign out</Button>
 								</Space.Compact>
 							</Space>
