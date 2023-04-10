@@ -176,7 +176,7 @@ export const MenuSider = () => {
 				inlineCollapsed={sidebarCollapsed}
 				defaultOpenKeys={[pageLv0]}
 				defaultSelectedKeys={[pageLv0, menuPath]}
-				items={activeRole?.type === "member" ? items.filter((item) => item?.key !== "menu/workspace") : items}
+				items={items}
 				onSelect={onMenuSelected}
 			/>
 		</Sider>

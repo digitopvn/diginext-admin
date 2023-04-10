@@ -27,17 +27,19 @@ export const WorkspaceSettings = () => {
 			<Typography.Title>{workspace?.name} Workspace</Typography.Title>
 
 			{/* API ACCESS TOKEN */}
-			<List
-				// grid={{ gutter: 16, column: 2, sm: 1 }}
-				dataSource={apiKeys}
-				renderItem={({ name, email, token: { access_token } = { access_token: "" } }, index) => (
-					<Card title={name}>
-						<div key={`api-key-${access_token}`}>
-							<CopyCode type="password" mode="inline" value={access_token} />
-						</div>
-					</Card>
-				)}
-			/>
+			{apiKeys.length > 0 && (
+				<List
+					// grid={{ gutter: 16, column: 2, sm: 1 }}
+					dataSource={apiKeys}
+					renderItem={({ name, email, token: { access_token } = { access_token: "" } }, index) => (
+						<Card title={name}>
+							<div key={`api-key-${access_token}`}>
+								<CopyCode type="password" mode="inline" value={access_token} />
+							</div>
+						</Card>
+					)}
+				/>
+			)}
 
 			<Divider dashed />
 

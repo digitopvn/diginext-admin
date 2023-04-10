@@ -57,7 +57,13 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 	}, [debouncedValue]);
 
 	let icon;
-	if (status && status[name] === "error") icon = <CloseOutlined />;
+	if (status && status[name] === "error")
+		icon = (
+			<span className="text-red-600">
+				<CloseOutlined />
+				Failed
+			</span>
+		);
 	if (status && status[name] === "loading") icon = <LoadingOutlined />;
 	if (status && status[name] === "success") icon = <CheckOutlined color="green" />;
 

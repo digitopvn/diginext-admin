@@ -14,8 +14,6 @@ type IMainProps = {
 	useSidebar?: boolean;
 };
 
-// const SiteLayout = dynamic(() => import("../layouts/SiteLayout").then((mod) => mod.SiteLayout), { ssr: false });
-
 const Main = (props: IMainProps) => {
 	const { isDarkMode } = useDarkMode();
 	const { useSidebar = true } = props;

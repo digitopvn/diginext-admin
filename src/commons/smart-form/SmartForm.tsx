@@ -1,7 +1,7 @@
 import type { UseQueryResult } from "@tanstack/react-query";
 import { App, Button, Form, Popconfirm, Space, theme } from "antd";
 import _, { isEmpty } from "lodash";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import type { UseCreateApi, UseUpdateApi } from "@/api/api";
 import type { ApiResponse } from "@/api/api-types";
@@ -42,7 +42,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 	// const slug = slugKey ? query[slugKey] : undefined;
 
 	const [form] = Form.useForm<T>();
-	const [fieldsStatus, setFieldsStatus] = useState();
+	const [fieldsStatus, setFieldsStatus] = useState<Record<string, "error" | "idle" | "loading" | "success" | undefined>>();
 
 	const isNew = typeof item === "undefined";
 
@@ -74,7 +74,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 				closeDrawer();
 			}
 		} else {
-			const statuses: any = {};
+			const statuses: Record<string, "error" | "idle" | "loading" | "success" | undefined> = {};
 			Object.entries(postData).forEach(([field, value]) => {
 				if (item && value !== (item as any)[field]) {
 					statuses[field] = "loading";
@@ -84,12 +84,13 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 				}
 			});
 
-			console.log("statuses :>> ", statuses);
-			setFieldsStatus(statuses);
-
 			if (!isEmpty(statuses)) {
 				if (updateApi) result = await updateApi(postData);
 				console.log("[UPDATE] result :>> ", result);
+
+				Object.entries(postData).forEach(([field, value]) => {
+					statuses[field] = result?.status === 0 ? "error" : "success";
+				});
 
 				// if success
 				if (result?.status) {
@@ -98,6 +99,9 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 			} else {
 				console.log("[UPDATE] Skipped, nothing new to update.");
 			}
+
+			console.log("statuses :>> ", statuses);
+			setFieldsStatus(statuses);
 		}
 	};
 
@@ -105,16 +109,16 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 		console.log("Failed:", errorInfo);
 	};
 
-	useEffect(() => {
-		if (typeof fieldsStatus === "undefined") return;
-		// console.log("fieldsStatus :>> ", fieldsStatus);
-		const fields = Object.keys(fieldsStatus);
-		const statuses: any = {};
-		fields.forEach((field) => {
-			statuses[field] = updateStatus;
-		});
-		setFieldsStatus(statuses);
-	}, [updateStatus]);
+	// useEffect(() => {
+	// 	if (typeof fieldsStatus === "undefined") return;
+	// 	// console.log("fieldsStatus :>> ", fieldsStatus);
+	// 	const fields = Object.keys(fieldsStatus);
+	// 	const statuses: Record<string, "error" | "idle" | "loading" | "success" | undefined> = {};
+	// 	fields.forEach((field) => {
+	// 		statuses[field] = updateStatus;
+	// 	});
+	// 	setFieldsStatus(statuses);
+	// }, [updateStatus]);
 
 	return (
 		<Form

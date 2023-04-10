@@ -67,11 +67,19 @@ const SmartSelect = (props: SmartFormElementProps) => {
 		if (autoSave && !isNew) submit();
 	}, [debouncedValue]);
 
+	// console.log("status :>> ", status);
+	// console.log(`status[${name}] :>> `, status[name]);
+
 	let icon;
-	if (status && status[name] === "error") icon = <CloseOutlined />;
+	if (status && status[name] === "error")
+		icon = (
+			<span className="text-red-600">
+				<CloseOutlined />
+				Failed
+			</span>
+		);
 	if (status && status[name] === "loading") icon = <LoadingOutlined />;
 	if (status && status[name] === "success") icon = <CheckOutlined color="green" />;
-
 	return (
 		<Form.Item
 			label={

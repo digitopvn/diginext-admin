@@ -28,7 +28,7 @@ const ContainerRegistryNewEdit = (props: ContainerRegistryNewEditProps = {}) => 
 			label: "Cloud Provider",
 			name: "provider",
 			style: { width: 250 },
-			displayKey: "provider.shortName", // the magic is here 😅...
+			displayKey: "provider", // the magic is here 😅...
 			options: providers.map((provider) => {
 				return { label: provider.name || "", value: provider.shortName };
 			}),
