@@ -35,6 +35,22 @@ export interface ApiResponse<T = any> extends ApiPagination {
 	token?: AccessTokenInfo;
 }
 
+export const registryProviderList = ["gcloud", "digitalocean", "dockerhub"] as const;
+export const registryProviders = registryProviderList.map((provider) => {
+	switch (provider) {
+		case "digitalocean":
+			return { name: "Digital Ocean Registry", slug: "digitalocean" };
+		case "gcloud":
+			return { name: "Google Container Registry", slug: "gcloud" };
+		case "dockerhub":
+			return { name: "Docker Registry", slug: "dockerhub" };
+		default:
+			return undefined;
+	}
+});
+// eslint-disable-next-line prettier/prettier
+export type RegistryProviderType = typeof registryProviderList[number];
+
 export interface IGeneral {
 	/**
 	 * Alias of `_id` MongoDB
@@ -386,7 +402,7 @@ export interface IContainerRegistry extends IGeneral {
 	// @Column()
 	// serviceAccount?: string;
 
-	imagePullingSecret?: {
+	imagePullSecret?: {
 		name?: string;
 		value?: string;
 	};

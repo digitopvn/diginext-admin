@@ -32,9 +32,8 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 
 	const root = useApp();
 
-	const { data: item } = props.api?.useSlugApi || {};
-
-	const { useCreateApi, useUpdateApi } = props.api || {};
+	const { useSlugApi, useCreateApi, useUpdateApi } = props.api || {};
+	const { data: item } = useSlugApi || {};
 	const [updateApi, updateStatus] = useUpdateApi || [];
 	const [createApi, createStatus] = useCreateApi || [];
 
@@ -109,17 +108,6 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 		console.log("Failed:", errorInfo);
 	};
 
-	// useEffect(() => {
-	// 	if (typeof fieldsStatus === "undefined") return;
-	// 	// console.log("fieldsStatus :>> ", fieldsStatus);
-	// 	const fields = Object.keys(fieldsStatus);
-	// 	const statuses: Record<string, "error" | "idle" | "loading" | "success" | undefined> = {};
-	// 	fields.forEach((field) => {
-	// 		statuses[field] = updateStatus;
-	// 	});
-	// 	setFieldsStatus(statuses);
-	// }, [updateStatus]);
-
 	return (
 		<Form
 			className="h-full overflow-auto"
@@ -133,13 +121,14 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 		>
 			<div className="p-6 pb-16">
 				{configs.map((field) => {
+					console.log("field :>> ", field);
 					switch (field.type) {
 						case "input":
 							return (
 								<SmartInput
 									key={`${name}-${field.name}`}
 									{...field}
-									value={item && _.get(item, field.name)}
+									value={field.value || (item ? _.get(item, field.name) : null)}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>
@@ -150,7 +139,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 								<SmartTextArea
 									key={`${name}-${field.name}`}
 									{...field}
-									value={item && _.get(item, field.name)}
+									value={field.value || (item ? _.get(item, field.name) : null)}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>
@@ -161,7 +150,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 								<SmartCodeEditor
 									key={`${name}-${field.name}`}
 									{...field}
-									value={item && _.get(item, field.name)}
+									value={field.value || (item ? _.get(item, field.name) : null)}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>

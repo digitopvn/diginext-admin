@@ -22,7 +22,7 @@ const ClusterNewEdit = (props: ClusterNewEditProps = {}) => {
 
 	// providers
 	const { data: { list: providers = [] } = {} } = useCloudProviderListApi();
-	const [cloudProvider, setCloudProvider] = useState("");
+	const [providerShortName, setProviderShortName] = useState("");
 	// console.log("providers :>> ", providers);
 
 	const smartFormConfigs: SmartFormElementProps[] = [
@@ -37,22 +37,22 @@ const ClusterNewEdit = (props: ClusterNewEditProps = {}) => {
 			options: providers.map((provider) => {
 				return { label: provider.name || "", value: provider._id };
 			}),
-			onChange: (value) => setCloudProvider(providers.find((provider) => provider._id === value)?.shortName || ""),
+			onChange: (value) => setProviderShortName(providers.find((provider) => provider._id === value)?.shortName || ""),
 		},
 		{ type: "input", label: "Primary IP", name: "primaryIP", placeholder: "192.168.10.50" },
 		{ type: "input", label: "Primary domain", name: "primaryDomain", placeholder: "example.com" },
-		{ type: "input", label: "Project ID (Google)", name: "projectID", placeholder: "my-project-id", visible: cloudProvider === "gcloud" },
+		{ type: "input", label: "Project ID (Google)", name: "projectID", placeholder: "my-project-id", visible: providerShortName === "gcloud" },
 		{
 			type: "input",
 			label: "Region (Google)",
 			name: "region",
 			placeholder: "asia-southeast1",
-			visible: cloudProvider === "gcloud",
+			visible: providerShortName === "gcloud",
 		},
-		{ type: "input", label: "Zone (Google)", name: "zone", placeholder: "asia-southeast1-a", visible: cloudProvider === "gcloud" },
-		{ type: "code-editor", lang: ["json"], label: "Service Account (JSON)", name: "serviceAccount", visible: cloudProvider === "gcloud" },
-		{ type: "code-editor", lang: ["yaml"], label: "KubeConfig (YAML)", name: "kubeConfig", visible: cloudProvider === "custom" },
-		{ type: "textarea", label: "API Access Token", name: "apiAccessToken", visible: cloudProvider === "digitalocean" },
+		{ type: "input", label: "Zone (Google)", name: "zone", placeholder: "asia-southeast1-a", visible: providerShortName === "gcloud" },
+		{ type: "code-editor", lang: ["json"], label: "Service Account (JSON)", name: "serviceAccount", visible: providerShortName === "gcloud" },
+		{ type: "code-editor", lang: ["yaml"], label: "KubeConfig (YAML)", name: "kubeConfig", visible: providerShortName === "custom" },
+		{ type: "textarea", label: "API Access Token", name: "apiAccessToken", visible: providerShortName === "digitalocean" },
 	];
 
 	return <SmartForm name="cluster" api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />;

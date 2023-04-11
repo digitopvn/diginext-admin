@@ -45,8 +45,9 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 
 	// update the value immediatly:
 	useEffect(() => {
+		// console.log("value :>> ", value);
 		form.setFieldValue(name, value);
-		setValue(value);
+		setValue(value || "");
 	}, [value]);
 
 	useEffect(() => {

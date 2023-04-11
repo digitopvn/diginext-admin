@@ -15,10 +15,10 @@ dayjs.extend(localizedFormat);
 
 export const WorkspaceSettings = () => {
 	const workspace = useWorkspace();
-	console.log("workspace :>> ", workspace);
+	// console.log("workspace :>> ", workspace);
 
 	const { data: { list: apiKeys = [] } = { list: [] } } = useApiKeyListApi();
-	console.log("apiKeys :>> ", apiKeys);
+	// console.log("apiKeys :>> ", apiKeys);
 
 	const { data: publicKeyRes } = useGitPublicKeyApi();
 
