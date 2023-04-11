@@ -49,7 +49,7 @@ export const registryProviders = registryProviderList.map((provider) => {
 	}
 });
 // eslint-disable-next-line prettier/prettier
-export type RegistryProviderType = typeof registryProviderList[number];
+export type RegistryProviderType = (typeof registryProviderList)[number];
 
 export interface IGeneral {
 	/**

@@ -1,5 +1,5 @@
 import { Button, Checkbox, Form, Input, Select, Space, Typography } from "antd";
-import Router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import type { SyntheticEvent } from "react";
 import { useState } from "react";
 
@@ -44,6 +44,9 @@ const WorkspaceSetupPage = () => {
 	const joinWorkspace = async (workspaceId: string) => {
 		const res = await joinWorkspaceApi({ userId: user._id, workspace: workspaceId });
 		if (res?.status) {
+			// await queryClient.invalidateQueries({ queryKey: ["auth"] });
+			refetch();
+
 			// redirect to workspace URL:
 			const url = new URL(window.location.href);
 			const redirectUrl = url.searchParams.get("redirect_url") || window.location.origin;
@@ -58,7 +61,7 @@ const WorkspaceSetupPage = () => {
 		if (result?.status) {
 			const workspace = result?.data;
 			await refetch();
-			Router.push(isDev() ? `${Config.NEXT_PUBLIC_BASE_URL}` : `https://${workspace?.slug}.${Config.NEXT_PUBLIC_DOMAIN}`);
+			router.push(isDev() ? `${Config.NEXT_PUBLIC_BASE_URL}` : `/`);
 		}
 	};
 
@@ -103,7 +106,7 @@ const WorkspaceSetupPage = () => {
 						<Title level={3}>Create a new workspace:</Title>
 						<Form name="create" onFinish={createWorkspace} onFinishFailed={onFinishFailed} autoComplete="off">
 							<Space>
-								<Form.Item name="public" valuePropName="public">
+								<Form.Item name="public" valuePropName="checked">
 									<Checkbox defaultChecked>Public</Checkbox>
 								</Form.Item>
 								<Space.Compact className="w-full">

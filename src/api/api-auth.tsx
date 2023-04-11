@@ -56,7 +56,7 @@ export const useAuth = (props: { redirectUrl?: string } = {}) => {
 	// const [isSettled, setIsSettled] = useState<boolean>(false);
 
 	const authActions = useAuthApi({ access_token: access_token as string });
-	const { data: response, isError, isFetched, isLoading, isSuccess } = authActions;
+	const { data: response, isError, isFetched, isLoading, isSuccess, refetch } = authActions;
 	const { status, data } = response || {};
 	const user = response?.data as IUser;
 	const queryClient = useQueryClient();
@@ -72,14 +72,11 @@ export const useAuth = (props: { redirectUrl?: string } = {}) => {
 		setTimeout(() => {
 			const cookieToken = getCookie("x-auth-cookie");
 
-			// console.log("cookieToken :>>", cookieToken);
-			// console.log("status :>>", status);
+			if (!cookieToken || !status) return router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
 
-			if (!cookieToken || !status) {
-				router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
-			} else {
-				reload();
-			}
+			if (!user.activeWorkspace) return router.push(`/workspace/select`);
+
+			return reload();
 		}, 200);
 	}, [status]);
 
