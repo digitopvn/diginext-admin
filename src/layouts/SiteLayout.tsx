@@ -9,6 +9,7 @@ import { PageFooter } from "@/commons/PageFooter";
 import { SiteHeader } from "@/commons/SiteHeader";
 import { BuildList } from "@/components/deployments/BuildList";
 import { BuildLogs } from "@/components/deployments/BuildLogs";
+import EnvVarsNewEdit from "@/components/deployments/EnvVarsNewEdit";
 import { ReleaseList } from "@/components/deployments/ReleaseList";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useDrawerProvider } from "@/providers/DrawerProvider";
@@ -51,6 +52,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 		if (showDrawer) showDrawer({ title: "Build Logs", content: <BuildLogs /> }, { level: 2 });
 	};
 
+	const openEnvVarsPage = () => {
+		if (showDrawer) showDrawer({ title: "Environment Variables", content: <EnvVarsNewEdit /> }, { level: 1 });
+	};
+
 	const openEditPage = () => {
 		if (showDrawer) showDrawer({ title: "Edit", content: <NewEditPage /> }, { level: 1 });
 	};
@@ -78,6 +83,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 				openEditPage();
 				break;
 
+			case "env_vars":
+				openEnvVarsPage();
+				break;
+
 			default:
 				// close drawer lv1
 				if (closeDrawer) closeDrawer("lv1");
@@ -98,7 +107,20 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 
 	useEffect(() => {
 		if (drawerVisibility?.lv1 === false)
-			deleteQuery(["lv1", "project", "app", "release", "type", "cluster_slug", "framework_slug", "git_provider_slug", "registry_slug"]);
+			deleteQuery([
+				"lv1",
+				"project",
+				"app",
+				"env",
+				"release",
+				"type",
+				"cluster_slug",
+				"framework_slug",
+				"git_provider_slug",
+				"registry_slug",
+				"user",
+				"role",
+			]);
 	}, [drawerVisibility?.lv1]);
 
 	useEffect(() => {

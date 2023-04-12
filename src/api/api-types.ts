@@ -1,6 +1,16 @@
 import type { AxiosRequestConfig } from "axios";
 
-export type ApiOptions = AxiosRequestConfig & { pagination?: IPaginationOptions; populate?: string; filter?: any; sort?: string };
+export type ApiFilter = Record<string, any> | URLSearchParams | undefined;
+
+export type ApiOptions = AxiosRequestConfig & {
+	pagination?: IPaginationOptions;
+	populate?: string;
+	filter?: ApiFilter;
+	sort?: string;
+	staleTime?: number;
+};
+
+export type ApiStatus = "error" | "loading" | "success" | "idle";
 
 export type ApiPagination = {
 	current_page: number;
@@ -10,6 +20,36 @@ export type ApiPagination = {
 	next_page?: number;
 	prev_page?: number;
 };
+
+export interface AccessTokenInfo {
+	access_token: string;
+	expiredTimestamp: number;
+	expiredDate: Date;
+	expiredDateGTM7: string;
+}
+
+export interface ApiResponse<T = any> extends ApiPagination {
+	status: number;
+	data: T;
+	messages: string[];
+	token?: AccessTokenInfo;
+}
+
+export const registryProviderList = ["gcloud", "digitalocean", "dockerhub"] as const;
+export const registryProviders = registryProviderList.map((provider) => {
+	switch (provider) {
+		case "digitalocean":
+			return { name: "Digital Ocean Registry", slug: "digitalocean" };
+		case "gcloud":
+			return { name: "Google Container Registry", slug: "gcloud" };
+		case "dockerhub":
+			return { name: "Docker Registry", slug: "dockerhub" };
+		default:
+			return undefined;
+	}
+});
+// eslint-disable-next-line prettier/prettier
+export type RegistryProviderType = (typeof registryProviderList)[number];
 
 export interface IGeneral {
 	/**
@@ -49,6 +89,28 @@ export interface IPaginationOptions {
 	limit?: number;
 }
 
+export interface WorkspaceApiAccessToken {
+	/**
+	 *
+	 */
+	name: string;
+
+	/**
+	 *
+	 */
+	slug?: string;
+
+	/**
+	 *
+	 */
+	token: string;
+
+	/**
+	 *
+	 */
+	roles?: IRole[];
+}
+
 export interface IWorkspace extends IGeneral {
 	/**
 	 * Workspace name
@@ -77,11 +139,41 @@ export interface IWorkspace extends IGeneral {
 	 * @remarks This can be populated to {User} data
 	 */
 	owner?: IUser | string;
+
+	/**
+	 * List of this workspace's API Access Token
+	 */
+	apiAccessTokens?: WorkspaceApiAccessToken[];
+}
+
+export type IRouteScope = "all" | "workspace" | "team" | "project" | "app";
+
+export type IRoutePermission = "full" | "own" | "create" | "read" | "update" | "delete";
+
+export interface RoleRoute {
+	/**
+	 * Route path
+	 * @example /api/v1/healthz
+	 */
+	route: string;
+	/**
+	 * @default ["full"]
+	 */
+	permissions: IRoutePermission[];
+	/**
+	 * (TBC)
+	 * @default all
+	 * @example all
+	 */
+	scope?: IRouteScope;
 }
 
 export interface IRole extends IGeneral {
 	name?: string;
 	image?: string;
+	type?: string;
+
+	routes?: RoleRoute[];
 
 	/**
 	 * ID of the project
@@ -145,6 +237,11 @@ export interface IUser extends IGeneral {
 	name?: string;
 
 	/**
+	 * User's type
+	 */
+	type?: "user" | "service_account" | "api_key_user";
+
+	/**
 	 * Unique username of a user
 	 * This equavilent with "slug"
 	 */
@@ -178,7 +275,7 @@ export interface IUser extends IGeneral {
 	/**
 	 * User token
 	 */
-	token?: any;
+	token?: AccessTokenInfo;
 
 	/**
 	 * User's roles
@@ -194,7 +291,14 @@ export interface IUser extends IGeneral {
 	 * List of workspace IDs which this user is a member
 	 */
 	workspaces?: IWorkspace[];
+
+	/**
+	 * Active workspace ID which the user is logging into
+	 */
+	activeWorkspace?: IWorkspace;
 }
+
+export interface IServiceAccount extends IUser {}
 
 export interface IGitProvider extends IGeneral {
 	name?: string;
@@ -298,7 +402,7 @@ export interface IContainerRegistry extends IGeneral {
 	// @Column()
 	// serviceAccount?: string;
 
-	imagePullingSecret?: {
+	imagePullSecret?: {
 		name?: string;
 		value?: string;
 	};
@@ -316,6 +420,20 @@ export interface IContainerRegistry extends IGeneral {
 	 * @remarks This can be populated to {Workspace} data
 	 */
 	workspace?: IWorkspace | string;
+}
+
+export interface KubeEnvironmentVariable {
+	name: string;
+	value: string;
+}
+
+export interface DiginextEnvironmentVariable {
+	name: string;
+	value: string;
+	/**
+	 * @default "string"
+	 */
+	type?: "string" | "secret";
 }
 
 export interface IAppEnvironment {
@@ -381,6 +499,26 @@ export interface IAppEnvironment {
 	ssl?: "letsencrypt" | "custom" | "none";
 	tlsSecret?: string;
 	cliVersion?: string;
+	/**
+	 * Content of namespace YAML file
+	 */
+	namespaceYaml?: string;
+	/**
+	 * Content of deployment YAML file
+	 */
+	deploymentYaml?: string;
+	/**
+	 * Content of prerelease deployment YAML file
+	 */
+	prereleaseDeploymentYaml?: string;
+	/**
+	 * Prerelease endpoint URL
+	 */
+	prereleaseUrl?: string;
+	/**
+	 * Collection array of environment variables
+	 */
+	envVars?: KubeEnvironmentVariable[];
 }
 
 export interface ICloudProvider extends IGeneral {
@@ -437,6 +575,11 @@ export interface ICluster extends IGeneral {
 	 * Cluster slug
 	 */
 	slug?: string;
+
+	/**
+	 * Flag to check cluster's accessibility
+	 */
+	isVerified?: boolean;
 
 	/**
 	 * Cluster short name (to access via `kubectl context`)
@@ -516,7 +659,12 @@ export interface ICluster extends IGeneral {
 }
 
 export interface IApp extends IGeneral {
+	/**
+	 * @deprecated
+	 */
 	environment?: { [key: string]: IAppEnvironment };
+	deployEnvironment?: { [key: string]: IAppEnvironment };
+
 	git?: string;
 	latestBuild?: string;
 	name?: string;
@@ -564,6 +712,7 @@ export interface IBuild extends IGeneral {
 	slug?: string;
 	env?: string;
 	branch?: string;
+	logs?: string;
 	createdBy?: string;
 	status?: "start" | "building" | "failed" | "success";
 	projectSlug?: string;

@@ -22,20 +22,23 @@ const SmartSelect = (props: SmartFormElementProps) => {
 		autoSave = true,
 		isNew,
 		options,
+		onChange,
 		disabled = false,
+		visible = true,
 	} = props;
 
 	const form = Form.useFormInstance();
 
 	const [_value, setValue] = useState(value ?? defaultValue);
 	const debouncedValue = useDebounce(_value, 500);
-	console.log("_value :>> ", _value);
+	// console.log("_value :>> ", _value);
 
 	// callbacks
-	const onChange = (selectedValue: any) => {
-		const editorValue = selectedValue;
+	const _onChange = (selectedValue: any) => {
 		form.setFieldValue(name, selectedValue);
 		setValue(selectedValue);
+
+		if (onChange) onChange(selectedValue);
 	};
 
 	const submit = () => form.submit();
@@ -52,8 +55,7 @@ const SmartSelect = (props: SmartFormElementProps) => {
 
 	// update the value immediatly:
 	useEffect(() => {
-		console.log("value :>> ", value);
-
+		// console.log("value :>> ", value);
 		form.setFieldValue(name, value);
 		setValue(value);
 	}, [value]);
@@ -65,11 +67,19 @@ const SmartSelect = (props: SmartFormElementProps) => {
 		if (autoSave && !isNew) submit();
 	}, [debouncedValue]);
 
+	// console.log("status :>> ", status);
+	// console.log(`status[${name}] :>> `, status[name]);
+
 	let icon;
-	if (status && status[name] === "error") icon = <CloseOutlined />;
+	if (status && status[name] === "error")
+		icon = (
+			<span className="text-red-600">
+				<CloseOutlined />
+				Failed
+			</span>
+		);
 	if (status && status[name] === "loading") icon = <LoadingOutlined />;
 	if (status && status[name] === "success") icon = <CheckOutlined color="green" />;
-
 	return (
 		<Form.Item
 			label={
@@ -80,14 +90,15 @@ const SmartSelect = (props: SmartFormElementProps) => {
 			}
 			name={name}
 			rules={[{ required, message: requiredMessage }]}
+			style={{ display: visible ? "block" : "none" }}
 		>
 			<Space direction="horizontal" className="w-full">
-				<Select className={className} style={style} value={_value} onChange={onChange} options={options} disabled={disabled} />
+				<Select className={className} style={style} value={_value} onChange={_onChange} options={options} disabled={disabled} />
 
 				{postLabel}
 
 				{/* Display manual save controller if auto save is off */}
-				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}
+				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
 			</Space>
 		</Form.Item>
 	);

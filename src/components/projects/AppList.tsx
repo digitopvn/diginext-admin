@@ -16,7 +16,7 @@ import React from "react";
 
 import { useAppListApi } from "@/api/api-app";
 import { useProjectListApi } from "@/api/api-project";
-import type { IApp, IAppEnvironment, IProject, IUser } from "@/api/api-types";
+import type { IApp, IProject, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
@@ -170,10 +170,9 @@ export const AppList = () => {
 	const { list: apps } = appResponse || {};
 
 	const displayedApps: DataType[] = (apps || []).map((app) => {
-		const environmentNames = Object.keys(app.environment ?? {});
-		const environments: DataType[] = environmentNames.map((envName) => {
-			const envStr = app.environment ? (app.environment[envName] as string) : "[]";
-			const envData = JSON.parse(envStr) as IAppEnvironment;
+		const envList = Object.keys(app.deployEnvironment ?? {});
+		const environments: DataType[] = envList.map((envName) => {
+			const deployEnvironment = (app.deployEnvironment || {})[envName] || {};
 			return {
 				name: envName.toUpperCase(),
 				key: `${project?.slug}-${app.slug}-${envName}`,
@@ -181,8 +180,8 @@ export const AppList = () => {
 				slug: envName,
 				action: envName !== "prod" ? "env" : "env-prod",
 				status: "live",
-				url: envData.domains ? `https://${envData.domains[0]}` : "",
-				...(envData as any),
+				url: deployEnvironment.domains ? `https://${deployEnvironment.domains[0]}` : "",
+				...(deployEnvironment as any),
 			};
 		});
 		return { ...app, children: environments };

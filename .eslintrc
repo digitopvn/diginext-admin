@@ -54,7 +54,7 @@
 				"react/jsx-filename-extension": "off", //
 				"react/no-unescaped-entities": "off",
 				"react/display-name": "off",
-				// typescrypt
+				// typescript
 				"@typescript-eslint/naming-convention": "off",
 				"@typescript-eslint/comma-dangle": "off", // Avoid conflict rule between Eslint and Prettier
 				"@typescript-eslint/consistent-type-imports": "error", // Ensure `import type` is used when it's necessary

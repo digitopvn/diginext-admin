@@ -22,6 +22,7 @@ const SmartInput = (props: SmartFormElementProps) => {
 		isNew,
 		placeholder,
 		disabled = false,
+		visible = true,
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -62,7 +63,13 @@ const SmartInput = (props: SmartFormElementProps) => {
 	}, [debouncedValue]);
 
 	let icon;
-	if (status && status[name] === "error") icon = <CloseOutlined />;
+	if (status && status[name] === "error")
+		icon = (
+			<span className="text-red-600">
+				<CloseOutlined />
+				Failed
+			</span>
+		);
 	if (status && status[name] === "loading") icon = <LoadingOutlined />;
 	if (status && status[name] === "success") icon = <CheckOutlined color="green" />;
 
@@ -79,12 +86,13 @@ const SmartInput = (props: SmartFormElementProps) => {
 			}
 			name={name}
 			rules={[{ required, message: requiredMessage }]}
+			style={{ display: visible ? "block" : "none" }}
 		>
 			<Space direction="vertical" className="w-full">
 				<Input placeholder={placeholder} onChange={onChange} value={_value} disabled={disabled} />
 
 				{/* Display manual save controller if auto save is off */}
-				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}
+				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
 			</Space>
 		</Form.Item>
 	);

@@ -1,8 +1,18 @@
-import { CheckOutlined, ClearOutlined, RollbackOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, CheckOutlined, ClearOutlined, CloseCircleOutlined, LoadingOutlined, RollbackOutlined } from "@ant-design/icons";
 import { Button, Form, Space } from "antd";
 
-const ManualSaveController = (props: { compact?: boolean; icon?: any; name: string; initialValue: any; setValue: (value: any) => void }) => {
-	const { compact = false, icon, name, setValue, initialValue } = props;
+import type { ApiStatus } from "@/api/api-types";
+
+interface ManualSaveControllerProps {
+	name: string;
+	initialValue: any;
+	setValue: (value: any) => void;
+	compact?: boolean;
+	apiStatus?: ApiStatus;
+}
+
+const ManualSaveController = (props: ManualSaveControllerProps) => {
+	const { compact = false, name, setValue, initialValue, apiStatus } = props;
 	const form = Form.useFormInstance();
 
 	const submit = () => form.submit();
@@ -14,11 +24,17 @@ const ManualSaveController = (props: { compact?: boolean; icon?: any; name: stri
 
 	const clear = () => {
 		form.setFieldValue(name, "");
-		setValue("");
+		setValue(undefined);
 	};
+
+	let statusIcon;
+	if (apiStatus && apiStatus === "loading") statusIcon = <LoadingOutlined />;
+	if (apiStatus && apiStatus === "error") statusIcon = <CloseCircleOutlined />;
+	if (apiStatus && apiStatus === "success") statusIcon = <CheckCircleOutlined />;
 
 	return (
 		<Space size={compact ? 4 : 8}>
+			{statusIcon}
 			<Button type="primary" icon={compact && <CheckOutlined />} onClick={() => submit()}>
 				{!compact && "Save"}
 			</Button>

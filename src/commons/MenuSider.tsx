@@ -22,6 +22,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useDarkMode } from "usehooks-ts";
 
+import { useAuth } from "@/api/api-auth";
+import type { IRole } from "@/api/api-types";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
 
 const items: MenuProps["items"] = [
@@ -110,6 +112,11 @@ export const MenuSider = () => {
 	const router = useRouter();
 	const { sidebarCollapsed, toggleSidebar } = useLayoutProvider();
 	const { isDarkMode } = useDarkMode();
+
+	const [user] = useAuth();
+	const userRoles = ((user?.roles as IRole[]) || []).filter((role) => role.workspace === user.activeWorkspace?._id);
+	const activeRole = userRoles[0];
+	// console.log("activeRole :>> ", activeRole);
 
 	const pageLv0 = `menu/${trimStart(router.pathname, "/").split("/")[0]}`;
 	const menuPath = `menu${trimEnd(router.pathname, "/")}`;

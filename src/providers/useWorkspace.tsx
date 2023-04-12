@@ -7,7 +7,8 @@ const useWorkspace = (props: { name?: string } = {}) => {
 	const [{ workspace: workspaceInQuery }] = useRouterQuery();
 	const workspaceSlug = subdomain === "app" || subdomain === "localhost" || subdomain === "diginext" ? props.name : workspaceInQuery ?? subdomain;
 	// console.log("workspaceSlug :>> ", workspaceSlug);
-	const { data: workspace } = useWorkspaceSlugApi(workspaceSlug);
+
+	const { data: workspace } = useWorkspaceSlugApi(workspaceSlug, { staleTime: 8 * 60 * 60 * 1000 });
 
 	return workspace;
 };

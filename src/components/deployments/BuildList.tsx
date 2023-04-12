@@ -1,11 +1,12 @@
 import {
-	BugOutlined,
 	CheckCircleOutlined,
 	CloseCircleOutlined,
+	CodeOutlined,
 	EyeOutlined,
 	InfoCircleOutlined,
 	LoadingOutlined,
 	RocketOutlined,
+	StopOutlined,
 } from "@ant-design/icons";
 import { App, Button, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
@@ -15,7 +16,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 
-import { useBuildListApi } from "@/api/api-build";
+import { useBuildListApi, useBuildStopApi } from "@/api/api-build";
 import { useCreateReleaseFromBuildApi } from "@/api/api-release";
 import type { IBuild, IRelease, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
@@ -48,7 +49,7 @@ const columns: ColumnsType<IBuild & DataType> = [
 		render: (value, record) => (
 			<>
 				<p>
-					<Link href={{ pathname: `/build/[...slugs]`, query: { slugs: [record.slug as string] } }}>
+					<Link href={`/build/logs?build_slug=${record.slug}`}>
 						<strong>{value}</strong>
 					</Link>
 				</p>
@@ -143,7 +144,9 @@ export const BuildList = () => {
 	// const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 	const [page, setPage] = useState(1);
 
-	const { data } = useBuildListApi({ populate: "owner", pagination: { page, size: pageSize }, filter });
+	const [stopBuildApi, stopBuildStatus] = useBuildStopApi();
+
+	const { data } = useBuildListApi({ sort: "-createdAt", populate: "owner", pagination: { page, size: pageSize }, filter });
 	const { list: builds, pagination } = data || {};
 	const { total_items } = pagination || {};
 
@@ -164,17 +167,21 @@ export const BuildList = () => {
 		}
 
 		try {
-			const release = await releaseCreateFromBuildApi({ build: buildId } as IRelease);
+			const createRes = await releaseCreateFromBuildApi({ build: buildId, env } as IRelease);
 
-			root.notification.success({
-				message: `Congrats, the release has been created successfully!`,
-				description: (
-					<>
-						You can now preview it on <a href={`https://${release?.prereleaseUrl}`}>PRE-RELEASE</a> endpoint.
-					</>
-				),
-				placement: "top",
-			});
+			if (createRes?.status) {
+				const release = createRes?.data;
+				root.notification.success({
+					message: `Congrats, the release has been created successfully!`,
+					description: (
+						<>
+							You can now preview it on <a href={`https://${release?.prereleaseUrl}`}>PRE-RELEASE</a> endpoint.
+						</>
+					),
+					placement: "top",
+				});
+				return;
+			}
 		} catch (e) {
 			console.error(`Could not process releasing this build:`, e);
 
@@ -186,20 +193,38 @@ export const BuildList = () => {
 		}
 	};
 
+	const stopBuild = async (slug?: string) => {
+		const result = await stopBuildApi({ slug });
+		console.log("[BuildList] stopBuild :>> ", result);
+
+		if (!result?.status) {
+			root.notification.error({
+				message: `Failed to proceed.`,
+				description: `Could not stop this build due to server issue. Please try again later.`,
+				placement: "top",
+			});
+		}
+	};
+
 	const displayedBuilds = builds?.map((build) => {
 		return {
 			id: build._id,
 			...build,
 			action: (
 				<Space.Compact>
-					<Tooltip title="View log history">
-						<Button icon={<BugOutlined />} onClick={() => openBuildLogs(build.slug)} />
+					{build.status === "building" && (
+						<Tooltip title="Stop building">
+							<Button danger icon={<StopOutlined />} onClick={() => stopBuild(build?.slug)} />
+						</Tooltip>
+					)}
+					<Tooltip title="View logs">
+						<Button icon={<CodeOutlined />} onClick={() => openBuildLogs(build.slug)} />
 					</Tooltip>
-					<Tooltip title="Go to image link">
+					<Tooltip title="Open image URL">
 						<Button icon={<EyeOutlined />} href={`https://${build.image}`} target="_blank" />
 					</Tooltip>
 					{build.env === "prod" && (
-						<Tooltip title="Release this build">
+						<Tooltip title="Create a release from this build">
 							<Button icon={<RocketOutlined />} onClick={() => releaseBuild(build._id?.toString())} />
 						</Tooltip>
 					)}
@@ -217,11 +242,11 @@ export const BuildList = () => {
 	};
 
 	return (
-		<div>
+		<div className="h-full overflow-auto">
 			<Table
 				columns={columns}
 				dataSource={displayedBuilds}
-				scroll={{ x: 600 }}
+				scroll={{ x: 550 }}
 				sticky={{ offsetHeader: 0 }}
 				pagination={{ current: page, pageSize, total: total_items }}
 				onChange={onTableChange}

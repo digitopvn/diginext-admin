@@ -26,6 +26,20 @@ export const useUserDeleteApi = () => {
 };
 
 // Add an user to a workspace
+type UserJoinWorkspaceParams = {
+	/**
+	 * User ID
+	 */
+	userId: string;
+	/**
+	 * Workspace slug
+	 */
+	workspace: string;
+};
 export const useUserJoinWorkspaceApi = (options?: ApiOptions) => {
-	return useUpdateApi<IUser>(["users"], `/api/v1/user/join-workspace`, options);
+	return useUpdateApi<UserJoinWorkspaceParams, IUser>(["users"], `/api/v1/user/join-workspace`, options);
+};
+
+export const useUserAssignRoleApi = (options?: ApiOptions) => {
+	return useUpdateApi<{ roleId: string }, IUser>(["users"], `/api/v1/user/assign-role`, options);
 };

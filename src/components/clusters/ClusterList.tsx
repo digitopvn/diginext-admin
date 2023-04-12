@@ -51,8 +51,15 @@ const columns: ColumnsType<DataType> = [
 		title: "Provider",
 		dataIndex: "provider",
 		key: "provider",
-		width: 30,
+		width: 40,
 		render: (value, record) => <>{record.providerShortName}</>,
+	},
+	{
+		title: "Verified",
+		dataIndex: "isVerified",
+		key: "isVerified",
+		width: 30,
+		render: (value, record) => <>{record.isVerified ? "YES" : "NO"}</>,
 	},
 	{
 		title: "Created by",

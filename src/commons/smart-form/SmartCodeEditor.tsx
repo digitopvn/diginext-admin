@@ -26,6 +26,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 		lang = [],
 		height = "350px",
 		disabled = false,
+		visible = true,
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -44,8 +45,9 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 
 	// update the value immediatly:
 	useEffect(() => {
+		// console.log("value :>> ", value);
 		form.setFieldValue(name, value);
-		setValue(value);
+		setValue(value || "");
 	}, [value]);
 
 	useEffect(() => {
@@ -56,7 +58,13 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 	}, [debouncedValue]);
 
 	let icon;
-	if (status && status[name] === "error") icon = <CloseOutlined />;
+	if (status && status[name] === "error")
+		icon = (
+			<span className="text-red-600">
+				<CloseOutlined />
+				Failed
+			</span>
+		);
 	if (status && status[name] === "loading") icon = <LoadingOutlined />;
 	if (status && status[name] === "success") icon = <CheckOutlined color="green" />;
 
@@ -70,6 +78,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 			}
 			name={name}
 			rules={[{ required, message: requiredMessage }]}
+			style={{ display: visible ? "block" : "none" }}
 		>
 			{/* <Input suffix={icon} onChange={onChange} /> */}
 			<Space direction="vertical" className="w-full">
@@ -85,7 +94,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 				{postLabel}
 
 				{/* Display manual save controller if auto save is off */}
-				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} icon={icon} />}
+				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
 			</Space>
 		</Form.Item>
 	);

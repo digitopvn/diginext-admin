@@ -24,8 +24,8 @@ const CliPage = () => {
 	// console.log("user :>> ", user);
 	const [joinApi] = useUserJoinWorkspaceApi();
 
-	const _slug = user?.workspaces && user?.workspaces.length > 0 ? user?.workspaces[0].slug : undefined;
-	const workspace = useWorkspace({ name: _slug });
+	const wsSlug = user?.activeWorkspace?.slug;
+	const workspace = useWorkspace({ name: wsSlug });
 	const { slug: workspaceSlug } = workspace || {};
 	// console.log("workspaceSlug :>> ", workspaceSlug);
 
@@ -35,10 +35,12 @@ const CliPage = () => {
 
 		// console.log("userId :>> ", userId);
 
-		const joinedUser = await joinApi({
+		const joinRes = await joinApi({
 			userId,
 			workspace: workspaceSlug,
 		});
+
+		const joinedUser = joinRes?.data;
 		console.log("joinedUser :>> ", joinedUser);
 	};
 
@@ -60,7 +62,7 @@ const CliPage = () => {
 					{!isEmpty(workspace) ? (
 						<div className="text-center">
 							<p>Copy & paste this ACCESS TOKEN into your command interface:</p>
-							<CopyCode value={!isEmpty(user) ? (user?.token as any).access_token : ""} />
+							<CopyCode value={!isEmpty(user) ? (user?.token as any)?.access_token : ""} />
 							<Button size="large" className="mt-2" href="/" icon={<HomeOutlined />}>
 								Dashboard
 							</Button>

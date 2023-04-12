@@ -1,9 +1,10 @@
 import type { UseQueryResult } from "@tanstack/react-query";
-import { Button, Form, Popconfirm, Space, theme } from "antd";
+import { App, Button, Form, Popconfirm, Space, theme } from "antd";
 import _, { isEmpty } from "lodash";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import type { UseCreateApi, UseUpdateApi } from "@/api/api";
+import type { ApiResponse } from "@/api/api-types";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useDrawerProvider } from "@/providers/DrawerProvider";
 
@@ -24,12 +25,15 @@ export type SmartFormProps<T> = {
 	configs?: SmartFormElementProps[];
 };
 
+const { useApp } = App;
+
 const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 	const { name, configs = [] } = props;
 
-	const { data: item } = props.api?.useSlugApi || {};
+	const root = useApp();
 
-	const { useCreateApi, useUpdateApi } = props.api || {};
+	const { useSlugApi, useCreateApi, useUpdateApi } = props.api || {};
+	const { data: item } = useSlugApi || {};
 	const [updateApi, updateStatus] = useUpdateApi || [];
 	const [createApi, createStatus] = useCreateApi || [];
 
@@ -37,7 +41,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 	// const slug = slugKey ? query[slugKey] : undefined;
 
 	const [form] = Form.useForm<T>();
-	const [fieldsStatus, setFieldsStatus] = useState();
+	const [fieldsStatus, setFieldsStatus] = useState<Record<string, "error" | "idle" | "loading" | "success" | undefined>>();
 
 	const isNew = typeof item === "undefined";
 
@@ -51,7 +55,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 		console.log(isNew ? "[NEW]" : "[UPDATE]", "Submit:", values);
 		const postData = { ...values };
 
-		let result: T | undefined;
+		let result: ApiResponse<T> | undefined;
 		if (isNew) {
 			Object.entries(postData).forEach(([field, value]) => {
 				if (field.indexOf(".") > -1) {
@@ -63,9 +67,13 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 			if (createApi) result = await createApi(postData);
 			console.log("[NEW] result :>> ", result);
 
-			closeDrawer();
+			// if success
+			if (result?.status) {
+				root.notification.success({ message: "Congrats!", description: `Item has been created successfully.` });
+				closeDrawer();
+			}
 		} else {
-			const statuses: any = {};
+			const statuses: Record<string, "error" | "idle" | "loading" | "success" | undefined> = {};
 			Object.entries(postData).forEach(([field, value]) => {
 				if (item && value !== (item as any)[field]) {
 					statuses[field] = "loading";
@@ -75,32 +83,28 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 				}
 			});
 
-			console.log("statuses :>> ", statuses);
-			setFieldsStatus(statuses);
-
 			if (!isEmpty(statuses)) {
 				if (updateApi) result = await updateApi(postData);
 				console.log("[UPDATE] result :>> ", result);
+
+				Object.entries(postData).forEach(([field, value]) => {
+					statuses[field] = result?.status === 0 ? "error" : "success";
+				});
+
+				// if success
+				// if (result?.status) closeDrawer();
 			} else {
 				console.log("[UPDATE] Skipped, nothing new to update.");
 			}
+
+			console.log("statuses :>> ", statuses);
+			setFieldsStatus(statuses);
 		}
 	};
 
 	const onFinishFailed = (errorInfo: any) => {
 		console.log("Failed:", errorInfo);
 	};
-
-	useEffect(() => {
-		if (typeof fieldsStatus === "undefined") return;
-		// console.log("fieldsStatus :>> ", fieldsStatus);
-		const fields = Object.keys(fieldsStatus);
-		const statuses: any = {};
-		fields.forEach((field) => {
-			statuses[field] = updateStatus;
-		});
-		setFieldsStatus(statuses);
-	}, [updateStatus]);
 
 	return (
 		<Form
@@ -115,13 +119,14 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 		>
 			<div className="p-6 pb-16">
 				{configs.map((field) => {
+					console.log("field :>> ", field);
 					switch (field.type) {
 						case "input":
 							return (
 								<SmartInput
 									key={`${name}-${field.name}`}
 									{...field}
-									value={item && _.get(item, field.name)}
+									value={field.value || (item ? _.get(item, field.name) : null)}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>
@@ -132,7 +137,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 								<SmartTextArea
 									key={`${name}-${field.name}`}
 									{...field}
-									value={item && _.get(item, field.name)}
+									value={field.value || (item ? _.get(item, field.name) : null)}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>
@@ -143,22 +148,27 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 								<SmartCodeEditor
 									key={`${name}-${field.name}`}
 									{...field}
-									value={item && _.get(item, field.name)}
+									value={field.value || (item ? _.get(item, field.name) : null)}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>
 							);
 
 						case "select": {
-							let { selectedKey } = field;
-							if (typeof selectedKey === "undefined") selectedKey = "_id";
+							let { displayKey } = field;
+							if (typeof displayKey === "undefined") displayKey = "name";
+							// console.log("item :>> ", item);
+							// console.log("fiefield.options :>> ", field.options);
+							// console.log("selectedKey :>> ", selectedKey);
 
+							const selectedValue = _.get(item, displayKey ? `${displayKey}` : field.name);
+							// console.log("selectedValue :>> ", selectedValue);
 							return (
 								<SmartSelect
 									key={`${name}-${field.name}`}
 									{...field}
 									style={{ minWidth: 300, ...field?.style }}
-									value={item && _.get(item, selectedKey === "" ? field.name : `${field.name}.${selectedKey}`)}
+									value={selectedValue}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>
