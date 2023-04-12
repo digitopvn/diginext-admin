@@ -50,7 +50,7 @@ export class Config {
 	static get NEXT_PUBLIC_API_BASE_URL() {
 		if (typeof window !== "undefined") {
 			if (window.location.origin.indexOf("localhost") > -1) {
-				return "http://api.localhost:6969";
+				return "http://localhost:6969";
 			}
 			return window.location.origin;
 		}

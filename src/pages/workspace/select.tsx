@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import type { SyntheticEvent } from "react";
 import { useState } from "react";
 
-import { AuthPage, useAuth } from "@/api/api-auth";
+import { useAuth } from "@/api/api-auth";
 import { useUserJoinWorkspaceApi } from "@/api/api-user";
 import { useWorkspaceCreateApi } from "@/api/api-workspace";
 import CenterContainer from "@/commons/CenterContainer";
@@ -55,9 +55,11 @@ const WorkspaceSetupPage = () => {
 	};
 
 	const createWorkspace = async (values: any) => {
-		console.log("Submit:", values);
+		const wsData: any = {};
+		wsData.name = values.name;
+		wsData.public = typeof values.public === "undefined" ? false : values.public;
 
-		const result = await createWorkspaceApi({ ...values });
+		const result = await createWorkspaceApi(wsData);
 		if (result?.status) {
 			const workspace = result?.data;
 			await refetch();
@@ -75,60 +77,58 @@ const WorkspaceSetupPage = () => {
 	};
 
 	return (
-		<AuthPage>
-			<Main useSidebar={false} meta={<Meta title="Select/Create a Workspace" description="Select or create your workspace." />}>
-				{/* Page title & desc here */}
+		<Main useSidebar={false} meta={<Meta title="Select/Create a Workspace" description="Select or create your workspace." />}>
+			{/* Page title & desc here */}
 
-				{/* Page Content */}
-				<CenterContainer className="text-center">
-					<DiginextLogo />
+			{/* Page Content */}
+			<CenterContainer className="text-center">
+				<DiginextLogo />
 
-					{workspaces.length > 0 && (
-						<div>
-							<Title level={3}>Select a workspace:</Title>
-							<p>Choose a workspace which you want to interact with:</p>
-							<Form name="select">
-								<Form.Item name="workspace">
-									<Select
-										size="large"
-										value={`${workspaces[0]?.name} (${workspaces[0]?.slug})`}
-										onChange={onSelectWorkspace}
-										options={workspaces?.map((workspace) => {
-											return { label: `${workspace.name} (${workspace.slug})`, value: workspace._id };
-										})}
-									/>
-								</Form.Item>
-							</Form>
-						</div>
-					)}
-
+				{workspaces.length > 0 && (
 					<div>
-						<Title level={3}>Create a new workspace:</Title>
-						<Form name="create" onFinish={createWorkspace} onFinishFailed={onFinishFailed} autoComplete="off">
-							<Space>
-								<Form.Item name="public" valuePropName="checked">
-									<Checkbox defaultChecked>Public</Checkbox>
-								</Form.Item>
-								<Space.Compact className="w-full">
-									<Form.Item
-										name="name"
-										style={{ flex: "auto" }}
-										rules={[{ required: true, message: "Please input your workspace name!" }]}
-									>
-										<Input className="text-center text-lg" placeholder="Enter your workspace name" onChange={onChange} />
-									</Form.Item>
-									<Form.Item>
-										<Button type="primary" htmlType="submit" disabled={wsName === ""} className="h-[38px]">
-											GO!
-										</Button>
-									</Form.Item>
-								</Space.Compact>
-							</Space>
+						<Title level={3}>Select a workspace:</Title>
+						<p>Choose a workspace which you want to interact with:</p>
+						<Form name="select">
+							<Form.Item name="workspace">
+								<Select
+									size="large"
+									value={`${workspaces[0]?.name} (${workspaces[0]?.slug})`}
+									onChange={onSelectWorkspace}
+									options={workspaces?.map((workspace) => {
+										return { label: `${workspace.name} (${workspace.slug})`, value: workspace._id };
+									})}
+								/>
+							</Form.Item>
 						</Form>
 					</div>
-				</CenterContainer>
-			</Main>
-		</AuthPage>
+				)}
+
+				<div>
+					<Title level={3}>Create a new workspace:</Title>
+					<Form name="create" onFinish={createWorkspace} onFinishFailed={onFinishFailed} autoComplete="off">
+						<Space>
+							<Form.Item name="public" valuePropName="checked">
+								<Checkbox>Public</Checkbox>
+							</Form.Item>
+							<Space.Compact className="w-full">
+								<Form.Item
+									name="name"
+									style={{ flex: "auto" }}
+									rules={[{ required: true, message: "Please input your workspace name!" }]}
+								>
+									<Input className="text-center text-lg" placeholder="Your workspace name" onChange={onChange} />
+								</Form.Item>
+								<Form.Item>
+									<Button type="primary" htmlType="submit" disabled={wsName === ""} className="h-[38px]">
+										GO!
+									</Button>
+								</Form.Item>
+							</Space.Compact>
+						</Space>
+					</Form>
+				</div>
+			</CenterContainer>
+		</Main>
 	);
 };
 

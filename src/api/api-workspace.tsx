@@ -25,6 +25,10 @@ export const useWorkspaceDeleteApi = () => {
 	return useDeleteApi<IWorkspace>(["workspaces", "delete"], `/api/v1/workspace`);
 };
 
+export const useWorkspaceInviteApi = (options?: ApiOptions) => {
+	return useCreateApi<IWorkspace>(["workspaces", "invite"], `/api/v1/workspace/invite`, options);
+};
+
 // export const useWorkspaceJoinApi = (filter: any, options?: ApiOptions) => {
 // 	return useUpdateApi<IWorkspace>(["workspaces"], `/api/v1/workspace`, filter, options);
 // };

@@ -92,9 +92,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 				});
 
 				// if success
-				if (result?.status) {
-					closeDrawer();
-				}
+				// if (result?.status) closeDrawer();
 			} else {
 				console.log("[UPDATE] Skipped, nothing new to update.");
 			}
