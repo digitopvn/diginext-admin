@@ -99,12 +99,12 @@ const items: MenuProps["items"] = [
 				icon: <LockOutlined />,
 				label: "Roles",
 			},
-			{
-				key: `menu/workspace/settings`,
-				icon: <SettingOutlined />,
-				label: "Settings",
-			},
 		],
+	},
+	{
+		key: `menu/settings`,
+		icon: <SettingOutlined />,
+		label: "Settings",
 	},
 ];
 
