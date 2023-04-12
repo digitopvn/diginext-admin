@@ -1,6 +1,5 @@
 import { Card, Divider, List, Typography } from "antd";
 import dayjs from "dayjs";
-import React from "react";
 
 import { useGitPublicKeyApi } from "@/api/api-git-provider";
 import { useApiKeyListApi } from "@/api/api-key";

@@ -1,6 +1,7 @@
 import { AuthPage } from "@/api/api-auth";
 import { PageTitle } from "@/commons/PageTitle";
 import DestroyWorkspaceButton from "@/components/workspaces/DestroyButton";
+import WorkspacePrivacySwitch from "@/components/workspaces/WorkspacePrivacySwitch";
 import { WorkspaceSettings } from "@/components/workspaces/WorkspaceSettings";
 import { Main } from "@/templates/Main";
 import { Meta } from "@/templates/Meta";
@@ -13,7 +14,10 @@ const WorkspaceSettingPage = () => {
 				<PageTitle
 					title="Workspace Settings"
 					breadcrumbs={[{ name: "Workspace" }]}
-					actions={[<DestroyWorkspaceButton key={`destroy-workspace-button`} />]}
+					actions={[
+						<WorkspacePrivacySwitch key={`workspace-privacy-switch`} />,
+						<DestroyWorkspaceButton key={`destroy-workspace-button`} />,
+					]}
 				/>
 
 				{/* Page Content */}

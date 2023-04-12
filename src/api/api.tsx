@@ -130,7 +130,7 @@ export const useApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
-	console.log(apiPath, "> headers :>> ", headers);
+	// console.log(apiPath, "> headers :>> ", headers);
 
 	return useQuery<ApiResponse<T>, Error>({
 		queryKey: keys,

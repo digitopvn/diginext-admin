@@ -124,6 +124,11 @@ export interface IWorkspace extends IGeneral {
 	slug?: string;
 
 	/**
+	 * Is this a Public workspace
+	 */
+	public?: boolean;
+
+	/**
 	 * Workspace profile picture
 	 */
 	image?: string;
