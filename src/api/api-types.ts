@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import type { AxiosRequestConfig } from "axios";
 
 export type ApiFilter = Record<string, any> | URLSearchParams | undefined;
@@ -48,8 +49,42 @@ export const registryProviders = registryProviderList.map((provider) => {
 			return undefined;
 	}
 });
-// eslint-disable-next-line prettier/prettier
 export type RegistryProviderType = (typeof registryProviderList)[number];
+
+// cloud providers
+export const cloudProviderList = ["gcloud", "digitalocean", "custom"] as const;
+export type CloudProviderType = (typeof cloudProviderList)[number];
+
+// git providers
+export const availableGitProviders = ["bitbucket", "github"] as const;
+export const gitProviders = availableGitProviders.map((provider) => {
+	switch (provider) {
+		case "bitbucket":
+			return { name: "Bitbucket", slug: "bitbucket" };
+		case "github":
+			return { name: "Github", slug: "github" };
+		// case "gitlab":
+		// 	return { name: "Gitlab", slug: "gitlab" };
+		default:
+			return { name: "Unknown", slug: "unknown" };
+	}
+});
+export type GitProviderType = (typeof availableGitProviders)[number];
+
+// resource types
+export const availableResourceSizes = ["none", "1x", "2x", "3x", "4x", "5x", "6x", "7x", "8x", "9x", "10x"] as const;
+export type ResourceQuotaSize = (typeof availableResourceSizes)[number];
+
+// git provider domains
+export const gitProviderDomain = {
+	bitbucket: "bitbucket.org",
+	github: "github.com",
+	gitlab: "gitlab.com",
+};
+
+// build status
+export const buildStatusList = ["start", "building", "failed", "success"] as const;
+export type BuildStatus = (typeof buildStatusList)[number];
 
 export interface IGeneral {
 	/**
