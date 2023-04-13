@@ -27,6 +27,7 @@ const FrameworkNewEdit = (props: FrameworkNewEditProps = {}) => {
 			type: "select",
 			label: "Git Provider",
 			name: "gitProvider",
+			displayKey: "gitProvider",
 			style: { width: 250 },
 			options: gitProviders.map((gitProvider) => {
 				return { label: gitProvider?.name, value: gitProvider?.slug };
