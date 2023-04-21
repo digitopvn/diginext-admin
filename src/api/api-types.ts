@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import type { AxiosRequestConfig } from "axios";
 
-export type ApiFilter = Record<string, any> | URLSearchParams | undefined;
+export type ApiFilter = any;
 
 export type ApiOptions = AxiosRequestConfig & {
 	pagination?: IPaginationOptions;
@@ -9,6 +9,7 @@ export type ApiOptions = AxiosRequestConfig & {
 	filter?: ApiFilter;
 	sort?: string;
 	staleTime?: number;
+	enabled?: boolean;
 };
 
 export type ApiStatus = "error" | "loading" | "success" | "idle";
@@ -49,11 +50,11 @@ export const registryProviders = registryProviderList.map((provider) => {
 			return undefined;
 	}
 });
-export type RegistryProviderType = (typeof registryProviderList)[number];
+export type RegistryProviderType = typeof registryProviderList[number];
 
 // cloud providers
 export const cloudProviderList = ["gcloud", "digitalocean", "custom"] as const;
-export type CloudProviderType = (typeof cloudProviderList)[number];
+export type CloudProviderType = typeof cloudProviderList[number];
 
 // git providers
 export const availableGitProviders = ["bitbucket", "github"] as const;
@@ -69,11 +70,11 @@ export const gitProviders = availableGitProviders.map((provider) => {
 			return { name: "Unknown", slug: "unknown" };
 	}
 });
-export type GitProviderType = (typeof availableGitProviders)[number];
+export type GitProviderType = typeof availableGitProviders[number];
 
 // resource types
 export const availableResourceSizes = ["none", "1x", "2x", "3x", "4x", "5x", "6x", "7x", "8x", "9x", "10x"] as const;
-export type ResourceQuotaSize = (typeof availableResourceSizes)[number];
+export type ResourceQuotaSize = typeof availableResourceSizes[number];
 
 // git provider domains
 export const gitProviderDomain = {
@@ -84,7 +85,7 @@ export const gitProviderDomain = {
 
 // build status
 export const buildStatusList = ["start", "building", "failed", "success"] as const;
-export type BuildStatus = (typeof buildStatusList)[number];
+export type BuildStatus = typeof buildStatusList[number];
 
 export interface IGeneral {
 	/**
@@ -116,6 +117,8 @@ export interface IGeneral {
 	 */
 	workspace?: any;
 }
+
+export type IBase = IGeneral;
 
 export interface IPaginationOptions {
 	page?: number;
@@ -340,31 +343,220 @@ export interface IUser extends IGeneral {
 
 export interface IServiceAccount extends IUser {}
 
-export interface IGitProvider extends IGeneral {
+export interface BitbucketOAuthOptions {
+	/**
+	 * The CONSUMER_KEY for Bitbucket authentication:
+	 * to create new repo, commit, pull & push changes to the repositories.
+	 *
+	 * @link https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	consumer_key?: string;
+
+	/**
+	 * The CONSUMER_SECRET for Bitbucket authentication:
+	 * to create new repo, commit, pull & push changes to the repositories.
+	 *
+	 * @link https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	consumer_secret?: string;
+
+	/**
+	 * Your Bitbucket account's username
+	 */
+	username?: string;
+
+	/**
+	 * The APP_PASSWORD for Bitbucket authentication:
+	 * to create new repo, commit, pull & push changes to the repositories.
+	 *
+	 * @link https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	app_password?: string;
+
+	/**
+	 * `TRUE` if the REST API calling was successfully.
+	 */
+	verified?: boolean;
+}
+
+export interface GithubOAuthOptions {
+	/**
+	 * The app's CLIENT_ID for Github authentication:
+	 * to create new repo, commit, pull & push changes to the repositories.
+	 *
+	 * @link https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	client_id?: string;
+
+	/**
+	 * The app's CLIENT_SECRET for Github authentication:
+	 * to create new repo, commit, pull & push changes to the repositories.
+	 *
+	 * @link https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	client_secret?: string;
+
+	/**
+	 * Your Github account's username
+	 */
+	username?: string;
+
+	/**
+	 * The PERSONAL ACCESS TOKEN for Github authentication:
+	 * to create new repo, commit, pull & push changes to the repositories.
+	 *
+	 * @link https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	personal_access_token?: string;
+
+	/**
+	 * `TRUE` if the REST API calling was successfully.
+	 */
+	verified?: boolean;
+}
+
+export interface GitUser {
+	id?: string;
+	username?: string;
+	display_name?: string;
+	url?: string;
+	email?: string;
+}
+
+export interface GitOrg {
+	id: string;
+	name: string;
+	description: string;
+	url: string;
+}
+
+export interface GitRepository {
+	id: string;
+	name: string;
+	full_name: string;
+	description: string;
+	private: boolean;
+	fork: boolean;
+	repo_url: string;
+	ssh_url: string;
+	owner: {
+		username: string;
+		id: string;
+		url: string;
+		type: string;
+	};
+	created_at: string;
+	updated_at: string;
+}
+
+export interface GitRepositoryDto {
+	name: string;
+	description?: string;
+	private: boolean;
+}
+
+export interface IGitProvider extends IBase {
+	/**
+	 * The name of the Git provider.
+	 *
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
 	name?: string;
 
+	/**
+	 * The host of the Git provider.
+	 *
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
 	host?: string;
 
+	/**
+	 * The Git workspace of the Git provider.
+	 *
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
 	gitWorkspace?: string;
 
+	/**
+	 * The repository of the Git provider.
+	 *
+	 * @type {{
+	 *     url?: string;
+	 *     sshPrefix?: string;
+	 *   }}
+	 * @memberof IGitProvider
+	 */
 	repo?: {
+		/**
+		 * The URL of the repository of the Git provider.
+		 *
+		 * @type {string}
+		 */
 		url?: string;
+
+		/**
+		 * The SSH prefix of the repository of the Git provider.
+		 *
+		 * @type {string}
+		 */
 		sshPrefix?: string;
 	};
 
 	/**
-	 * User ID of the owner
+	 * The type of the Git provider.
 	 *
-	 * @remarks This can be populated to {User} data
+	 * @type {GitProviderType}
+	 * @memberof IGitProvider
 	 */
-	owner?: IUser | string;
+	type?: GitProviderType;
 
 	/**
-	 * ID of the workspace
-	 *
-	 * @remarks This can be populated to {Workspace} data
+	 * Bitbucket OAuth Information
 	 */
-	workspace?: IWorkspace | string;
+	bitbucket_oauth?: BitbucketOAuthOptions;
+
+	/**
+	 * Github OAuth Information
+	 */
+	github_oauth?: GithubOAuthOptions;
+
+	/**
+	 * Authorization header method
+	 */
+	method?: "bearer" | "basic";
+
+	/**
+	 * The API access token of the Git provider,
+	 * to create new repo, commit, pull & push changes to the repositories.
+	 *
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	access_token?: string;
+
+	/**
+	 * The API refresh token of the Git provider,
+	 * to obtain new access token if it's expired
+	 *
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	refresh_token?: string;
 }
 
 export interface IFramework extends IGeneral {

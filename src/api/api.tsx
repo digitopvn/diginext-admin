@@ -40,6 +40,7 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 		refetchOnWindowFocus: false,
 		queryKey: queryKeys,
 		staleTime: options?.staleTime,
+		enabled: options?.enabled,
 		queryFn: async () => {
 			const { data } = await axios.get<ApiResponse<T[]>>(
 				`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${sortParams}&${populateParams}&${paginationParams}`,
@@ -278,6 +279,7 @@ export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, opt
 					notification.error({ message: "Something is wrong..." });
 				}
 			}
+
 			return data;
 		},
 

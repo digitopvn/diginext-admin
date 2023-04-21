@@ -80,17 +80,6 @@ const columns: ColumnsType<DataType> = [
 	},
 ];
 
-// const data: DataType[] = [];
-// for (let i = 0; i < 100; i++) {
-// 	data.push({
-// 		key: i,
-// 		name: `Framework #${i}`,
-// 		git: `Github`,
-// 		version: "main",
-// 		username: `goon`,
-// 		createdAt: dayjs().format("LLL"),
-// 	});
-// }
 const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const GitProviderList = () => {

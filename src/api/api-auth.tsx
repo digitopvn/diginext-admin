@@ -26,6 +26,7 @@ export const useAuthApi = (props: { access_token?: string } = {}) => {
 
 	return useQuery({
 		staleTime: 5 * 60 * 1000, // 5 minutes
+		cacheTime: 60 * 1000,
 		queryKey: ["auth"],
 		// enabled: typeof access_token !== "undefined",
 		queryFn: async () => {
