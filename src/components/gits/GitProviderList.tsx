@@ -84,10 +84,16 @@ const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const GitProviderList = () => {
 	const [page, setPage] = useState(1);
-	const { data } = useGitProviderListApi({ populate: "owner", pagination: { page, size: pageSize } });
+
+	const { data } = useGitProviderListApi({
+		filter: { verified: true },
+		populate: "owner",
+		pagination: { page, size: pageSize },
+	});
+
 	const { list: gitProviders, pagination } = data || {};
 	const { total_items } = pagination || {};
-	console.log("gitProviders :>> ", gitProviders);
+	// console.log("gitProviders :>> ", gitProviders);
 
 	const [deleteApi] = useGitProviderDeleteApi();
 

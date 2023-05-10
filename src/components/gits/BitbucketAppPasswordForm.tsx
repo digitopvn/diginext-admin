@@ -1,9 +1,21 @@
 import { ArrowRightOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Form, Input } from "antd";
 
-const BitbucketAppPasswordForm = () => {
-	const onFinish = (values: any) => {
+import { useGitProviderCreateApi } from "@/api/api-git-provider";
+
+const BitbucketAppPasswordForm = (props: { next?: (org: string) => void }) => {
+	const { next } = props;
+	const [createApi] = useGitProviderCreateApi();
+
+	const onFinish = async (values: { username: string; app_password: string }) => {
 		console.log("Success:", values);
+
+		const gitProvider = await createApi({
+			type: "bitbucket",
+			bitbucket_oauth: values,
+		});
+
+		if (gitProvider && next && gitProvider.data.slug) next(gitProvider.data.slug);
 	};
 
 	const onFinishFailed = (errorInfo: any) => {
