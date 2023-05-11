@@ -50,11 +50,11 @@ export const registryProviders = registryProviderList.map((provider) => {
 			return undefined;
 	}
 });
-export type RegistryProviderType = typeof registryProviderList[number];
+export type RegistryProviderType = (typeof registryProviderList)[number];
 
 // cloud providers
 export const cloudProviderList = ["gcloud", "digitalocean", "custom"] as const;
-export type CloudProviderType = typeof cloudProviderList[number];
+export type CloudProviderType = (typeof cloudProviderList)[number];
 
 // git providers
 export const availableGitProviders = ["bitbucket", "github"] as const;
@@ -70,11 +70,11 @@ export const gitProviders = availableGitProviders.map((provider) => {
 			return { name: "Unknown", slug: "unknown" };
 	}
 });
-export type GitProviderType = typeof availableGitProviders[number];
+export type GitProviderType = (typeof availableGitProviders)[number];
 
 // resource types
 export const availableResourceSizes = ["none", "1x", "2x", "3x", "4x", "5x", "6x", "7x", "8x", "9x", "10x"] as const;
-export type ResourceQuotaSize = typeof availableResourceSizes[number];
+export type ResourceQuotaSize = (typeof availableResourceSizes)[number];
 
 // git provider domains
 export const gitProviderDomain = {
@@ -85,7 +85,7 @@ export const gitProviderDomain = {
 
 // build status
 export const buildStatusList = ["start", "building", "failed", "success"] as const;
-export type BuildStatus = typeof buildStatusList[number];
+export type BuildStatus = (typeof buildStatusList)[number];
 
 export interface IGeneral {
 	/**

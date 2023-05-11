@@ -1,14 +1,17 @@
 import {
+	AppstoreAddOutlined,
 	BuildOutlined,
 	DeleteOutlined,
 	EditOutlined,
 	EyeOutlined,
 	GlobalOutlined,
 	InfoCircleOutlined,
+	MoreOutlined,
+	PlusCircleFilled,
 	QrcodeOutlined,
 	RocketOutlined,
 } from "@ant-design/icons";
-import { Button, Popconfirm, Space, Table, Tag, Tooltip } from "antd";
+import { Button, Dropdown, Modal, notification, Popconfirm, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
@@ -21,6 +24,8 @@ import { useProjectDeleteApi, useProjectListWithAppsApi } from "@/api/api-projec
 import { DateDisplay } from "@/commons/DateDisplay";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { AppConfig } from "@/utils/AppConfig";
+
+import AddDomainForm from "./AddDomainForm";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -138,6 +143,30 @@ export const ProjectList = () => {
 	const [deleteProjectApi, deleteProjectApiStatus] = useProjectDeleteApi();
 	const [deleteAppApi, deleteAppApiStatus] = useAppDeleteApi();
 	const [deleteAppEnvApi, deleteAppEnvApiStatus] = useAppEnvVarsDeleteApi();
+
+	// modals
+	const [modal, contextHolder] = Modal.useModal();
+	const openAddDomains = (app: string, env: string) => {
+		console.log("env :>> ", env);
+		const instance = modal.info({
+			title: "Add new domains",
+			icon: <PlusCircleFilled />,
+			content: (
+				<AddDomainForm
+					app={app}
+					env={env}
+					next={() => {
+						instance.destroy();
+						notification.success({ message: "Congrats!", description: `New domain was added successfully!` });
+					}}
+				/>
+			),
+			footer: null,
+			closable: true,
+			maskClosable: true,
+			onOk() {},
+		});
+	};
 
 	// console.log({ total_pages });
 	const openBuildList = (project: string, app: string, env: string) => {
@@ -279,7 +308,35 @@ export const ProjectList = () => {
 											<Button icon={<EyeOutlined />} href={record.url} target="_blank" disabled={isEmpty(record.url)} />
 										</Tooltip>
 										{/* <Button icon={<PauseCircleOutlined />} /> */}
-										<Tooltip title="List of builds">
+										<Dropdown
+											menu={{
+												items: [
+													{
+														label: "List of builds",
+														key: "list-of-builds",
+														icon: <BuildOutlined />,
+														onClick: () => openBuildList(record.projectSlug, record.appSlug, record.id),
+													},
+													{
+														label: "Modify environment variables",
+														key: "env-vars",
+														icon: <QrcodeOutlined />,
+														onClick: () => openEnvVarsEdit(record.projectSlug, record.appSlug, envName),
+													},
+													{
+														label: "Add domains",
+														key: "add-domains",
+														icon: <AppstoreAddOutlined />,
+														onClick: () => openAddDomains(record.appSlug, envName),
+													},
+												],
+											}}
+										>
+											<Button style={{ padding: "4px 4px" }}>
+												<MoreOutlined />
+											</Button>
+										</Dropdown>
+										{/* <Tooltip title="List of builds">
 											<Button
 												icon={<BuildOutlined />}
 												onClick={() => openBuildList(record.projectSlug, record.appSlug, record.id)}
@@ -290,7 +347,7 @@ export const ProjectList = () => {
 												icon={<QrcodeOutlined />}
 												onClick={() => openEnvVarsEdit(record.projectSlug, record.appSlug, envName)}
 											/>
-										</Tooltip>
+										</Tooltip> */}
 										<Popconfirm
 											title="Are you sure to delete this environment?"
 											description={
@@ -368,10 +425,7 @@ export const ProjectList = () => {
 				}}
 				onChange={onTableChange}
 			/>
-			{/* <Drawer title={query.type === "build" ? "Builds" : "Releases"} placement="right" onClose={onClose} open={open} size="large">
-				{query.type === "build" && <BuildList project={query.project} app={query.app} env={query.env} />}
-				{query.type === "release" && <ReleaseList project={query.project} app={query.app} env={query.env} />}
-			</Drawer> */}
+			{contextHolder}
 		</div>
 	);
 };

@@ -32,3 +32,7 @@ export const useAppEnvVarsCreateApi = (options?: ApiOptions) => {
 export const useAppEnvVarsDeleteApi = (options?: ApiOptions) => {
 	return useDeleteApi<KubeEnvironmentVariable[] | any>(["env_vars", "delete"], `/api/v1/app/environment/variables`, options);
 };
+
+export const useAppAddDomainApi = (options?: ApiOptions) => {
+	return useCreateApi<any>(["env_vars"], `/api/v1/app/environment/domains`, options);
+};
