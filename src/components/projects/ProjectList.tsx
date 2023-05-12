@@ -270,7 +270,41 @@ export const ProjectList = () => {
 										{/* <Tooltip title="Take down">
 											<Button icon={<PauseCircleOutlined />} />
 										</Tooltip> */}
-										<Tooltip title="List of builds">
+										<Dropdown
+											menu={{
+												items: [
+													{
+														label: "List of builds",
+														key: "list-of-builds",
+														icon: <BuildOutlined />,
+														onClick: () => openBuildList(record.projectSlug, record.appSlug, record.id),
+													},
+													{
+														label: "List of releases",
+														key: "list-of-releases",
+														icon: <RocketOutlined />,
+														onClick: () => openReleaseList(record.projectSlug, record.appSlug, envName),
+													},
+													{
+														label: "Modify environment variables",
+														key: "env-vars",
+														icon: <QrcodeOutlined />,
+														onClick: () => openEnvVarsEdit(record.projectSlug, record.appSlug, envName),
+													},
+													{
+														label: "Add domains",
+														key: "add-domains",
+														icon: <AppstoreAddOutlined />,
+														onClick: () => openAddDomains(record.appSlug, envName),
+													},
+												],
+											}}
+										>
+											<Button style={{ padding: "4px 4px" }}>
+												<MoreOutlined />
+											</Button>
+										</Dropdown>
+										{/* <Tooltip title="List of builds">
 											<Button
 												icon={<BuildOutlined />}
 												onClick={() => openBuildList(record.projectSlug, record.appSlug, envName)}
@@ -287,7 +321,7 @@ export const ProjectList = () => {
 												icon={<QrcodeOutlined />}
 												onClick={() => openEnvVarsEdit(record.projectSlug, record.appSlug, envName)}
 											/>
-										</Tooltip>
+										</Tooltip> */}
 										<Popconfirm
 											title="Are you sure to delete this environment?"
 											description={
