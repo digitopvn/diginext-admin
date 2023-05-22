@@ -26,6 +26,10 @@ export class Config {
 		return env[key] ?? defaultValue;
 	};
 
+	static get DX_SITE() {
+		return this.NEXT_PUBLIC_ENV === "development" ? "http://localhost:4000" : "https://diginext.vn";
+	}
+
 	static get ENV() {
 		return this.grab("NODE_ENV", "development").toUpperCase();
 	}

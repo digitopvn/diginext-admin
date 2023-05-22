@@ -10,7 +10,6 @@ import { useEffect } from "react";
 
 import CenterContainer from "@/commons/CenterContainer";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
-import { useWorkspace } from "@/providers/useWorkspace";
 import { Config } from "@/utils/AppConfig";
 
 import type { IUser } from "./api-types";
@@ -93,8 +92,9 @@ export const AuthPage = (props: { children?: ReactNode } = {}) => {
 
 	const { workspaces = [] } = user || {};
 
-	const workspaceSlug = workspaces[0]?.slug;
-	const workspace = useWorkspace({ name: workspaceSlug });
+	// const workspaceSlug = workspaces[0]?.slug;
+	// const workspace = useWorkspace({ name: workspaceSlug });
+	const workspace = user.activeWorkspace;
 
 	// useEffect(() => {
 	// 	if (!workspaces) return;

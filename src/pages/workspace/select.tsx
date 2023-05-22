@@ -1,4 +1,6 @@
-import { Button, Checkbox, Form, Input, Select, Space, Typography } from "antd";
+import { QuestionCircleOutlined } from "@ant-design/icons";
+import { Button, Checkbox, Form, Input, Select, Space, Tooltip, Typography } from "antd";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import type { SyntheticEvent } from "react";
 import { useState } from "react";
@@ -32,7 +34,10 @@ interface WorkspaceInputData {
 
 const WorkspaceSetupPage = () => {
 	const router = useRouter();
+
 	const [wsName, setWsName] = useState("");
+	const [dxKey, setDxKey] = useState("");
+
 	const onChange = (e: SyntheticEvent) => setWsName((e.currentTarget as any).value);
 	const [user, { refetch }] = useAuth();
 
@@ -58,6 +63,7 @@ const WorkspaceSetupPage = () => {
 		const wsData: any = {};
 		wsData.name = values.name;
 		wsData.public = typeof values.public === "undefined" ? false : values.public;
+		wsData.dx_key = dxKey;
 
 		const result = await createWorkspaceApi(wsData);
 		if (result?.status) {
@@ -111,15 +117,25 @@ const WorkspaceSetupPage = () => {
 								<Checkbox>Public</Checkbox>
 							</Form.Item>
 							<Space.Compact className="w-full">
-								<Form.Item
-									name="name"
-									style={{ flex: "auto" }}
-									rules={[{ required: true, message: "Please input your workspace name!" }]}
-								>
-									<Input className="text-center text-lg" placeholder="Your workspace name" onChange={onChange} />
+								<Form.Item name="name" style={{ flex: "auto" }} rules={[{ required: true, message: "Workspace name is required." }]}>
+									<Input className="text-center text-lg" placeholder="Workspace name" onChange={onChange} />
+								</Form.Item>
+								<Form.Item name="dx_key" style={{ flex: "auto" }} rules={[{ required: true, message: "Diginext Key is required." }]}>
+									<Input
+										className="text-center text-lg"
+										placeholder="Diginext KEY"
+										onChange={(e) => setDxKey(e.currentTarget.value)}
+										suffix={
+											<Tooltip title="Where can I get this?">
+												<Link href={Config.DX_SITE} target="_blank">
+													<QuestionCircleOutlined />
+												</Link>
+											</Tooltip>
+										}
+									/>
 								</Form.Item>
 								<Form.Item>
-									<Button type="primary" htmlType="submit" disabled={wsName === ""} className="h-[38px]">
+									<Button type="primary" htmlType="submit" disabled={wsName === "" || dxKey === ""} className="h-[38px]">
 										GO!
 									</Button>
 								</Form.Item>

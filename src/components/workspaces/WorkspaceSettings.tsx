@@ -14,7 +14,7 @@ dayjs.extend(localizedFormat);
 
 export const WorkspaceSettings = () => {
 	const workspace = useWorkspace();
-	// console.log("workspace :>> ", workspace);
+	console.log("workspace :>> ", workspace);
 
 	const { data: { list: apiKeys = [] } = { list: [] } } = useApiKeyListApi();
 	// console.log("apiKeys :>> ", apiKeys);
@@ -39,6 +39,14 @@ export const WorkspaceSettings = () => {
 					)}
 				/>
 			)}
+
+			<Divider dashed />
+
+			<Card title="DX_KEY">
+				<div key={`dx-key`}>
+					<CopyCode mode="inline" value={workspace?.dx_key || ""} />
+				</div>
+			</Card>
 
 			<Divider dashed />
 

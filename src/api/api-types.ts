@@ -187,6 +187,11 @@ export interface IWorkspace extends IGeneral {
 	 * List of this workspace's API Access Token
 	 */
 	apiAccessTokens?: WorkspaceApiAccessToken[];
+
+	/**
+	 * `DX_KEY` that obtained from https://diginext.vn
+	 */
+	dx_key?: string;
 }
 
 export type IRouteScope = "all" | "workspace" | "team" | "project" | "app";
