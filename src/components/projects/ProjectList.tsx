@@ -237,7 +237,14 @@ export const ProjectList = () => {
 							const deployEnvironment = (app.deployEnvironment || {})[envName] || {};
 
 							const record: any = {
-								name: envName.toUpperCase(),
+								name: (
+									<Button
+										type="link"
+										onClick={() => setQuery({ lv1: "deploy_environment", project: p.slug, app: app.slug, env: envName })}
+									>
+										{envName.toUpperCase()}
+									</Button>
+								),
 								key: `${p.slug}-${app.slug}-${envName}`,
 								id: envName,
 								slug: envName,

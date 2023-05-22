@@ -11,7 +11,9 @@ import { useDrawerProvider } from "@/providers/DrawerProvider";
 import SmartCodeEditor from "./SmartCodeEditor";
 import type { SmartFormElementProps } from "./SmartFormTypes";
 import SmartInput from "./SmartInput";
+import SmartNumber from "./SmartNumber";
 import SmartSelect from "./SmartSelect";
+import SmartStringList from "./SmartStringList";
 import SmartTextArea from "./SmartTextArea";
 
 export type SmartFormProps<T> = {
@@ -45,6 +47,8 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 
 	const isNew = typeof item === "undefined";
 
+	console.log("item :>> ", item);
+
 	const {
 		token: { colorBgContainer },
 	} = theme.useToken();
@@ -57,6 +61,8 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 
 		let result: ApiResponse<T> | undefined;
 		if (isNew) {
+			if (!createApi) return;
+
 			Object.entries(postData).forEach(([field, value]) => {
 				if (field.indexOf(".") > -1) {
 					delete postData[field];
@@ -64,7 +70,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 				}
 			});
 
-			if (createApi) result = await createApi(postData);
+			result = await createApi(postData);
 			console.log("[NEW] result :>> ", result);
 
 			// if success
@@ -73,6 +79,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 				closeDrawer();
 			}
 		} else {
+			if (!updateApi) return;
 			const statuses: Record<string, "error" | "idle" | "loading" | "success" | undefined> = {};
 			Object.entries(postData).forEach(([field, value]) => {
 				if (item && value !== (item as any)[field]) {
@@ -84,7 +91,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 			});
 
 			if (!isEmpty(statuses)) {
-				if (updateApi) result = await updateApi(postData);
+				result = await updateApi(postData);
 				console.log("[UPDATE] result :>> ", result);
 
 				Object.entries(postData).forEach(([field, value]) => {
@@ -119,14 +126,27 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 		>
 			<div className="p-6 pb-16">
 				{configs.map((field) => {
-					console.log("field :>> ", field);
+					// console.log("field :>> ", field);
 					switch (field.type) {
 						case "input":
 							return (
 								<SmartInput
 									key={`${name}-${field.name}`}
 									{...field}
-									value={field.value || (item ? _.get(item, field.name) : null)}
+									value={field.value ?? (item ? _.get(item, field.name) : null)}
+									status={fieldsStatus}
+									isNew={isNew}
+								/>
+							);
+
+						case "number":
+							// console.log("field.name :>> ", field.name);
+							// console.log("field.value :>> ", field.value);
+							return (
+								<SmartNumber
+									key={`${name}-${field.name}`}
+									{...field}
+									value={field.value ?? (item ? _.get(item, field.name) : null)}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>
@@ -137,7 +157,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 								<SmartTextArea
 									key={`${name}-${field.name}`}
 									{...field}
-									value={field.value || (item ? _.get(item, field.name) : null)}
+									value={field.value ?? (item ? _.get(item, field.name) : null)}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>
@@ -148,7 +168,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 								<SmartCodeEditor
 									key={`${name}-${field.name}`}
 									{...field}
-									value={field.value || (item ? _.get(item, field.name) : null)}
+									value={field.value ?? (item ? _.get(item, field.name) : null)}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>
@@ -157,9 +177,6 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 						case "select": {
 							let { displayKey } = field;
 							if (typeof displayKey === "undefined") displayKey = "name";
-							// console.log("item :>> ", item);
-							// console.log("fiefield.options :>> ", field.options);
-							// console.log("selectedKey :>> ", selectedKey);
 
 							const selectedValue = _.get(item, displayKey ? `${displayKey}` : field.name);
 							// console.log("selectedValue :>> ", selectedValue);
@@ -174,6 +191,19 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 								/>
 							);
 						}
+
+						case "list_string":
+							console.log("field.name :>> ", field.name);
+							console.log("field.value :>> ", field.value);
+							return (
+								<SmartStringList
+									key={`${name}-${field.name}`}
+									{...field}
+									value={field.value ?? (item ? _.get(item, field.name) : null)}
+									status={fieldsStatus}
+									isNew={isNew}
+								/>
+							);
 
 						default:
 							return null;

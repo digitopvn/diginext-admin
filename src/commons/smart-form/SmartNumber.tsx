@@ -1,15 +1,16 @@
-import { CheckOutlined, CloseOutlined, LoadingOutlined } from "@ant-design/icons";
-import { Form, Select, Space } from "antd";
+import { CheckOutlined, CloseOutlined, LoadingOutlined, MinusOutlined, PlusOutlined } from "@ant-design/icons";
+import { Button, Form, Input, Space } from "antd";
+import { toNumber } from "lodash";
 import React, { useEffect, useState } from "react";
 import { useDebounce } from "usehooks-ts";
 
 import ManualSaveController from "./ManualSaveController";
 import type { SmartFormElementProps } from "./SmartFormTypes";
 
-const SmartSelect = (props: SmartFormElementProps) => {
+export type SmartNumberProps = SmartFormElementProps<number>;
+
+const SmartNumber = (props: SmartNumberProps) => {
 	const {
-		className,
-		style,
 		label,
 		postLabel,
 		name,
@@ -21,8 +22,7 @@ const SmartSelect = (props: SmartFormElementProps) => {
 		status,
 		autoSave = true,
 		isNew,
-		options,
-		onChange,
+		placeholder,
 		disabled = false,
 		visible = true,
 		wrapperStyle,
@@ -32,14 +32,27 @@ const SmartSelect = (props: SmartFormElementProps) => {
 
 	const [_value, setValue] = useState(value ?? defaultValue);
 	const debouncedValue = useDebounce(_value, 500);
-	// console.log("_value :>> ", _value);
+
+	// features
+	const plus = (step: number) => {
+		console.log("_value :>> ", _value);
+		const result = (_value ?? 0) + step;
+		console.log("result :>> ", result);
+		form.setFieldValue(name, result);
+		setValue(result);
+	};
+
+	const minus = (step: number) => {
+		const result = (_value ?? 0) - step;
+		form.setFieldValue(name, result);
+		setValue(result);
+	};
 
 	// callbacks
-	const _onChange = (selectedValue: any) => {
-		form.setFieldValue(name, selectedValue);
-		setValue(selectedValue);
-
-		if (onChange) onChange(selectedValue);
+	const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const newValue = toNumber(e.currentTarget.value);
+		form.setFieldValue(name, newValue);
+		setValue(newValue);
 	};
 
 	const submit = () => form.submit();
@@ -50,13 +63,12 @@ const SmartSelect = (props: SmartFormElementProps) => {
 	};
 
 	const clear = () => {
-		form.setFieldValue(name, "");
-		setValue("");
+		form.setFieldValue(name, 0);
+		setValue(0);
 	};
 
 	// update the value immediatly:
 	useEffect(() => {
-		// console.log("value :>> ", value);
 		form.setFieldValue(name, value);
 		setValue(value);
 	}, [value]);
@@ -68,9 +80,6 @@ const SmartSelect = (props: SmartFormElementProps) => {
 		if (autoSave && !isNew) submit();
 	}, [debouncedValue]);
 
-	// console.log("status :>> ", status);
-	// console.log(`status[${name}] :>> `, status[name]);
-
 	let icon;
 	if (status && status[name] === "error")
 		icon = (
@@ -81,22 +90,33 @@ const SmartSelect = (props: SmartFormElementProps) => {
 		);
 	if (status && status[name] === "loading") icon = <LoadingOutlined />;
 	if (status && status[name] === "success") icon = <CheckOutlined color="green" />;
+
 	return (
 		<Form.Item
 			label={
-				<Space size="small">
-					{label}
-					{icon}
-				</Space>
+				<Space.Compact direction="vertical">
+					<Space size="small">
+						{label}
+						{icon}
+					</Space>
+					{postLabel}
+				</Space.Compact>
 			}
 			name={name}
 			rules={[{ required, message: requiredMessage }]}
 			style={{ display: visible ? "block" : "none", ...wrapperStyle }}
 		>
-			<Space direction="horizontal" className="w-full">
-				<Select className={className} style={style} value={_value} onChange={_onChange} options={options} disabled={disabled} />
-
-				{postLabel}
+			<Space direction="vertical" className="w-full">
+				<Input
+					size="small"
+					placeholder={placeholder}
+					onChange={onChange}
+					value={_value}
+					disabled={disabled}
+					prefix={<Button type="link" icon={<MinusOutlined />} onClick={() => minus(1)} />}
+					suffix={<Button type="link" icon={<PlusOutlined />} onClick={() => plus(1)} />}
+					style={{ textAlign: "center" }}
+				/>
 
 				{/* Display manual save controller if auto save is off */}
 				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
@@ -105,4 +125,4 @@ const SmartSelect = (props: SmartFormElementProps) => {
 	);
 };
 
-export default SmartSelect;
+export default SmartNumber;

@@ -9,6 +9,7 @@ import { PageFooter } from "@/commons/PageFooter";
 import { SiteHeader } from "@/commons/SiteHeader";
 import { BuildList } from "@/components/deployments/BuildList";
 import { BuildLogs } from "@/components/deployments/BuildLogs";
+import DeployEnvironment from "@/components/deployments/DeployEnvironment";
 import EnvVarsNewEdit from "@/components/deployments/EnvVarsNewEdit";
 import { ReleaseList } from "@/components/deployments/ReleaseList";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -56,6 +57,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 		if (showDrawer) showDrawer({ title: "Environment Variables", content: <EnvVarsNewEdit /> }, { level: 1 });
 	};
 
+	const openDeployEnvironment = () => {
+		if (showDrawer) showDrawer({ title: `Deploy Environment: ${env.toUpperCase()}`, content: <DeployEnvironment /> }, { level: 1 });
+	};
+
 	const openEditPage = () => {
 		if (showDrawer) showDrawer({ title: "Edit", content: <NewEditPage /> }, { level: 1 });
 	};
@@ -81,6 +86,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 
 			case "edit":
 				openEditPage();
+				break;
+
+			case "deploy_environment":
+				openDeployEnvironment();
 				break;
 
 			case "env_vars":

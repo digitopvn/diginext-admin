@@ -110,14 +110,15 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, o
 			// console.log("data :>> ", data);
 
 			if (isArray(data.data)) {
-				return data.data.map((d: any) => {
+				const _data = data.data.map((d: any) => {
 					return { ...d, key: d._id };
 				})[0];
+				return _data[0];
 			}
 
 			if (isString(data.data)) return { status: data.status, data: data.data, messages: data.messages };
 
-			return { status: data.status, data: data.data[0], messages: data.messages };
+			return data.data;
 		},
 	});
 };
@@ -286,6 +287,8 @@ export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, opt
 		// [2] - FINISH & SUCCESS!
 		onSuccess: (updateData, variables, context) => {
 			queryClient.invalidateQueries({ queryKey: [keys[0], "list"] });
+
+			if (filter.slug) queryClient.invalidateQueries({ queryKey: [keys[0], filter.slug] });
 		},
 	});
 

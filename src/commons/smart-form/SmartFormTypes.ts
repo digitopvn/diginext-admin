@@ -2,15 +2,16 @@ import type { langNames } from "@uiw/codemirror-extensions-langs";
 import type { CSSProperties } from "react";
 import type React from "react";
 
-export type SmartFormElementProps = {
+export type SmartFormElementProps<T = any> = {
 	key?: React.Key;
-	type?: "input" | "textarea" | "code-editor" | "select";
+	type?: "input" | "textarea" | "code-editor" | "select" | "list_string" | "number";
 	className?: string;
 	style?: CSSProperties;
+	wrapperStyle?: CSSProperties;
 	name: string;
-	value?: any;
-	defaultValue?: any;
-	initialValue?: any;
+	value?: T;
+	defaultValue?: T;
+	initialValue?: T;
 	label?: string;
 	postLabel?: any;
 	requiredMessage?: string;

@@ -87,6 +87,10 @@ export const gitProviderDomain = {
 export const buildStatusList = ["start", "building", "failed", "success"] as const;
 export type BuildStatus = (typeof buildStatusList)[number];
 
+// ssl
+export const sslIssuers = ["letsencrypt", "custom", "none"] as const;
+export type SSLIssuer = (typeof sslIssuers)[number];
+
 export interface IGeneral {
 	/**
 	 * Alias of `_id` MongoDB
