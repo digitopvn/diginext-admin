@@ -9,7 +9,7 @@ const useWorkspace = (props: { name?: string } = {}) => {
 	// const { data: workspace } = useWorkspaceSlugApi(workspaceSlug, { staleTime: 8 * 60 * 60 * 1000 });
 	const [user] = useAuth();
 
-	return user.activeWorkspace;
+	return user?.activeWorkspace;
 };
 
 export { useWorkspace };

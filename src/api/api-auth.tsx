@@ -94,7 +94,7 @@ export const AuthPage = (props: { children?: ReactNode } = {}) => {
 
 	// const workspaceSlug = workspaces[0]?.slug;
 	// const workspace = useWorkspace({ name: workspaceSlug });
-	const workspace = user.activeWorkspace;
+	const workspace = user?.activeWorkspace;
 
 	// useEffect(() => {
 	// 	if (!workspaces) return;
