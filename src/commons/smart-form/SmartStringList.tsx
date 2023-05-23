@@ -1,5 +1,6 @@
 import { CheckOutlined, CloseOutlined, DeleteOutlined, LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import { Button, Form, Input, List, Space } from "antd";
+import { isArray } from "lodash";
 import React, { useEffect, useState } from "react";
 import { useDebounce } from "usehooks-ts";
 
@@ -37,7 +38,6 @@ const SmartStringList = (props: SmartStringListProps) => {
 
 	const [_value, setValue] = useState(value ?? defaultValue);
 	const debouncedValue = useDebounce(_value, 500);
-	// console.log("_value :>> ", _value);
 
 	// callbacks
 	const addValue = (newValue: string) => {
@@ -76,9 +76,16 @@ const SmartStringList = (props: SmartStringListProps) => {
 
 	// update the value immediatly:
 	useEffect(() => {
-		// console.log("value :>> ", value);
-		form.setFieldValue(name, value);
-		setValue(value);
+		let initialVal = value ?? [];
+		if (value && !isArray(value) && typeof value[0] !== "undefined") {
+			initialVal = [];
+			Object.entries(value).forEach(([, val]) => {
+				console.log("val :>> ", val);
+				if (typeof val === "string") initialVal.push(val);
+			});
+		}
+		form.setFieldValue(name, initialVal);
+		setValue(initialVal);
 	}, [value]);
 
 	useEffect(() => {
@@ -89,7 +96,7 @@ const SmartStringList = (props: SmartStringListProps) => {
 	}, [debouncedValue]);
 
 	// console.log("status :>> ", status);
-	console.log(`status[${name}] :>> `, status[name]);
+	// console.log(`status[${name}] :>> `, status[name]);
 
 	let icon;
 	if (status && status[name] === "error")
@@ -115,9 +122,11 @@ const SmartStringList = (props: SmartStringListProps) => {
 			style={{ display: visible ? "block" : "none" }}
 		>
 			{/* <Select className={className} style={style} value={_value} onChange={_onChange} options={options} disabled={disabled} /> */}
-			<Input hidden />
+			{/* <Input hidden /> */}
 			<List
-				dataSource={value ?? []}
+				bordered
+				size="small"
+				dataSource={_value ?? []}
 				footer={
 					<Space.Compact style={{ width: "100%" }}>
 						<Input.Search
@@ -126,7 +135,7 @@ const SmartStringList = (props: SmartStringListProps) => {
 							loading={status && status[name] === "loading"}
 							enterButton={
 								<Button icon={<PlusOutlined />} onClick={() => addValue(valueToBeAdded)}>
-									Add {label}
+									Add
 								</Button>
 							}
 						/>

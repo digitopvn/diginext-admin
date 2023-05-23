@@ -10,6 +10,7 @@ import { SiteHeader } from "@/commons/SiteHeader";
 import { BuildList } from "@/components/deployments/BuildList";
 import { BuildLogs } from "@/components/deployments/BuildLogs";
 import DeployEnvironment from "@/components/deployments/DeployEnvironment";
+import DeploymentYaml from "@/components/deployments/DeploymentYaml";
 import EnvVarsNewEdit from "@/components/deployments/EnvVarsNewEdit";
 import { ReleaseList } from "@/components/deployments/ReleaseList";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -53,12 +54,16 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 		if (showDrawer) showDrawer({ title: "Build Logs", content: <BuildLogs /> }, { level: 2 });
 	};
 
-	const openEnvVarsPage = () => {
-		if (showDrawer) showDrawer({ title: "Environment Variables", content: <EnvVarsNewEdit /> }, { level: 1 });
+	const openEnvVarsPage = (lv = 1) => {
+		if (showDrawer) showDrawer({ title: "Environment Variables", content: <EnvVarsNewEdit /> }, { level: lv });
 	};
 
-	const openDeployEnvironment = () => {
-		if (showDrawer) showDrawer({ title: `Deploy Environment: ${env.toUpperCase()}`, content: <DeployEnvironment /> }, { level: 1 });
+	const openDeploymentYamlPage = (lv = 1) => {
+		if (showDrawer) showDrawer({ title: `Deployment YAML: ${env.toUpperCase()}`, content: <DeploymentYaml /> }, { level: lv });
+	};
+
+	const openDeployEnvironment = (lv = 1) => {
+		if (showDrawer) showDrawer({ title: `Deploy Environment: ${env.toUpperCase()}`, content: <DeployEnvironment /> }, { level: lv });
 	};
 
 	const openEditPage = () => {
@@ -105,6 +110,14 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 		switch (lv2) {
 			case "build_logs":
 				openBuildLogs();
+				break;
+
+			case "env_vars":
+				openEnvVarsPage(2);
+				break;
+
+			case "deployment_yaml":
+				openDeploymentYamlPage(2);
 				break;
 
 			default:

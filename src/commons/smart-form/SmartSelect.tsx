@@ -32,7 +32,6 @@ const SmartSelect = (props: SmartFormElementProps) => {
 
 	const [_value, setValue] = useState(value ?? defaultValue);
 	const debouncedValue = useDebounce(_value, 500);
-	// console.log("_value :>> ", _value);
 
 	// callbacks
 	const _onChange = (selectedValue: any) => {
@@ -56,7 +55,6 @@ const SmartSelect = (props: SmartFormElementProps) => {
 
 	// update the value immediatly:
 	useEffect(() => {
-		// console.log("value :>> ", value);
 		form.setFieldValue(name, value);
 		setValue(value);
 	}, [value]);

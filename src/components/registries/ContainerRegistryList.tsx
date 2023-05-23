@@ -1,5 +1,5 @@
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { Button, Popconfirm, Space, Table } from "antd";
+import { Button, notification, Popconfirm, Space, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import React, { useState } from "react";
@@ -104,7 +104,7 @@ export const ContainerRegistryList = () => {
 
 	const deleteItem = async (id: string) => {
 		const res = await deleteApi({ _id: id });
-		console.log("deleteItem :>> ", res);
+		if (res?.status) notification.success({ message: `Item deleted successfully.` });
 	};
 
 	const displayedData =

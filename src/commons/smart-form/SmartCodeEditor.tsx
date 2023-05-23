@@ -45,7 +45,6 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 
 	// update the value immediatly:
 	useEffect(() => {
-		// console.log("value :>> ", value);
 		form.setFieldValue(name, value);
 		setValue(value || "");
 	}, [value]);
@@ -94,7 +93,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 				{postLabel}
 
 				{/* Display manual save controller if auto save is off */}
-				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
+				{!disabled && !autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
 			</Space>
 		</Form.Item>
 	);

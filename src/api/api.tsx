@@ -107,12 +107,11 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, o
 
 			// for token is about to expired
 			if (data.token?.access_token) setCookie("x-auth-cookie", data.token?.access_token);
-			// console.log("data :>> ", data);
 
 			if (isArray(data.data)) {
 				const _data = data.data.map((d: any) => {
 					return { ...d, key: d._id };
-				})[0];
+				});
 				return _data[0];
 			}
 

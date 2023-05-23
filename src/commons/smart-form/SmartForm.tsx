@@ -1,6 +1,7 @@
 import type { UseQueryResult } from "@tanstack/react-query";
 import { App, Button, Form, Popconfirm, Space, theme } from "antd";
 import _, { isEmpty } from "lodash";
+import type { ReactNode } from "react";
 import { useState } from "react";
 
 import type { UseCreateApi, UseUpdateApi } from "@/api/api";
@@ -17,6 +18,8 @@ import SmartStringList from "./SmartStringList";
 import SmartTextArea from "./SmartTextArea";
 
 export type SmartFormProps<T> = {
+	children?: ReactNode;
+	className?: string;
 	name: string;
 	slugKey?: string;
 	api?: {
@@ -30,7 +33,7 @@ export type SmartFormProps<T> = {
 const { useApp } = App;
 
 const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
-	const { name, configs = [] } = props;
+	const { children, className = "", name, configs = [] } = props;
 
 	const root = useApp();
 
@@ -46,8 +49,6 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 	const [fieldsStatus, setFieldsStatus] = useState<Record<string, "error" | "idle" | "loading" | "success" | undefined>>();
 
 	const isNew = typeof item === "undefined";
-
-	console.log("item :>> ", item);
 
 	const {
 		token: { colorBgContainer },
@@ -115,7 +116,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 
 	return (
 		<Form
-			className="h-full overflow-auto"
+			className={["h-full", "overflow-auto", className].join(" ")}
 			layout="vertical"
 			// name="edit"
 			// initialValues={initialValues}
@@ -133,7 +134,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 								<SmartInput
 									key={`${name}-${field.name}`}
 									{...field}
-									value={field.value ?? (item ? _.get(item, field.name) : null)}
+									value={field.value ?? (item ? _.get(item, field.name) : "")}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>
@@ -146,7 +147,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 								<SmartNumber
 									key={`${name}-${field.name}`}
 									{...field}
-									value={field.value ?? (item ? _.get(item, field.name) : null)}
+									value={field.value ?? (item ? _.get(item, field.name) : 0)}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>
@@ -157,7 +158,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 								<SmartTextArea
 									key={`${name}-${field.name}`}
 									{...field}
-									value={field.value ?? (item ? _.get(item, field.name) : null)}
+									value={field.value ?? (item ? _.get(item, field.name) : "")}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>
@@ -168,7 +169,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 								<SmartCodeEditor
 									key={`${name}-${field.name}`}
 									{...field}
-									value={field.value ?? (item ? _.get(item, field.name) : null)}
+									value={field.value ?? (item ? _.get(item, field.name) : "")}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>
@@ -193,13 +194,13 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 						}
 
 						case "list_string":
-							console.log("field.name :>> ", field.name);
-							console.log("field.value :>> ", field.value);
+							// console.log("field.name :>> ", field.name);
+							// console.log("field.value :>> ", field.value);
 							return (
 								<SmartStringList
 									key={`${name}-${field.name}`}
 									{...field}
-									value={field.value ?? (item ? _.get(item, field.name) : null)}
+									value={field.value ?? (item ? _.get(item, field.name) : [])}
 									status={fieldsStatus}
 									isNew={isNew}
 								/>
@@ -210,6 +211,8 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 					}
 				})}
 			</div>
+
+			{children}
 
 			{isNew && (
 				<div className="fixed bottom-0 w-full px-6 py-3" style={{ backgroundColor: colorBgContainer }}>

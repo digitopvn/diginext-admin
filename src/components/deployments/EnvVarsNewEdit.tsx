@@ -1,6 +1,6 @@
 import { CloseOutlined } from "@ant-design/icons";
 import { Button, Empty, Form, Input, Space, Typography } from "antd";
-import { isEmpty } from "lodash";
+import { isArray, isEmpty } from "lodash";
 import { useEffect, useState } from "react";
 
 import { useAppEnvVarsCreateApi, useAppSlugApi } from "@/api/api-app";
@@ -26,6 +26,7 @@ const EnvVarsNewEdit = () => {
 	const [createApi, createStatus] = useAppEnvVarsCreateApi();
 	const { data: app = {} } = useAppSlugApi(appSlug, { populate: "project,owner,workspace" });
 
+	console.log("EnvVarsNewEdit > app :>> ", app);
 	const envVars = !isEmpty(app) ? (app.deployEnvironment || {})[env]?.envVars || [] : [];
 	// console.log("envVars :>> ", envVars);
 
@@ -35,7 +36,18 @@ const EnvVarsNewEdit = () => {
 	// This function to use for clearing forms
 	const setEnvVars = (values: KubeEnvironmentVariable[] = []) => _setEnvVars([...values]);
 
-	useEffect(() => setEnvVars(envVars), [JSON.stringify(envVars)]);
+	useEffect(() => {
+		let initialEnvVars = envVars;
+		if (!isArray(envVars) && typeof envVars[0] !== "undefined") {
+			initialEnvVars = [];
+			Object.entries(envVars).forEach(([, val]) => {
+				initialEnvVars.push(val as KubeEnvironmentVariable);
+			});
+		}
+		console.log("envVars :>> ", envVars);
+		console.log("initialEnvVars :>> ", initialEnvVars);
+		setEnvVars(initialEnvVars);
+	}, [JSON.stringify(envVars)]);
 
 	const deleteEnvVarAtIndex = (index: number) =>
 		_setEnvVars((_arr) => {

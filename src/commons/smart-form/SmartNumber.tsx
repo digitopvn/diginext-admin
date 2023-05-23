@@ -35,15 +35,14 @@ const SmartNumber = (props: SmartNumberProps) => {
 
 	// features
 	const plus = (step: number) => {
-		console.log("_value :>> ", _value);
 		const result = (_value ?? 0) + step;
-		console.log("result :>> ", result);
 		form.setFieldValue(name, result);
 		setValue(result);
 	};
 
 	const minus = (step: number) => {
-		const result = (_value ?? 0) - step;
+		let result = (_value ?? 0) - step;
+		if (result < 0) result = 0;
 		form.setFieldValue(name, result);
 		setValue(result);
 	};

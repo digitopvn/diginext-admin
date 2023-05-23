@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { Button, Col, Row } from "antd";
 
 import { useAppDeployEnvironmentSlugApi, useAppDeployEnvironmentUpdateApi } from "@/api/api-app";
-import { useCloudProviderListApi } from "@/api/api-cloud-provider";
 import { useClusterListApi } from "@/api/api-cluster";
 import { availableResourceSizes, sslIssuers } from "@/api/api-types";
 import SmartForm from "@/commons/smart-form/SmartForm";
@@ -10,13 +9,9 @@ import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useDrawerProvider } from "@/providers/DrawerProvider";
 
 const DeployEnvironment = () => {
-	const [{ project: projectSlug, app: appSlug, env }] = useRouterQuery();
+	const [{ project: projectSlug, app: appSlug, env }, { setQuery }] = useRouterQuery();
 
 	const { closeDrawer } = useDrawerProvider();
-
-	// providers
-	const { data: { list: providers = [] } = {} } = useCloudProviderListApi();
-	const [providerShortName, setProviderShortName] = useState("");
 
 	// clusters
 	const { data } = useClusterListApi({ populate: "owner", pagination: { page: 0, size: 100 } });
@@ -68,10 +63,31 @@ const DeployEnvironment = () => {
 			options: sslIssuers.map((issuer) => {
 				return { label: issuer || "", value: issuer };
 			}),
+			wrapperStyle: { float: "left", marginRight: 15 },
 		},
+		{ type: "input", label: "TLS Secret", name: "tlsSecret", placeholder: "" },
 	];
 
-	return <SmartForm name="deploy_environment" api={{ useSlugApi, useUpdateApi }} configs={smartFormConfigs} />;
+	return (
+		<>
+			<SmartForm name="deploy_environment" api={{ useSlugApi, useUpdateApi }} configs={smartFormConfigs} className="h-auto">
+				<div className="w-full px-6">
+					<Row gutter={[16, 16]} align="stretch">
+						<Col span={12}>
+							<Button block onClick={() => setQuery({ lv2: "env_vars", project: projectSlug, app: appSlug, env })}>
+								Environment Variables
+							</Button>
+						</Col>
+						<Col span={12}>
+							<Button block onClick={() => setQuery({ lv2: "deployment_yaml", project: projectSlug, app: appSlug, env })}>
+								Deployment YAML
+							</Button>
+						</Col>
+					</Row>
+				</div>
+			</SmartForm>
+		</>
+	);
 };
 
 export default DeployEnvironment;
