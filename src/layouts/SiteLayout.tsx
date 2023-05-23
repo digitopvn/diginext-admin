@@ -103,6 +103,7 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 
 			default:
 				// close drawer lv1
+				deleteQuery(["lv1"]);
 				if (closeDrawer) closeDrawer("lv1");
 				break;
 		}
@@ -122,32 +123,17 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 
 			default:
 				// close drawer lv2
+				deleteQuery(["lv2"]);
 				if (closeDrawer) closeDrawer("lv2");
 				break;
 		}
 	}, [lv1, lv2, project, app, env]);
 
-	useEffect(() => {
-		if (drawerVisibility?.lv1 === false)
-			deleteQuery([
-				"lv1",
-				"project",
-				"app",
-				"env",
-				"release",
-				"type",
-				"cluster_slug",
-				"framework_slug",
-				"git_provider_slug",
-				"registry_slug",
-				"user",
-				"role",
-			]);
-	}, [drawerVisibility?.lv1]);
-
-	useEffect(() => {
-		if (drawerVisibility?.lv2 === false) deleteQuery(["lv2", "build_slug"]);
-	}, [drawerVisibility?.lv2]);
+	// useEffect(() => {
+	// 	if (drawerVisibility?.lv1 === false) deleteQuery(["lv1"]);
+	// 	if (drawerVisibility?.lv2 === false) deleteQuery(["lv2"]);
+	// 	if (drawerVisibility?.lv1 === false && drawerVisibility?.lv2 === false) deleteAllQueryKeys();
+	// }, [drawerVisibility?.lv1, drawerVisibility?.lv2]);
 
 	return (
 		<Layout hasSider>

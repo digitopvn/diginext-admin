@@ -2,6 +2,8 @@ import { Drawer } from "antd";
 import type { ReactNode } from "react";
 import { createContext, useContext, useState } from "react";
 
+import { useRouterQuery } from "@/plugins/useRouterQuery";
+
 // import { useRouterQuery } from "@/plugins/useRouterQuery";
 
 type DrawerContentParams = {
@@ -36,6 +38,7 @@ export const DrawerProvider = (props: { children?: ReactNode } = {}) => {
 	const [drawerVisibility, setDrawerVisibility] = useState<DrawerVisibility>({ lv1: false, lv2: false });
 	const [content, setContent] = useState<DrawerContentParams>();
 	const [contentLv2, setContentLv2] = useState<DrawerContentParams>();
+	const [query, { setQuery, deleteQuery, deleteAllQueryKeys }] = useRouterQuery();
 
 	const toggleDrawer = (lv: "lv1" | "lv2" = "lv1", flag?: boolean) => {
 		if (typeof flag !== "undefined")
@@ -54,19 +57,23 @@ export const DrawerProvider = (props: { children?: ReactNode } = {}) => {
 
 	const closeDrawer = (lv?: "lv1" | "lv2") => {
 		if (lv) {
+			deleteQuery([lv]);
 			toggleDrawer(lv, false);
 		} else {
+			deleteAllQueryKeys();
 			setDrawerVisibility({ lv1: false, lv2: false });
 		}
 	};
 
 	const onCloseLv1 = () => {
+		deleteAllQueryKeys();
 		setDrawerVisibility((_drawerVisibility) => {
 			return { ..._drawerVisibility, lv1: false };
 		});
 	};
 
 	const onCloseLv2 = () => {
+		deleteQuery(["lv2"]);
 		setDrawerVisibility((_drawerVisibility) => {
 			return { ..._drawerVisibility, lv2: false };
 		});

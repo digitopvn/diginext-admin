@@ -110,49 +110,53 @@ const SmartStringList = (props: SmartStringListProps) => {
 	if (status && status[name] === "success") icon = <CheckOutlined color="green" />;
 
 	return (
-		<Form.Item
-			label={
-				<Space size="small">
-					{label}
-					{icon}
-				</Space>
-			}
-			name={name}
-			rules={[{ required, message: requiredMessage }]}
-			style={{ display: visible ? "block" : "none" }}
-		>
-			{/* <Select className={className} style={style} value={_value} onChange={_onChange} options={options} disabled={disabled} /> */}
-			{/* <Input hidden /> */}
-			<List
-				bordered
-				size="small"
-				dataSource={_value ?? []}
-				footer={
-					<Space.Compact style={{ width: "100%" }}>
-						<Input.Search
-							value={valueToBeAdded}
-							onChange={(e) => setValueToBeAdded(e.currentTarget.value)}
-							loading={status && status[name] === "loading"}
-							enterButton={
-								<Button icon={<PlusOutlined />} onClick={() => addValue(valueToBeAdded)}>
-									Add
-								</Button>
-							}
-						/>
-					</Space.Compact>
+		<>
+			<Form.Item
+				label={
+					<Space size="small">
+						{label}
+						{icon}
+					</Space>
 				}
-				renderItem={(item, index) => (
-					<List.Item actions={[<Button key={`${label}-delete-btn`} icon={<DeleteOutlined />} onClick={() => removeValueAtIndex(index)} />]}>
-						<List.Item.Meta title={<span>{item}</span>} />
-					</List.Item>
-				)}
-			/>
+				name={name}
+				rules={[{ required, message: requiredMessage }]}
+				style={{ display: visible ? "block" : "none" }}
+			>
+				{/* <Select className={className} style={style} value={_value} onChange={_onChange} options={options} disabled={disabled} /> */}
+				{/* <Input hidden /> */}
+				<List
+					bordered
+					size="small"
+					dataSource={_value ?? []}
+					footer={
+						<Space.Compact style={{ width: "100%" }}>
+							<Input.Search
+								value={valueToBeAdded}
+								onChange={(e) => setValueToBeAdded(e.currentTarget.value)}
+								loading={status && status[name] === "loading"}
+								enterButton={
+									<Button icon={<PlusOutlined />} onClick={() => addValue(valueToBeAdded)}>
+										Add
+									</Button>
+								}
+							/>
+						</Space.Compact>
+					}
+					renderItem={(item, index) => (
+						<List.Item
+							actions={[<Button key={`${label}-delete-btn`} icon={<DeleteOutlined />} onClick={() => removeValueAtIndex(index)} />]}
+						>
+							<List.Item.Meta title={<span>{item}</span>} />
+						</List.Item>
+					)}
+				/>
+			</Form.Item>
 
 			{postLabel}
 
 			{/* Display manual save controller if auto save is off */}
 			{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
-		</Form.Item>
+		</>
 	);
 };
 
