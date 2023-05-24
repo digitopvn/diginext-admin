@@ -57,6 +57,8 @@ const SmartSelect = (props: SmartFormElementProps) => {
 	useEffect(() => {
 		form.setFieldValue(name, value);
 		setValue(value);
+
+		if (onChange) onChange(value);
 	}, [value]);
 
 	useEffect(() => {

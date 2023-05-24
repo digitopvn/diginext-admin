@@ -54,3 +54,9 @@ export const useAppDeployEnvironmentUpdateApi = (options?: ApiOptions) => {
 export const useAppDeployEnvironmentDeleteApi = () => {
 	return useDeleteApi<IAppEnvironment>(["deploy_environment", "delete"], `/api/v1/app/deploy_environment`);
 };
+
+// LOGS
+
+export const useAppDeployEnvironmentLogsApi = (slug: string, options?: ApiOptions) => {
+	return useItemSlugApi<{ [pod: string]: string }>(["app_logs", slug], `/api/v1/app/environment/logs`, slug, options);
+};

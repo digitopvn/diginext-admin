@@ -7,6 +7,7 @@ import { MenuSider } from "@/commons/MenuSider";
 import NewEditPage from "@/commons/NewEditPage";
 import { PageFooter } from "@/commons/PageFooter";
 import { SiteHeader } from "@/commons/SiteHeader";
+import { AppLogs } from "@/components/deployments/AppLogs";
 import { BuildList } from "@/components/deployments/BuildList";
 import { BuildLogs } from "@/components/deployments/BuildLogs";
 import DeployEnvironment from "@/components/deployments/DeployEnvironment";
@@ -50,12 +51,16 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 		if (showDrawer) showDrawer({ title: "Releases", content: <ReleaseList /> }, { level: 1 });
 	};
 
-	const openBuildLogs = () => {
-		if (showDrawer) showDrawer({ title: "Build Logs", content: <BuildLogs /> }, { level: 2 });
+	const openBuildLogs = (lv = 1) => {
+		if (showDrawer) showDrawer({ title: "Build Logs", content: <BuildLogs /> }, { level: lv });
 	};
 
 	const openEnvVarsPage = (lv = 1) => {
 		if (showDrawer) showDrawer({ title: "Environment Variables", content: <EnvVarsNewEdit /> }, { level: lv });
+	};
+
+	const openAppDeployEnvLogsPage = (lv = 1) => {
+		if (showDrawer) showDrawer({ title: `Application Logs (env: ${env || "unknown"})`, content: <AppLogs /> }, { level: lv });
 	};
 
 	const openDeploymentYamlPage = (lv = 1) => {
@@ -101,6 +106,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 				openEnvVarsPage();
 				break;
 
+			case "app_logs":
+				openAppDeployEnvLogsPage();
+				break;
+
 			default:
 				// close drawer lv1
 				deleteQuery(["lv1"]);
@@ -110,7 +119,11 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 
 		switch (lv2) {
 			case "build_logs":
-				openBuildLogs();
+				openBuildLogs(2);
+				break;
+
+			case "app_logs":
+				openAppDeployEnvLogsPage(2);
 				break;
 
 			case "env_vars":

@@ -1,4 +1,5 @@
 import { Button, Col, Row } from "antd";
+import { useState } from "react";
 
 import { useAppDeployEnvironmentSlugApi, useAppDeployEnvironmentUpdateApi } from "@/api/api-app";
 import { useClusterListApi } from "@/api/api-cluster";
@@ -11,6 +12,8 @@ import { useDrawerProvider } from "@/providers/DrawerProvider";
 const DeployEnvironment = () => {
 	const [{ project: projectSlug, app: appSlug, env }, { setQuery }] = useRouterQuery();
 
+	const [sslIssuer, setSSLIssuer] = useState("");
+	console.log("sslIssuer :>> ", sslIssuer);
 	const { closeDrawer } = useDrawerProvider();
 
 	// clusters
@@ -64,8 +67,11 @@ const DeployEnvironment = () => {
 				return { label: issuer || "", value: issuer };
 			}),
 			wrapperStyle: { float: "left", marginRight: 15 },
+			onChange: (value) => {
+				setSSLIssuer(value);
+			},
 		},
-		{ type: "input", label: "TLS Secret", name: "tlsSecret", placeholder: "" },
+		{ type: "input", label: "TLS Secret", name: "tlsSecret", placeholder: "", disabled: sslIssuer === "letsencrypt" },
 	];
 
 	return (
@@ -81,6 +87,11 @@ const DeployEnvironment = () => {
 						<Col span={12}>
 							<Button block onClick={() => setQuery({ lv2: "deployment_yaml", project: projectSlug, app: appSlug, env })}>
 								Deployment YAML
+							</Button>
+						</Col>
+						<Col span={12}>
+							<Button block onClick={() => setQuery({ lv2: "app_logs", project: projectSlug, app: appSlug, env })}>
+								Application Logs
 							</Button>
 						</Col>
 					</Row>

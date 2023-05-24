@@ -39,6 +39,7 @@ interface DataType {
 	name?: string;
 	slug?: string;
 	cluster?: string;
+	replicas?: number;
 	owner?: string;
 	updatedAt?: string;
 	createdAt?: string;
@@ -57,14 +58,24 @@ const columns: ColumnsType<DataType> = [
 		dataIndex: "name",
 		key: "name",
 		fixed: "left",
-		filterSearch: true,
-		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
-		render: (value, record) => (record.type === "project" ? <Link href={`/project/${record.slug}`}>{value}</Link> : <>{value}</>),
+		// filterSearch: true,
+		// filters: [{ text: "goon", value: "goon" }],
+		// onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
+		render: (value, record) =>
+			// eslint-disable-next-line no-nested-ternary
+			record.type === "project" ? (
+				<Link href={`/apps?project=${record.slug}`}>
+					<strong>{record.slug}</strong>
+				</Link>
+			) : record.type === "app" ? (
+				<>{record.slug}</>
+			) : (
+				value
+			),
 	},
 	{
 		title: "Cluster",
-		width: 60,
+		width: 40,
 		dataIndex: "cluster",
 		key: "cluster",
 		render: (value) => (
@@ -81,16 +92,20 @@ const columns: ColumnsType<DataType> = [
 		width: 20,
 		dataIndex: "readyCount",
 		key: "readyCount",
-		render: (value) => value,
-		// filterSearch: true,
-		// filters: [{ text: "goon", value: "goon" }],
-		// onFilter: (value, record) => (record.cluster && record.cluster.indexOf(value.toString()) > -1) || true,
+		render: (value, record) =>
+			value && record.replicas ? (
+				<Tag>
+					{value}/{record.replicas}
+				</Tag>
+			) : (
+				<></>
+			),
 	},
 	{
 		title: "Last updated by",
 		dataIndex: "owner",
 		key: "owner",
-		width: 50,
+		width: 45,
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
 		onFilter: (value, record) => (record.owner && record.owner.indexOf(value.toString()) > -1) || true,
@@ -100,7 +115,7 @@ const columns: ColumnsType<DataType> = [
 		title: "Last updated",
 		dataIndex: "updatedAt",
 		key: "updatedAt",
-		width: 50,
+		width: 40,
 		render: (value) => <DateDisplay date={value} />,
 		sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
 	},
@@ -108,7 +123,7 @@ const columns: ColumnsType<DataType> = [
 		title: "Created at",
 		dataIndex: "createdAt",
 		key: "createdAt",
-		width: 50,
+		width: 40,
 		render: (value) => <DateDisplay date={value} />,
 		sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
 	},
@@ -118,7 +133,21 @@ const columns: ColumnsType<DataType> = [
 		fixed: "right",
 		key: "status",
 		width: 35,
-		filters: [{ text: "healthy", value: "healthy" }],
+		filters: [
+			{ text: "healthy", value: "healthy" },
+			{ text: "undeployed", value: "undeployed" },
+			{ text: "partial_healthy", value: "partial_healthy" },
+			{ text: "failed", value: "failed" },
+			{ text: "crashed", value: "crashed" },
+			{ text: "unknown", value: "unknown" },
+		],
+		filterSearch: true,
+		onFilter: (value, record) => {
+			if (record.type === "project" || record.type === "app") return true;
+			console.log("record.status === value :>> ", record.status, value);
+			if (record.status) return record.status === value;
+			return false;
+		},
 		render: (value) => (
 			// <Tag color="success" icon={<CheckCircleOutlined className="align-middle" />}>
 			<Tag
@@ -437,7 +466,7 @@ export const ProjectList = () => {
 			<Table
 				columns={columns}
 				dataSource={displayedProjects}
-				scroll={{ x: 1200 }}
+				scroll={{ x: 1600 }}
 				sticky={{ offsetHeader: 48 }}
 				pagination={{
 					showSizeChanger: true,
