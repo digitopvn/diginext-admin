@@ -287,7 +287,7 @@ export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, opt
 		onSuccess: (updateData, variables, context) => {
 			queryClient.invalidateQueries({ queryKey: [keys[0], "list"] });
 
-			if (filter.slug) queryClient.invalidateQueries({ queryKey: [keys[0], filter.slug] });
+			if (filter?.slug) queryClient.invalidateQueries({ queryKey: [keys[0], filter.slug] });
 		},
 	});
 

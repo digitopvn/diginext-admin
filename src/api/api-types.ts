@@ -87,6 +87,18 @@ export const gitProviderDomain = {
 export const buildStatusList = ["start", "building", "failed", "success"] as const;
 export type BuildStatus = (typeof buildStatusList)[number];
 
+/**
+ * App status:
+ * - `healthy`: App's containers are running well.
+ * - `partial_healthy`: Some of the app's containers are unhealthy.
+ * - `undeployed`: App has not been deployed yet.
+ * - `failed`: App's containers are unable to deploy due to image pull back-off or image pulling errors.
+ * - `crashed`: App's containers are facing some unexpected errors.
+ * - `unknown`: Other unknown errors.
+ */
+export const appStatusList = ["healthy", "partial_healthy", "undeployed", "failed", "crashed", "unknown"] as const;
+export type AppStatus = (typeof appStatusList)[number];
+
 // ssl
 export const sslIssuers = ["letsencrypt", "custom", "none"] as const;
 export type SSLIssuer = (typeof sslIssuers)[number];
@@ -760,6 +772,36 @@ export interface IAppEnvironment {
 	 * Collection array of environment variables
 	 */
 	envVars?: KubeEnvironmentVariable[];
+
+	/**
+	 * User name of the first person who deploy on this environment.
+	 */
+	createdBy?: string;
+
+	/**
+	 * User name of the last person who deploy or update this environment.
+	 */
+	lastUpdatedBy?: string;
+
+	/**
+	 * ID of the creator
+	 */
+	creator?: any;
+
+	/**
+	 * Update time
+	 */
+	updatedAt?: Date;
+
+	/**
+	 * Deployment's status
+	 */
+	status?: AppStatus;
+
+	/**
+	 * Amount of ready instances
+	 */
+	readyCount?: number;
 }
 
 export interface ICloudProvider extends IGeneral {

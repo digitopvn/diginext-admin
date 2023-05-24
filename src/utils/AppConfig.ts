@@ -55,6 +55,7 @@ export class Config {
 		if (typeof window !== "undefined") {
 			if (window.location.origin.indexOf("localhost") > -1) {
 				return "http://localhost:6969";
+				// return "https://topgroup.diginext.site";
 			}
 			return window.location.origin;
 		}

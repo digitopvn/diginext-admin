@@ -77,6 +77,16 @@ const columns: ColumnsType<DataType> = [
 		onFilter: (value, record) => (record.cluster && record.cluster.indexOf(value.toString()) > -1) || true,
 	},
 	{
+		title: "Ready",
+		width: 20,
+		dataIndex: "readyCount",
+		key: "readyCount",
+		render: (value) => value,
+		// filterSearch: true,
+		// filters: [{ text: "goon", value: "goon" }],
+		// onFilter: (value, record) => (record.cluster && record.cluster.indexOf(value.toString()) > -1) || true,
+	},
+	{
 		title: "Last updated by",
 		dataIndex: "owner",
 		key: "owner",
@@ -107,11 +117,15 @@ const columns: ColumnsType<DataType> = [
 		dataIndex: "status",
 		fixed: "right",
 		key: "status",
-		width: 30,
-		filters: [{ text: "live", value: "live" }],
+		width: 35,
+		filters: [{ text: "healthy", value: "healthy" }],
 		render: (value) => (
 			// <Tag color="success" icon={<CheckCircleOutlined className="align-middle" />}>
-			<Tag color="warning" icon={<InfoCircleOutlined className="align-middle" />}>
+			<Tag
+				// eslint-disable-next-line no-nested-ternary
+				color={value === "healthy" ? "success" : value === "undeployed" ? "pink" : "default"}
+				icon={<InfoCircleOutlined className="align-middle" />}
+			>
 				{value}
 			</Tag>
 		),
@@ -311,24 +325,6 @@ export const ProjectList = () => {
 												<MoreOutlined />
 											</Button>
 										</Dropdown>
-										{/* <Tooltip title="List of builds">
-											<Button
-												icon={<BuildOutlined />}
-												onClick={() => openBuildList(record.projectSlug, record.appSlug, envName)}
-											/>
-										</Tooltip>
-										<Tooltip title="All releases">
-											<Button
-												icon={<RocketOutlined />}
-												onClick={() => openReleaseList(record.projectSlug, record.appSlug, envName)}
-											/>
-										</Tooltip>
-										<Tooltip title="Modify environment variables" placement="topRight">
-											<Button
-												icon={<QrcodeOutlined />}
-												onClick={() => openEnvVarsEdit(record.projectSlug, record.appSlug, envName)}
-											/>
-										</Tooltip> */}
 										<Popconfirm
 											title="Are you sure to delete this environment?"
 											description={
@@ -377,18 +373,6 @@ export const ProjectList = () => {
 												<MoreOutlined />
 											</Button>
 										</Dropdown>
-										{/* <Tooltip title="List of builds">
-											<Button
-												icon={<BuildOutlined />}
-												onClick={() => openBuildList(record.projectSlug, record.appSlug, record.id)}
-											/>
-										</Tooltip>
-										<Tooltip title="Modify environment variables" placement="topRight">
-											<Button
-												icon={<QrcodeOutlined />}
-												onClick={() => openEnvVarsEdit(record.projectSlug, record.appSlug, envName)}
-											/>
-										</Tooltip> */}
 										<Popconfirm
 											title="Are you sure to delete this environment?"
 											description={

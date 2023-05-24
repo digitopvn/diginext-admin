@@ -18,7 +18,7 @@
 		"export:cli": "npm run format && npm run clean && npm run build && npm run export && npm run copy-to-cli",
 		"export:cli-dev": "npm run format && npm run clean && npm run build:dev && npm run export:dev && npm run copy-to-cli",
 		"export:cli-prod": "npm run format && npm run clean && npm run build:prod && npm run export:prod && npm run copy-to-cli",
-		"copy-to-cli": "$(mv ../diginext/public/swagger.json ../diginext/swagger.json || true) && rimraf ../diginext/public && ncp ./out ../diginext/public && $(mv ../diginext/swagger.json ../diginext/public/swagger.json || true)",
+		"copy-to-cli": "rimraf ../diginext/public && ncp ./out ../diginext/public",
 		"clean": "rimraf .next out",
 		"lint": "npm run check-types && next lint",
 		"format": "npm run check-types && next lint --fix && prettier '**/*.{js,ts,tsx,json,yaml}' --write",
