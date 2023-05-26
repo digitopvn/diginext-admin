@@ -49,11 +49,7 @@ const EnvVarsNewEdit = () => {
 		setEnvVars(initialEnvVars);
 	}, [JSON.stringify(envVars)]);
 
-	const deleteEnvVarAtIndex = (index: number) =>
-		_setEnvVars((_arr) => {
-			_arr.splice(index, 1);
-			return [..._arr];
-		});
+	const deleteEnvVarAtIndex = (index: number) => _setEnvVars((_arr) => _arr.filter((item, i) => index !== i));
 
 	const addEnvVar = (value: KubeEnvironmentVariable = { name: "", value: "" }) => _setEnvVars((_arr) => [..._arr, value]);
 
@@ -145,8 +141,8 @@ const EnvVarsNewEdit = () => {
 						<Form.Item
 							className="mb-0 w-1/2"
 							name={[`envVars[${index}]`, "value"]}
-							rules={[{ required: true, message: `Variable value is required` }]}
-							initialValue={envVar.value}
+							// rules={[{ required: true, message: `Variable value is required` }]}
+							initialValue={envVar.value || ""}
 						>
 							<Input
 								className="!flex-auto"
