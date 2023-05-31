@@ -57,7 +57,7 @@ const columns: ColumnsType<DataType> = [
 		width: 70,
 		dataIndex: "name",
 		key: "name",
-		fixed: "left",
+		fixed: window?.innerWidth >= 728 ? "left" : undefined,
 		// filterSearch: true,
 		// filters: [{ text: "goon", value: "goon" }],
 		// onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
@@ -130,7 +130,7 @@ const columns: ColumnsType<DataType> = [
 	{
 		title: "Status",
 		dataIndex: "status",
-		fixed: "right",
+		fixed: window?.innerWidth >= 728 ? "right" : undefined,
 		key: "status",
 		width: 35,
 		filters: [
@@ -163,7 +163,7 @@ const columns: ColumnsType<DataType> = [
 		title: "Action",
 		key: "action",
 		fixed: "right",
-		width: 70,
+		width: window?.innerWidth >= 728 ? 70 : 14,
 		dataIndex: "action",
 		render: (value, record) => record.actions,
 	},
@@ -252,9 +252,9 @@ export const ProjectList = () => {
 			type: "project",
 			actions: (
 				<Space.Compact>
-					<Tooltip title="Edit project">
+					{/* <Tooltip title="Edit project">
 						<Button icon={<EditOutlined />} />
-					</Tooltip>
+					</Tooltip> */}
 					{/* <Button icon={<PauseCircleOutlined />} /> */}
 					<Popconfirm
 						title="Are you sure to delete this project?"
@@ -466,6 +466,7 @@ export const ProjectList = () => {
 			<Table
 				columns={columns}
 				dataSource={displayedProjects}
+				// scroll={{ x: window?.innerWidth >= 728 ? 1500 : 600 }}
 				scroll={{ x: 1600 }}
 				sticky={{ offsetHeader: 48 }}
 				pagination={{

@@ -20,6 +20,7 @@ import Sider from "antd/lib/layout/Sider";
 import { trimEnd, trimStart } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useMemo } from "react";
 import { useDarkMode } from "usehooks-ts";
 
 import { useAuth } from "@/api/api-auth";
@@ -122,6 +123,13 @@ export const MenuSider = () => {
 	const menuPath = `menu${trimEnd(router.pathname, "/")}`;
 	// console.log("menuPath :>> ", menuPath);
 
+	const isCollapsible = useMemo(() => window?.innerWidth >= 728, [window?.innerWidth]);
+	// console.log("isCollapsible :>> ", isCollapsible);
+
+	useEffect(() => {
+		if (window?.innerWidth < 728 && !sidebarCollapsed && toggleSidebar) toggleSidebar(true);
+	}, [window?.innerWidth]);
+
 	const onMenuSelected: MenuProps["onSelect"] = (e) => {
 		// console.log("e", e);
 		const path = trimStart(e.key, "menu");
@@ -131,7 +139,7 @@ export const MenuSider = () => {
 	return (
 		<Sider
 			theme="light"
-			collapsible
+			collapsible={isCollapsible}
 			collapsed={sidebarCollapsed}
 			onCollapse={(value) => toggleSidebar && toggleSidebar(value)}
 			style={{
