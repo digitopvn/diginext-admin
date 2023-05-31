@@ -57,7 +57,7 @@ const columns: ColumnsType<DataType> = [
 		width: 70,
 		dataIndex: "name",
 		key: "name",
-		fixed: window?.innerWidth >= 728 ? "left" : undefined,
+		fixed: typeof window !== "undefined" && window?.innerWidth >= 728 ? "left" : undefined,
 		// filterSearch: true,
 		// filters: [{ text: "goon", value: "goon" }],
 		// onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
@@ -130,7 +130,7 @@ const columns: ColumnsType<DataType> = [
 	{
 		title: "Status",
 		dataIndex: "status",
-		fixed: window?.innerWidth >= 728 ? "right" : undefined,
+		fixed: typeof window !== "undefined" && window?.innerWidth >= 728 ? "right" : undefined,
 		key: "status",
 		width: 35,
 		filters: [
@@ -163,7 +163,7 @@ const columns: ColumnsType<DataType> = [
 		title: "Action",
 		key: "action",
 		fixed: "right",
-		width: window?.innerWidth >= 728 ? 70 : 14,
+		width: typeof window !== "undefined" && window?.innerWidth >= 728 ? 70 : 14,
 		dataIndex: "action",
 		render: (value, record) => record.actions,
 	},

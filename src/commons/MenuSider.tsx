@@ -123,12 +123,15 @@ export const MenuSider = () => {
 	const menuPath = `menu${trimEnd(router.pathname, "/")}`;
 	// console.log("menuPath :>> ", menuPath);
 
-	const isCollapsible = useMemo(() => window?.innerWidth >= 728, [window?.innerWidth]);
+	const isCollapsible = useMemo(
+		() => typeof window !== "undefined" && window?.innerWidth >= 728,
+		[typeof window !== "undefined" ? window?.innerWidth : null]
+	);
 	// console.log("isCollapsible :>> ", isCollapsible);
 
 	useEffect(() => {
-		if (window?.innerWidth < 728 && !sidebarCollapsed && toggleSidebar) toggleSidebar(true);
-	}, [window?.innerWidth]);
+		if (typeof window !== "undefined" && window?.innerWidth < 728 && !sidebarCollapsed && toggleSidebar) toggleSidebar(true);
+	}, [typeof window !== "undefined" ? window?.innerWidth : null]);
 
 	const onMenuSelected: MenuProps["onSelect"] = (e) => {
 		// console.log("e", e);
