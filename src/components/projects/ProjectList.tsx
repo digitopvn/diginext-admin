@@ -11,7 +11,7 @@ import {
 	QrcodeOutlined,
 	RocketOutlined,
 } from "@ant-design/icons";
-import { Button, Dropdown, Modal, notification, Popconfirm, Space, Table, Tag, Tooltip } from "antd";
+import { Button, Dropdown, Modal, notification, Popconfirm, Space, Table, Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
@@ -23,6 +23,7 @@ import { useAppDeleteApi, useAppEnvVarsDeleteApi } from "@/api/api-app";
 import { useProjectDeleteApi, useProjectListWithAppsApi } from "@/api/api-project";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
+import { useLayoutProvider } from "@/providers/LayoutProvider";
 import { AppConfig } from "@/utils/AppConfig";
 
 import AddDomainForm from "./AddDomainForm";
@@ -51,129 +52,132 @@ interface DataType {
 	children?: DataType[];
 }
 
-const columns: ColumnsType<DataType> = [
-	{
-		title: "Project/app",
-		width: 70,
-		dataIndex: "name",
-		key: "name",
-		fixed: typeof window !== "undefined" && window?.innerWidth >= 728 ? "left" : undefined,
-		// filterSearch: true,
-		// filters: [{ text: "goon", value: "goon" }],
-		// onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
-		render: (value, record) =>
-			// eslint-disable-next-line no-nested-ternary
-			record.type === "project" ? (
-				<Link href={`/apps?project=${record.slug}`}>
-					<strong>{record.slug}</strong>
-				</Link>
-			) : record.type === "app" ? (
-				<>{record.slug}</>
-			) : (
-				value
-			),
-	},
-	{
-		title: "Cluster",
-		width: 40,
-		dataIndex: "cluster",
-		key: "cluster",
-		render: (value) => (
-			<Button type="link" style={{ padding: 0 }}>
-				{value}
-			</Button>
-		),
-		filterSearch: true,
-		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.cluster && record.cluster.indexOf(value.toString()) > -1) || true,
-	},
-	{
-		title: "Ready",
-		width: 20,
-		dataIndex: "readyCount",
-		key: "readyCount",
-		render: (value, record) =>
-			value && record.replicas ? (
-				<Tag>
-					{value}/{record.replicas}
-				</Tag>
-			) : (
-				<></>
-			),
-	},
-	{
-		title: "Last updated by",
-		dataIndex: "owner",
-		key: "owner",
-		width: 45,
-		filterSearch: true,
-		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.owner && record.owner.indexOf(value.toString()) > -1) || true,
-		render: (value) => <>{value?.name}</>,
-	},
-	{
-		title: "Last updated",
-		dataIndex: "updatedAt",
-		key: "updatedAt",
-		width: 40,
-		render: (value) => <DateDisplay date={value} />,
-		sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
-	},
-	{
-		title: "Created at",
-		dataIndex: "createdAt",
-		key: "createdAt",
-		width: 40,
-		render: (value) => <DateDisplay date={value} />,
-		sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
-	},
-	{
-		title: "Status",
-		dataIndex: "status",
-		fixed: typeof window !== "undefined" && window?.innerWidth >= 728 ? "right" : undefined,
-		key: "status",
-		width: 35,
-		filters: [
-			{ text: "healthy", value: "healthy" },
-			{ text: "undeployed", value: "undeployed" },
-			{ text: "partial_healthy", value: "partial_healthy" },
-			{ text: "failed", value: "failed" },
-			{ text: "crashed", value: "crashed" },
-			{ text: "unknown", value: "unknown" },
-		],
-		filterSearch: true,
-		onFilter: (value, record) => {
-			if (record.type === "project" || record.type === "app") return true;
-			console.log("record.status === value :>> ", record.status, value);
-			if (record.status) return record.status === value;
-			return false;
-		},
-		render: (value) => (
-			// <Tag color="success" icon={<CheckCircleOutlined className="align-middle" />}>
-			<Tag
-				// eslint-disable-next-line no-nested-ternary
-				color={value === "healthy" ? "success" : value === "undeployed" ? "pink" : "default"}
-				icon={<InfoCircleOutlined className="align-middle" />}
-			>
-				{value}
-			</Tag>
-		),
-	},
-	{
-		title: "Action",
-		key: "action",
-		fixed: "right",
-		width: typeof window !== "undefined" && window?.innerWidth >= 728 ? 70 : 14,
-		dataIndex: "action",
-		render: (value, record) => record.actions,
-	},
-];
-
 const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const ProjectList = () => {
 	const router = useRouter();
 	const [query, { setQuery }] = useRouterQuery();
+
+	const { responsive } = useLayoutProvider();
+
+	// table config
+	const columns: ColumnsType<DataType> = [
+		{
+			title: "Project/app",
+			width: responsive?.md ? 60 : 40,
+			dataIndex: "name",
+			key: "name",
+			fixed: responsive?.md ? "left" : undefined,
+			// filterSearch: true,
+			// filters: [{ text: "goon", value: "goon" }],
+			// onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
+			render: (value, record) =>
+				// eslint-disable-next-line no-nested-ternary
+				record.type === "project" ? (
+					<Link href={`/apps?project=${record.slug}`}>
+						<strong>{record.slug}</strong>
+					</Link>
+				) : record.type === "app" ? (
+					<>{record.slug}</>
+				) : (
+					value
+				),
+		},
+		{
+			title: "Cluster",
+			width: 40,
+			dataIndex: "cluster",
+			key: "cluster",
+			render: (value) => (
+				<Button type="link" style={{ padding: 0 }}>
+					{value}
+				</Button>
+			),
+			filterSearch: true,
+			filters: [{ text: "goon", value: "goon" }],
+			onFilter: (value, record) => (record.cluster && record.cluster.indexOf(value.toString()) > -1) || true,
+		},
+		{
+			title: "Ready",
+			width: 20,
+			dataIndex: "readyCount",
+			key: "readyCount",
+			render: (value, record) =>
+				value && record.replicas ? (
+					<Tag>
+						{value}/{record.replicas}
+					</Tag>
+				) : (
+					<></>
+				),
+		},
+		{
+			title: "Last updated by",
+			dataIndex: "owner",
+			key: "owner",
+			width: 45,
+			filterSearch: true,
+			filters: [{ text: "goon", value: "goon" }],
+			onFilter: (value, record) => (record.owner && record.owner.indexOf(value.toString()) > -1) || true,
+			render: (value) => <>{value?.name}</>,
+		},
+		{
+			title: "Last updated",
+			dataIndex: "updatedAt",
+			key: "updatedAt",
+			width: 40,
+			render: (value) => <DateDisplay date={value} />,
+			sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
+		},
+		{
+			title: "Created at",
+			dataIndex: "createdAt",
+			key: "createdAt",
+			width: 40,
+			render: (value) => <DateDisplay date={value} />,
+			sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
+		},
+		{
+			title: "Status",
+			dataIndex: "status",
+			fixed: responsive?.md ? "right" : undefined,
+			key: "status",
+			width: responsive?.md ? 20 : 15,
+			filters: [
+				{ text: "healthy", value: "healthy" },
+				{ text: "undeployed", value: "undeployed" },
+				{ text: "partial_healthy", value: "partial_healthy" },
+				{ text: "failed", value: "failed" },
+				{ text: "crashed", value: "crashed" },
+				{ text: "unknown", value: "unknown" },
+			],
+			filterSearch: true,
+			onFilter: (value, record) => {
+				if (record.type === "project" || record.type === "app") return true;
+				console.log("record.status === value :>> ", record.status, value);
+				if (record.status) return record.status === value;
+				return false;
+			},
+			render: (value) => (
+				// <Tag color="success" icon={<CheckCircleOutlined className="align-middle" />}>
+				<Tag
+					// eslint-disable-next-line no-nested-ternary
+					color={value === "healthy" ? "success" : value === "undeployed" ? "pink" : "default"}
+					icon={<InfoCircleOutlined className="align-middle" />}
+				>
+					{value}
+				</Tag>
+			),
+		},
+		{
+			title: <Typography.Text className="text-xs md:text-sm">Action</Typography.Text>,
+			key: "action",
+			fixed: "right",
+			width: responsive?.md ? 18 : 13,
+			dataIndex: "action",
+			render: (value, record) => record.actions,
+		},
+	];
 
 	// pagination
 	const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
@@ -246,7 +250,7 @@ export const ProjectList = () => {
 		setPage(newPage);
 	}, [query.page]);
 
-	const displayedProjects = projects?.map((p) => {
+	const displayedProjects = projects?.map((p: any) => {
 		return {
 			...p,
 			type: "project",
@@ -273,7 +277,7 @@ export const ProjectList = () => {
 			id: p._id,
 			status: "N/A",
 			children: p.apps
-				? p.apps.map((app) => {
+				? p.apps.map((app: any) => {
 						const envList = Object.keys(app.deployEnvironment ?? {});
 						const environments: DataType[] = envList.map((envName) => {
 							// console.log("envStr :>> ", envStr);
@@ -469,6 +473,7 @@ export const ProjectList = () => {
 				// scroll={{ x: window?.innerWidth >= 728 ? 1500 : 600 }}
 				scroll={{ x: 1600 }}
 				sticky={{ offsetHeader: 48 }}
+				defaultExpandAllRows
 				pagination={{
 					showSizeChanger: true,
 					current: page,

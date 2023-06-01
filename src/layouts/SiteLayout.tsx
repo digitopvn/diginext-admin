@@ -156,7 +156,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 			{/* Sidebar here */}
 			{useSidebar && <MenuSider />}
 
-			<Layout className="min-h-screen transition-all" style={{ marginLeft }}>
+			<Layout
+				className="min-h-screen transition-all"
+				// style={{ marginLeft }}
+			>
 				{/* Site Header */}
 				{useSidebar && <SiteHeader />}
 

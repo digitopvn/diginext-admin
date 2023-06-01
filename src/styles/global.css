@@ -20,3 +20,8 @@
 .anticon {
 	vertical-align: middle;
 }
+
+.ant-layout .ant-layout-sider-light .ant-layout-sider-zero-width-trigger {
+	top: 4px;
+	z-index: 101;
+}

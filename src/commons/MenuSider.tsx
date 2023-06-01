@@ -145,14 +145,16 @@ export const MenuSider = () => {
 			collapsible={isCollapsible}
 			collapsed={sidebarCollapsed}
 			onCollapse={(value) => toggleSidebar && toggleSidebar(value)}
-			style={{
-				overflow: "auto",
-				height: "100vh",
-				position: "fixed",
-				left: 0,
-				top: 0,
-				bottom: 0,
-			}}
+			breakpoint="lg"
+			collapsedWidth="0"
+			// style={{
+			// 	overflow: "auto",
+			// 	height: "100vh",
+			// 	position: "fixed",
+			// 	left: 0,
+			// 	top: 0,
+			// 	bottom: 0,
+			// }}
 		>
 			{sidebarCollapsed ? (
 				<div className="mx-auto my-5 w-[32px]">
