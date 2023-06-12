@@ -139,7 +139,7 @@ export const BuildList = () => {
 	const filter: any = {};
 	if (project) filter.projectSlug = project;
 	if (app) filter.appSlug = app;
-	if (env) filter.env = env;
+	// if (env) filter.env = env;
 
 	// const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 	const [page, setPage] = useState(1);

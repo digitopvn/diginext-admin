@@ -37,6 +37,7 @@ const WorkspaceSetupPage = () => {
 
 	const [wsName, setWsName] = useState("");
 	const [dxKey, setDxKey] = useState("");
+	const [err, setErr] = useState("");
 
 	const onChange = (e: SyntheticEvent) => setWsName((e.currentTarget as any).value);
 	const [user, { refetch }] = useAuth();
@@ -70,6 +71,8 @@ const WorkspaceSetupPage = () => {
 			const workspace = result?.data;
 			await refetch();
 			router.push(isDev() ? `${Config.NEXT_PUBLIC_BASE_URL}` : `/`);
+		} else {
+			setErr(result?.messages?.join(".") || "Internal Server Error");
 		}
 	};
 
@@ -141,6 +144,7 @@ const WorkspaceSetupPage = () => {
 								</Form.Item>
 							</Space.Compact>
 						</Space>
+						<Form.ErrorList className="text-red-400" errors={[err]} />
 					</Form>
 				</div>
 			</CenterContainer>

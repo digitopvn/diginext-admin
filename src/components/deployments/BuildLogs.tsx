@@ -137,9 +137,9 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 				</h3>
 			)}
 
-			{status === "failed" && <h2 className="text-xl text-red-600">Build lỗi rồi má ơi!</h2>}
+			{status === "failed" && <h2 className="text-xl text-red-600">Build failed.</h2>}
 
-			{status === "success" && <h2 className="text-xl text-green-600">Build thành công rồi, đỉnh quá idol ơi!</h2>}
+			{status === "success" && <h2 className="text-xl text-green-600">Congrats, your build process has been finished successfully!</h2>}
 
 			<Timeline
 				items={messages

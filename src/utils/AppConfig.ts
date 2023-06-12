@@ -27,7 +27,7 @@ export class Config {
 	};
 
 	static get DX_SITE() {
-		return this.NEXT_PUBLIC_ENV === "development" ? "http://localhost:4000" : "https://diginext.vn";
+		return this.NEXT_PUBLIC_ENV === "development" ? "http://localhost:4000" : "https://diginext.site";
 	}
 
 	static get ENV() {

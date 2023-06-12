@@ -1,8 +1,9 @@
 import { GoogleOutlined } from "@ant-design/icons";
-import { Button } from "antd";
+import { Button, Divider } from "antd";
 import { useRouter } from "next/router";
 
 import { login } from "@/api/api-auth";
+import BasicAuth from "@/commons/auth/basic-auth";
 import CenterContainer from "@/commons/CenterContainer";
 import DiginextLogo from "@/commons/DiginextLogo";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -28,6 +29,8 @@ const LoginPage = () => {
 			{/* Page Content */}
 			<CenterContainer className="text-center">
 				<DiginextLogo useTagline />
+				<BasicAuth />
+				<Divider>OR</Divider>
 				<Button type="primary" size="large" onClick={() => login({ redirectURL })}>
 					<GoogleOutlined />
 					Sign in with Google

@@ -188,6 +188,7 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptio
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	// console.log("useCreateApi > access_token :>> ", access_token);
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
@@ -198,12 +199,18 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptio
 
 	const mutation = useMutation<ApiResponse<T>, Error, T>({
 		mutationFn: async (newData) => {
-			const { data } = await axios.post<ApiResponse<T>>(apiURL, newData, { ...options, headers });
+			const { data, status } = await axios.post<ApiResponse<T>>(apiURL, newData, { ...options, headers });
+			if (status === 429) throw new Error("Too many requests.");
 
 			if (!data.status) {
 				if (!isEmpty(data.messages)) {
 					data.messages.forEach((message) => {
-						if (message) notification.error({ message: "Failed.", description: message });
+						if (message)
+							try {
+								notification.error({ message: "Failed.", description: message });
+							} catch (e) {
+								console.error(e);
+							}
 					});
 				} else {
 					notification.error({ message: "Something is wrong..." });
@@ -211,6 +218,12 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptio
 			}
 
 			return data;
+		},
+
+		onError: async (error, variables, ctx) => {
+			console.log("error :>> ", error);
+			// console.log("ctx :>> ", ctx);
+			// console.log("variables :>> ", variables);
 		},
 
 		onMutate: async (newData) => {
