@@ -1,5 +1,5 @@
 import type { UseQueryResult } from "@tanstack/react-query";
-import { App, Button, Form, Popconfirm, Space, theme } from "antd";
+import { Alert, App, Button, Form, Popconfirm, Skeleton, Space, theme } from "antd";
 import _, { isEmpty } from "lodash";
 import type { ReactNode } from "react";
 import { useState } from "react";
@@ -38,7 +38,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 	const root = useApp();
 
 	const { useSlugApi, useCreateApi, useUpdateApi } = props.api || {};
-	const { data: item } = useSlugApi || {};
+	const { data: item, status } = useSlugApi || {};
 	const [updateApi, updateStatus] = useUpdateApi || [];
 	const [createApi, createStatus] = useCreateApi || [];
 
@@ -115,122 +115,126 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 	};
 
 	return (
-		<Form
-			className={["h-full", "overflow-auto", className].join(" ")}
-			layout="vertical"
-			// name="edit"
-			// initialValues={initialValues}
-			form={form}
-			onFinish={onFinish}
-			onFinishFailed={onFinishFailed}
-			autoComplete="off"
-		>
-			<div className="p-6 pb-16">
-				{configs.map((field) => {
-					// console.log("field :>> ", field);
-					switch (field.type) {
-						case "input":
-							return (
-								<SmartInput
-									key={`${name}-${field.name}`}
-									{...field}
-									value={field.value ?? (item ? _.get(item, field.name) : "")}
-									status={fieldsStatus}
-									isNew={isNew}
-								/>
-							);
+		<div className="p-6 pb-16">
+			{status === "loading" && <Skeleton active />}
+			{status === "error" && <Alert message="Unable to get data at the moment." type="error" showIcon />}
+			{status === "success" && (
+				<Form
+					className={["h-full", "overflow-auto", className].join(" ")}
+					layout="vertical"
+					// name="edit"
+					// initialValues={initialValues}
+					form={form}
+					onFinish={onFinish}
+					onFinishFailed={onFinishFailed}
+					autoComplete="off"
+				>
+					{configs.map((field) => {
+						// console.log("field :>> ", field);
+						switch (field.type) {
+							case "input":
+								return (
+									<SmartInput
+										key={`${name}-${field.name}`}
+										{...field}
+										value={field.value ?? (item ? _.get(item, field.name) : "")}
+										status={fieldsStatus}
+										isNew={isNew}
+									/>
+								);
 
-						case "number":
-							// console.log("field.name :>> ", field.name);
-							// console.log("field.value :>> ", field.value);
-							return (
-								<SmartNumber
-									key={`${name}-${field.name}`}
-									{...field}
-									value={field.value ?? (item ? _.get(item, field.name) : 0)}
-									status={fieldsStatus}
-									isNew={isNew}
-								/>
-							);
+							case "number":
+								// console.log("field.name :>> ", field.name);
+								// console.log("field.value :>> ", field.value);
+								return (
+									<SmartNumber
+										key={`${name}-${field.name}`}
+										{...field}
+										value={field.value ?? (item ? _.get(item, field.name) : 0)}
+										status={fieldsStatus}
+										isNew={isNew}
+									/>
+								);
 
-						case "textarea":
-							return (
-								<SmartTextArea
-									key={`${name}-${field.name}`}
-									{...field}
-									value={field.value ?? (item ? _.get(item, field.name) : "")}
-									status={fieldsStatus}
-									isNew={isNew}
-								/>
-							);
+							case "textarea":
+								return (
+									<SmartTextArea
+										key={`${name}-${field.name}`}
+										{...field}
+										value={field.value ?? (item ? _.get(item, field.name) : "")}
+										status={fieldsStatus}
+										isNew={isNew}
+									/>
+								);
 
-						case "code-editor":
-							return (
-								<SmartCodeEditor
-									key={`${name}-${field.name}`}
-									{...field}
-									value={field.value ?? (item ? _.get(item, field.name) : "")}
-									status={fieldsStatus}
-									isNew={isNew}
-								/>
-							);
+							case "code-editor":
+								return (
+									<SmartCodeEditor
+										key={`${name}-${field.name}`}
+										{...field}
+										value={field.value ?? (item ? _.get(item, field.name) : "")}
+										status={fieldsStatus}
+										isNew={isNew}
+									/>
+								);
 
-						case "select": {
-							let { displayKey } = field;
-							if (typeof displayKey === "undefined") displayKey = "name";
+							case "select": {
+								let { displayKey } = field;
+								if (typeof displayKey === "undefined") displayKey = "name";
 
-							const selectedValue = _.get(item, displayKey ? `${displayKey}` : field.name);
-							// console.log("selectedValue :>> ", selectedValue);
-							return (
-								<SmartSelect
-									key={`${name}-${field.name}`}
-									{...field}
-									style={{ minWidth: 300, ...field?.style }}
-									value={selectedValue}
-									status={fieldsStatus}
-									isNew={isNew}
-								/>
-							);
+								const selectedValue = _.get(item, displayKey ? `${displayKey}` : field.name);
+								// console.log("selectedValue :>> ", selectedValue);
+								return (
+									<SmartSelect
+										key={`${name}-${field.name}`}
+										{...field}
+										style={{ minWidth: 300, ...field?.style }}
+										value={selectedValue}
+										status={fieldsStatus}
+										isNew={isNew}
+									/>
+								);
+							}
+
+							case "list_string":
+								// console.log("field.name :>> ", field.name);
+								// console.log("field.value :>> ", field.value);
+								return (
+									<SmartStringList
+										key={`${name}-${field.name}`}
+										{...field}
+										value={field.value ?? (item ? _.get(item, field.name) : [])}
+										status={fieldsStatus}
+										isNew={isNew}
+									/>
+								);
+
+							default:
+								return null;
 						}
+					})}
 
-						case "list_string":
-							// console.log("field.name :>> ", field.name);
-							// console.log("field.value :>> ", field.value);
-							return (
-								<SmartStringList
-									key={`${name}-${field.name}`}
-									{...field}
-									value={field.value ?? (item ? _.get(item, field.name) : [])}
-									status={fieldsStatus}
-									isNew={isNew}
-								/>
-							);
+					{children}
 
-						default:
-							return null;
-					}
-				})}
-			</div>
-
-			{children}
-
-			{isNew && (
-				<div className="fixed bottom-0 w-full px-6 py-3" style={{ backgroundColor: colorBgContainer }}>
-					<Space>
-						<Form.Item style={{ marginBottom: 0 }}>
-							<Button type="primary" htmlType="submit">
-								Submit
-							</Button>
-						</Form.Item>
-						<Popconfirm title="Are you sure?" onConfirm={() => deleteAllQueryKeys()} okText="Yes" cancelText="No">
-							<Button type="primary" danger>
-								Discard
-							</Button>
-						</Popconfirm>
-					</Space>
-				</div>
+					{isNew && (
+						<div className="fixed bottom-0 w-full px-6 py-3" style={{ backgroundColor: colorBgContainer }}>
+							<Space>
+								<Form.Item style={{ marginBottom: 0 }}>
+									<Button type="primary" htmlType="submit">
+										Submit
+									</Button>
+								</Form.Item>
+								<Popconfirm title="Are you sure?" onConfirm={() => deleteAllQueryKeys()} okText="Yes" cancelText="No">
+									<Button type="primary" danger>
+										Discard
+									</Button>
+								</Popconfirm>
+							</Space>
+						</div>
+					)}
+				</Form>
 			)}
-		</Form>
+		</div>
 	);
 };
 

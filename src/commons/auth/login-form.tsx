@@ -1,5 +1,6 @@
 import { Button, Form, Input } from "antd";
 import { setCookie } from "cookies-next";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 
@@ -60,8 +61,13 @@ const LoginForm = () => {
 				<Button type="primary" htmlType="submit">
 					Submit
 				</Button>
-				<Form.ErrorList errors={[errMsg]} />
+				{/* TODO: Forgot password */}
+				<Link href="#" className="ml-3 underline">
+					Forgot password?
+				</Link>
 			</Form.Item>
+
+			<Form.ErrorList errors={[errMsg]} />
 		</Form>
 	);
 };

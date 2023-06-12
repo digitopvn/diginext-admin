@@ -13,7 +13,6 @@ const BasicAuth = () => {
 			<div className="p-3">
 				{tab === "Sign in" && <LoginForm />}
 				{tab === "Register" && <RegisterForm />}
-				{/* TODO: Forgot password */}
 			</div>
 		</div>
 	);

@@ -30,11 +30,14 @@ const LoginPage = () => {
 			<CenterContainer className="text-center">
 				<DiginextLogo useTagline />
 				<BasicAuth />
-				<Divider>OR</Divider>
-				<Button type="primary" size="large" onClick={() => login({ redirectURL })}>
-					<GoogleOutlined />
-					Sign in with Google
-				</Button>
+				{/* TODO: Check GOOGLE_ID & SECRET */}
+				<>
+					<Divider>OR</Divider>
+					<Button type="primary" size="large" onClick={() => login({ redirectURL })}>
+						<GoogleOutlined />
+						Sign in with Google
+					</Button>
+				</>
 			</CenterContainer>
 		</Main>
 	);
