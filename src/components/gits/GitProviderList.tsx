@@ -85,7 +85,7 @@ const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 export const GitProviderList = () => {
 	const [page, setPage] = useState(1);
 
-	const { data } = useGitProviderListApi({
+	const { data, status } = useGitProviderListApi({
 		filter: { verified: true },
 		populate: "owner",
 		pagination: { page, size: pageSize },
@@ -136,6 +136,7 @@ export const GitProviderList = () => {
 	return (
 		<div>
 			<Table
+				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedData}
 				scroll={{ x: 1200 }}

@@ -118,7 +118,7 @@ export const UserList = () => {
 	];
 
 	const [page, setPage] = useState(1);
-	const { data } = useUserListApi({ populate: "roles,teams", pagination: { page, size: pageSize } });
+	const { data, status } = useUserListApi({ populate: "roles,teams", pagination: { page, size: pageSize } });
 	const { list, pagination } = data || {};
 	const { total_items } = pagination || {};
 	console.log("users :>> ", list);
@@ -161,6 +161,7 @@ export const UserList = () => {
 	return (
 		<div>
 			<Table
+				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedList}
 				scroll={{ x: 1200 }}

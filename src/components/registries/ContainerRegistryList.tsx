@@ -93,7 +93,7 @@ const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const ContainerRegistryList = () => {
 	const [page, setPage] = useState(1);
-	const { data } = useContainerRegistryListApi({ populate: "owner", pagination: { page, size: pageSize } });
+	const { data, status } = useContainerRegistryListApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: containerRegistries, pagination } = data || {};
 	const { total_items } = pagination || {};
 	// console.log("containerRegistries :>> ", containerRegistries);
@@ -139,6 +139,7 @@ export const ContainerRegistryList = () => {
 	return (
 		<div>
 			<Table
+				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedData}
 				scroll={{ x: 1200 }}

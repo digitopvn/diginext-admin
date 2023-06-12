@@ -24,6 +24,15 @@ export const WorkspaceSettings = () => {
 		<div className="px-4 py-6">
 			<Typography.Title>{workspace?.name} Workspace</Typography.Title>
 
+			{/* DX KEY */}
+			<Card title="DX_KEY">
+				<div key={`dx-key`}>
+					<CopyCode mode="inline" value={workspace?.dx_key || ""} />
+				</div>
+			</Card>
+
+			<Divider dashed />
+
 			{/* API ACCESS TOKEN */}
 			{apiKeys.length > 0 && (
 				<List
@@ -41,15 +50,7 @@ export const WorkspaceSettings = () => {
 
 			<Divider dashed />
 
-			<Card title="DX_KEY">
-				<div key={`dx-key`}>
-					<CopyCode mode="inline" value={workspace?.dx_key || ""} />
-				</div>
-			</Card>
-
-			<Divider dashed />
-
-			{/* PUBLIC KEY */}
+			{/* SSH PUBLIC KEY */}
 			<Card title="PUBLIC KEY">
 				<div key={`ssh-public-key`}>
 					<CopyCode mode="inline" value={publicKeyRes?.data.publicKey || ""} />

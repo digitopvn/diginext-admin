@@ -107,7 +107,7 @@ export const CloudProviderList = () => {
 	];
 
 	const [page, setPage] = useState(1);
-	const { data } = useCloudProviderListApi({ pagination: { page, size: pageSize } });
+	const { data, status } = useCloudProviderListApi({ pagination: { page, size: pageSize } });
 	const { list: cloudProviders, pagination } = data || {};
 	const { total_items } = pagination || {};
 	console.log("cloudProviders :>> ", cloudProviders);
@@ -134,6 +134,7 @@ export const CloudProviderList = () => {
 	return (
 		<div>
 			<Table
+				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedCloudProviders}
 				scroll={{ x: 1200 }}

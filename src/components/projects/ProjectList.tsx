@@ -183,7 +183,7 @@ export const ProjectList = () => {
 	const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 
 	// fetch projects
-	const { data } = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
+	const { data, status } = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: projects, pagination } = data || {};
 	const { total_pages, total_items } = pagination || {};
 
@@ -217,7 +217,7 @@ export const ProjectList = () => {
 
 	// console.log({ total_pages });
 	const openBuildList = (project: string, app: string, env: string) => {
-		setQuery({ lv1: "build", project, app, env });
+		setQuery({ lv1: "build", project, app });
 	};
 
 	const openReleaseList = (project: string, app: string, env: string) => {
@@ -468,6 +468,7 @@ export const ProjectList = () => {
 	return (
 		<div>
 			<Table
+				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedProjects}
 				// scroll={{ x: window?.innerWidth >= 728 ? 1500 : 600 }}

@@ -593,6 +593,8 @@ export interface IFramework extends IGeneral {
 
 	git?: IGitProvider;
 
+	gitProvider?: string;
+
 	repoURL?: string;
 
 	repoSSH?: string;

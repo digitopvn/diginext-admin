@@ -146,7 +146,7 @@ export const BuildList = () => {
 
 	const [stopBuildApi, stopBuildStatus] = useBuildStopApi();
 
-	const { data } = useBuildListApi({ sort: "-createdAt", populate: "owner", pagination: { page, size: pageSize }, filter });
+	const { data, status } = useBuildListApi({ sort: "-createdAt", populate: "owner", pagination: { page, size: pageSize }, filter });
 	const { list: builds, pagination } = data || {};
 	const { total_items } = pagination || {};
 
@@ -244,6 +244,7 @@ export const BuildList = () => {
 	return (
 		<div className="h-full overflow-auto">
 			<Table
+				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedBuilds}
 				scroll={{ x: 550 }}

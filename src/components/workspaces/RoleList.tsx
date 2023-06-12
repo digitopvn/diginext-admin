@@ -93,7 +93,7 @@ export const RoleList = () => {
 	//
 
 	const [page, setPage] = useState(1);
-	const { data } = useRoleListApi({ populate: "owner,workspace", pagination: { page, size: pageSize } });
+	const { data, status } = useRoleListApi({ populate: "owner,workspace", pagination: { page, size: pageSize } });
 	const { list, pagination } = data || {};
 	const { total_items } = pagination || {};
 	// console.log("list :>> ", list);
@@ -137,6 +137,7 @@ export const RoleList = () => {
 	return (
 		<div>
 			<Table
+				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedList}
 				scroll={{ x: 1000 }}

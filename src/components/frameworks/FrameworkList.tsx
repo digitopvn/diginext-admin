@@ -39,9 +39,17 @@ const columns: ColumnsType<DataType> = [
 		dataIndex: "git",
 		key: "git",
 		render: (value, record) => (
-			<Button type="link" style={{ padding: 0 }}>
-				{record.git?.name}
-			</Button>
+			<>
+				{record.git?.name ? (
+					<Button type="link" style={{ padding: 0 }}>
+						{record.git?.name}
+					</Button>
+				) : (
+					<Button type="link" style={{ padding: 0 }}>
+						{record.gitProvider}
+					</Button>
+				)}
+			</>
 		),
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
@@ -95,7 +103,7 @@ const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const FrameworkList = () => {
 	const [page, setPage] = useState(1);
-	const { data } = useFrameworkListApi({ populate: "git,owner", pagination: { page, size: pageSize } });
+	const { data, status } = useFrameworkListApi({ populate: "git,owner", pagination: { page, size: pageSize } });
 	const { list: frameworks, pagination } = data || {};
 	const { total_items } = pagination || {};
 	console.log("frameworks :>> ", frameworks);
@@ -142,6 +150,7 @@ export const FrameworkList = () => {
 	return (
 		<div>
 			<Table
+				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedData}
 				scroll={{ x: 1200 }}

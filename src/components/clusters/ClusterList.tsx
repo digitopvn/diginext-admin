@@ -104,7 +104,7 @@ export const ClusterList = () => {
 	];
 	//
 	const [page, setPage] = useState(1);
-	const { data } = useClusterListApi({ populate: "owner", pagination: { page, size: pageSize } });
+	const { data, status } = useClusterListApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: clusters, pagination } = data || {};
 	const { total_items } = pagination || {};
 	console.log("clusters :>> ", clusters);
@@ -150,6 +150,7 @@ export const ClusterList = () => {
 	return (
 		<div>
 			<Table
+				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedData}
 				scroll={{ x: 1200 }}

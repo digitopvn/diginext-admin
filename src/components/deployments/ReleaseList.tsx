@@ -141,7 +141,7 @@ export const ReleaseList = () => {
 	// const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 	const [page, setPage] = useState(1);
 
-	const { data } = useReleaseListApi({ populate: "owner", pagination: { page, size: pageSize }, filter });
+	const { data, status } = useReleaseListApi({ populate: "owner", pagination: { page, size: pageSize }, filter });
 	const { list: releases = [], pagination } = data || {};
 	const { total_items } = pagination || {};
 
@@ -264,6 +264,7 @@ export const ReleaseList = () => {
 	return (
 		<div>
 			<Table
+				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedReleases}
 				scroll={{ x: 600 }}

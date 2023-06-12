@@ -104,7 +104,7 @@ const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const TeamList = () => {
 	const [page, setPage] = useState(1);
-	const { data } = useTeamListApi({ populate: "owner", pagination: { page, size: pageSize } });
+	const { data, status } = useTeamListApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: teams, pagination } = data || {};
 	const { total_items } = pagination || {};
 	console.log("teams :>> ", teams);
@@ -117,6 +117,7 @@ export const TeamList = () => {
 	return (
 		<div>
 			<Table
+				loading={status === "loading"}
 				columns={columns}
 				dataSource={teams}
 				scroll={{ x: 1200 }}
