@@ -131,7 +131,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 
 	return (
 		<div style={{ color: colorText }}>
-			{status === "failed" && (
+			{status === "in_progress" && (
 				<h3 className="text-xl text-blue-600">
 					<LoadingOutlined /> Building...
 				</h3>

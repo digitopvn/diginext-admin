@@ -1005,6 +1005,23 @@ export interface IBuild extends IGeneral {
 	appSlug?: string;
 
 	/**
+	 * Image tag is also "buildNumber"
+	 */
+	tag?: string;
+	/**
+	 * Build start time
+	 */
+	startTime?: Date;
+	/**
+	 * Build end time
+	 */
+	endTime?: Date;
+	/**
+	 * Build duration in miliseconds
+	 */
+	duration?: number;
+
+	/**
 	 * ID of the app
 	 *
 	 * @remarks This can be populated to {Project} data

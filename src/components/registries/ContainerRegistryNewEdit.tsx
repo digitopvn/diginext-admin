@@ -10,7 +10,7 @@ import { useRouterQuery } from "@/plugins/useRouterQuery";
 type ContainerRegistryNewEditProps = { data?: IContainerRegistry; isNew?: boolean };
 
 const ContainerRegistryNewEdit = (props: ContainerRegistryNewEditProps = {}) => {
-	const [{ registry_slug }] = useRouterQuery();
+	const [{ lv1, registry_slug }] = useRouterQuery();
 
 	// API
 	const useSlugApi = useContainerRegistrySlugApi(registry_slug, { populate: "owner" });
@@ -33,6 +33,7 @@ const ContainerRegistryNewEdit = (props: ContainerRegistryNewEditProps = {}) => 
 			name: "provider",
 			displayKey: "name", // the magic is here 😅...
 			// value: providerShortName,
+			visible: lv1 === "new",
 			options: registryProviders.map((provider) => {
 				return { label: provider?.name || "", value: provider?.slug };
 			}),

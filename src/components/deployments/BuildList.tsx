@@ -1,5 +1,6 @@
 import {
 	CheckCircleOutlined,
+	ClockCircleOutlined,
 	CloseCircleOutlined,
 	CodeOutlined,
 	EyeOutlined,
@@ -11,6 +12,8 @@ import {
 import { App, Button, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { HumanizeDuration, HumanizeDurationLanguage } from "humanize-duration-ts";
 import { isEmpty } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -27,6 +30,9 @@ const relativeTime = require("dayjs/plugin/relativeTime");
 
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
+
+const humanrizerLang = new HumanizeDurationLanguage();
+const humanrizer = new HumanizeDuration(humanrizerLang);
 
 const { useApp } = App;
 
@@ -53,9 +59,30 @@ const columns: ColumnsType<IBuild & DataType> = [
 						<strong>{value}</strong>
 					</Link>
 				</p>
-				<p>
-					Created <DateDisplay date={record.createdAt} />
-				</p>
+				<ul className="ml-4 list-disc">
+					<li>
+						Project: <Tag color="blue">{record.projectSlug}</Tag>
+					</li>
+					<li>
+						App: <Tag color="cyan">{record.appSlug}</Tag>
+					</li>
+					{record.duration ? (
+						<li>
+							Duration:{" "}
+							<Tag key="duration" color="gold" icon={<ClockCircleOutlined />}>
+								{humanrizer.humanize(record.duration || 0, { round: true })}
+							</Tag>
+						</li>
+					) : (
+						<></>
+					)}
+					<li>
+						Created{" "}
+						<strong>
+							<DateDisplay date={record.createdAt} />
+						</strong>
+					</li>
+				</ul>
 			</>
 		),
 	},

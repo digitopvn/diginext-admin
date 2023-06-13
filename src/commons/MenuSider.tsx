@@ -1,6 +1,7 @@
 import {
 	ApartmentOutlined,
 	BranchesOutlined,
+	BuildOutlined,
 	CloudOutlined,
 	CloudServerOutlined,
 	ClusterOutlined,
@@ -38,6 +39,16 @@ const items: MenuProps["items"] = [
 		icon: <ProjectOutlined />,
 		label: "Projects",
 	},
+	{
+		key: `menu/build`,
+		icon: <BuildOutlined />,
+		label: "Builds",
+	},
+	// {
+	// 	key: `menu/release`,
+	// 	icon: <RocketOutlined />,
+	// 	label: "Releases",
+	// },
 	{
 		key: `menu/framework`,
 		icon: <CodepenOutlined />,
@@ -147,14 +158,6 @@ export const MenuSider = () => {
 			onCollapse={(value) => toggleSidebar && toggleSidebar(value)}
 			breakpoint="lg"
 			collapsedWidth="0"
-			// style={{
-			// 	overflow: "auto",
-			// 	height: "100vh",
-			// 	position: "fixed",
-			// 	left: 0,
-			// 	top: 0,
-			// 	bottom: 0,
-			// }}
 		>
 			{sidebarCollapsed ? (
 				<div className="mx-auto my-5 w-[32px]">

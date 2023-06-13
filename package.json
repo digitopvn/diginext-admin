@@ -53,6 +53,7 @@
 		"diginext-utils": "^2.0.32",
 		"dotenv": "^16.0.3",
 		"html-react-parser": "^3.0.7",
+		"humanize-duration-ts": "^2.1.1",
 		"inquirer": "^8.2.5",
 		"lodash": "^4.17.21",
 		"ncp": "^2.0.0",
