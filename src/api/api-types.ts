@@ -38,14 +38,15 @@ export interface ApiResponse<T = any> extends ApiPagination {
 }
 
 export const registryProviderList = ["gcloud", "digitalocean", "dockerhub"] as const;
+export type RegistryProvider = { name: string; slug: (typeof registryProviderList)[number] };
 export const registryProviders = registryProviderList.map((provider) => {
 	switch (provider) {
 		case "digitalocean":
-			return { name: "Digital Ocean Registry", slug: "digitalocean" };
+			return { name: "Digital Ocean Registry", slug: "digitalocean" } as RegistryProvider;
 		case "gcloud":
-			return { name: "Google Container Registry", slug: "gcloud" };
+			return { name: "Google Container Registry", slug: "gcloud" } as RegistryProvider;
 		case "dockerhub":
-			return { name: "Docker Registry", slug: "dockerhub" };
+			return { name: "Docker Registry", slug: "dockerhub" } as RegistryProvider;
 		default:
 			return undefined;
 	}

@@ -12,6 +12,7 @@ type IMetaProps = {
 
 const Meta = (props: IMetaProps) => {
 	const router = useRouter();
+	const isDev = typeof window !== "undefined" && window.origin.indexOf("localhost") > -1;
 
 	return (
 		<>
@@ -21,7 +22,7 @@ const Meta = (props: IMetaProps) => {
 				<link rel="apple-touch-icon" href={`${router.basePath}/apple-touch-icon.png`} key="apple" />
 				<link rel="icon" type="image/png" sizes="32x32" href={`${router.basePath}/favicon-32x32.png`} key="icon32" />
 				<link rel="icon" type="image/png" sizes="16x16" href={`${router.basePath}/favicon-16x16.png`} key="icon16" />
-				<link rel="icon" href={`${router.basePath}/favicon.ico`} key="favicon" />
+				<link rel="icon" href={`${router.basePath}/favicon${isDev ? "-red" : ""}.ico`} key="favicon" />
 			</Head>
 			<NextSeo
 				title={`${props.title} | ${AppConfig.site_name}`}

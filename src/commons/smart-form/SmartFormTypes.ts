@@ -4,7 +4,7 @@ import type React from "react";
 
 export type SmartFormElementProps<T = any> = {
 	key?: React.Key;
-	type?: "input" | "textarea" | "code-editor" | "select" | "list_string" | "number";
+	type?: "input" | "password" | "textarea" | "code-editor" | "select" | "list_string" | "number";
 	className?: string;
 	style?: CSSProperties;
 	wrapperStyle?: CSSProperties;

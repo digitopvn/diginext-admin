@@ -108,6 +108,7 @@ const SmartNumber = (props: SmartNumberProps) => {
 			<Space direction="vertical" className="w-full">
 				<Input
 					size="small"
+					autoComplete="off"
 					placeholder={placeholder}
 					onChange={onChange}
 					value={_value}

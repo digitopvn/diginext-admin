@@ -1,4 +1,4 @@
-import { CheckOutlined, CloseOutlined, LoadingOutlined } from "@ant-design/icons";
+import { CheckOutlined, CloseOutlined, EyeInvisibleOutlined, EyeTwoTone, LoadingOutlined } from "@ant-design/icons";
 import { Form, Input, Space } from "antd";
 import type { SyntheticEvent } from "react";
 import React, { useEffect, useState } from "react";
@@ -7,7 +7,7 @@ import { useDebounce } from "usehooks-ts";
 import ManualSaveController from "./ManualSaveController";
 import type { SmartFormElementProps } from "./SmartFormTypes";
 
-const SmartInput = (props: SmartFormElementProps) => {
+const SmartPassword = (props: SmartFormElementProps) => {
 	const {
 		label,
 		postLabel,
@@ -90,7 +90,14 @@ const SmartInput = (props: SmartFormElementProps) => {
 			style={{ display: visible ? "block" : "none", ...wrapperStyle }}
 		>
 			<Space direction="vertical" className="w-full">
-				<Input autoComplete="off" placeholder={placeholder} onChange={onChange} value={_value} disabled={disabled} />
+				<Input.Password
+					autoComplete="off"
+					placeholder={placeholder}
+					onChange={onChange}
+					value={_value}
+					disabled={disabled}
+					iconRender={(_visible) => (_visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+				/>
 
 				{/* Display manual save controller if auto save is off */}
 				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
@@ -99,4 +106,4 @@ const SmartInput = (props: SmartFormElementProps) => {
 	);
 };
 
-export default SmartInput;
+export default SmartPassword;

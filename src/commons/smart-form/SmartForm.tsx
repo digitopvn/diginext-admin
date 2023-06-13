@@ -13,6 +13,7 @@ import SmartCodeEditor from "./SmartCodeEditor";
 import type { SmartFormElementProps } from "./SmartFormTypes";
 import SmartInput from "./SmartInput";
 import SmartNumber from "./SmartNumber";
+import SmartPassword from "./SmartPassword";
 import SmartSelect from "./SmartSelect";
 import SmartStringList from "./SmartStringList";
 import SmartTextArea from "./SmartTextArea";
@@ -116,9 +117,14 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 
 	return (
 		<div className="p-6 pb-16">
-			{status === "loading" && <Skeleton active />}
-			{status === "error" && <Alert message="Unable to get data at the moment." type="error" showIcon />}
-			{status === "success" && (
+			{/* LOADING */}
+			{status === "loading" && isNew === false && <Skeleton active />}
+			{createStatus === "loading" && isNew === true && <Skeleton active />}
+			{/* ERROR */}
+			{status === "error" && isNew === false && <Alert message="Unable to get data at the moment." type="error" showIcon />}
+			{createStatus === "error" && isNew === true && <Alert message="Unable to submit data at the moment." type="error" showIcon />}
+			{/* INITIAL */}
+			{(status === "success" || (isNew === true && createStatus !== "loading")) && (
 				<Form
 					className={["h-full", "overflow-auto", className].join(" ")}
 					layout="vertical"
@@ -135,6 +141,17 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 							case "input":
 								return (
 									<SmartInput
+										key={`${name}-${field.name}`}
+										{...field}
+										value={field.value ?? (item ? _.get(item, field.name) : "")}
+										status={fieldsStatus}
+										isNew={isNew}
+									/>
+								);
+
+							case "password":
+								return (
+									<SmartPassword
 										key={`${name}-${field.name}`}
 										{...field}
 										value={field.value ?? (item ? _.get(item, field.name) : "")}
