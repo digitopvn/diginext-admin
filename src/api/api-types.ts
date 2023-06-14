@@ -1005,6 +1005,10 @@ export interface IBuild extends IGeneral {
 	appSlug?: string;
 
 	/**
+	 * CLI Version
+	 */
+	cliVersion?: string;
+	/**
 	 * Image tag is also "buildNumber"
 	 */
 	tag?: string;

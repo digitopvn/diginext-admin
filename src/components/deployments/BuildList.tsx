@@ -178,7 +178,12 @@ export const BuildList = () => {
 	const { total_items } = pagination || {};
 
 	const openBuildLogs = (slug?: string) => {
-		setQuery({ lv2: "build_logs", build_slug: slug });
+		const _query: any = { build_slug: slug };
+
+		if (!query.lv1) _query.lv1 = "build_logs";
+		else _query.lv2 = "build_logs";
+
+		setQuery(_query);
 	};
 
 	// release

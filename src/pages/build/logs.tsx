@@ -1,9 +1,12 @@
-import { CalendarOutlined, ClockCircleOutlined } from "@ant-design/icons";
+/* eslint-disable no-nested-ternary */
+import { CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined, LoadingOutlined } from "@ant-design/icons";
 import { Tag } from "antd";
 import dayjs from "dayjs";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { HumanizeDuration, HumanizeDurationLanguage } from "humanize-duration-ts";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { useInterval } from "usehooks-ts";
 
 import { useBuildSlugApi } from "@/api/api-build";
 import { PageTitle } from "@/commons/PageTitle";
@@ -24,6 +27,8 @@ const humanrizer = new HumanizeDuration(humanrizerLang);
 const BuildDetailPage = () => {
 	const router = useRouter();
 
+	const [buildDuration, setBuildDuration] = useState("0");
+
 	// console.log("router.asPath :>> ", router.asPath);
 	// const { slugs = [] } = router.query;
 	// const [buildSlug = ""] = slugs as string[];
@@ -31,6 +36,18 @@ const BuildDetailPage = () => {
 	const [{ build_slug }] = useRouterQuery();
 	// console.log("build_slug :>> ", build_slug);
 	const { data: build } = useBuildSlugApi(build_slug);
+
+	useInterval(
+		() => {
+			if (build?.startTime) setBuildDuration(humanrizer.humanize(dayjs(build.startTime).diff(dayjs()), { round: true }));
+			if (build?.duration) setBuildDuration(humanrizer.humanize(build?.duration || 0, { round: true }));
+		},
+		build?.duration ? null : 1000
+	);
+
+	useEffect(() => {
+		if (build?.duration) setBuildDuration(humanrizer.humanize(build?.duration || 0, { round: true }));
+	}, [build?.duration]);
 
 	if (!router.isReady || !build_slug) return <></>;
 
@@ -46,11 +63,31 @@ const BuildDetailPage = () => {
 					build?.env ? { name: `Env "${build?.env}"` } : {},
 				]}
 				actions={[
+					<Tag key="cli-version" color="gold" icon={<ClockCircleOutlined />}>
+						CLI: {build?.cliVersion || "unknown"}
+					</Tag>,
 					<Tag key="duration" color="gold" icon={<ClockCircleOutlined />}>
-						Duration: {humanrizer.humanize(build?.duration || 0, { round: true })}
+						Duration: {buildDuration}
 					</Tag>,
 					<Tag key="created-date" color="geekblue" icon={<CalendarOutlined />}>
 						{dayjs(build?.createdAt).format("LLL")}
+					</Tag>,
+					<Tag
+						key="status"
+						color="green"
+						icon={
+							build?.status === "success" ? (
+								<CheckCircleOutlined />
+							) : build?.status === "building" ? (
+								<LoadingOutlined />
+							) : build?.status === "failed" ? (
+								<ExclamationCircleOutlined />
+							) : (
+								<></>
+							)
+						}
+					>
+						{build?.status}
 					</Tag>,
 				]}
 			/>

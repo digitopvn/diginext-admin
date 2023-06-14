@@ -57,10 +57,10 @@ export const PageTitle = (props: IPageTitleProps = {}) => {
 					</Breadcrumb.Item>
 				))}
 			</Breadcrumb>
-			<div className=" flex w-full flex-row">
+			<div className=" flex w-full flex-col md:flex-row">
 				<Title value={title} />
 				<div>
-					<Space>
+					<Space wrap>
 						{actions}
 						{/* <Button type="default" icon={<SettingOutlined className="align-middle" />}>
 							Settings
