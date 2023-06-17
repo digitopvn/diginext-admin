@@ -805,6 +805,11 @@ export interface IAppEnvironment {
 	 * Amount of ready instances
 	 */
 	readyCount?: number;
+
+	/**
+	 * A screenshot URL from build success
+	 */
+	screenshot?: string;
 }
 
 export interface ICloudProvider extends IGeneral {
