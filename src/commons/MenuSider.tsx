@@ -66,6 +66,10 @@ const items: MenuProps["items"] = [
 		label: "Monitoring",
 		children: [
 			{
+				key: `menu/monitor/node`,
+				label: "Nodes",
+			},
+			{
 				key: `menu/monitor/namespace`,
 				label: "Namespaces",
 			},

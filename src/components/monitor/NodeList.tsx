@@ -1,17 +1,19 @@
+/* eslint-disable no-nested-ternary */
 import { DeleteOutlined } from "@ant-design/icons";
-import { Button, notification, Popconfirm, Space, Table, Typography } from "antd";
+import { Button, Col, notification, Popconfirm, Progress, Row, Space, Table, Tag, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
+import { round, toInteger } from "lodash";
 import React, { useState } from "react";
 
 import { useClusterListApi } from "@/api/api-cluster";
-import { useMonitorNamespaceApi } from "@/api/api-monitor-namespace";
+import { useMonitorNodeApi } from "@/api/api-monitor-node";
 import { useUserDeleteApi } from "@/api/api-user";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
-import type { KubeNamespace } from "@/types/KubeNamespace";
+import type { KubeNode } from "@/types/KubeNode";
 import { AppConfig } from "@/utils/AppConfig";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
@@ -20,7 +22,7 @@ const relativeTime = require("dayjs/plugin/relativeTime");
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
-interface DataType extends KubeNamespace {
+interface DataType extends KubeNode {
 	key?: React.Key;
 	id?: string;
 	actions?: any;
@@ -28,7 +30,7 @@ interface DataType extends KubeNamespace {
 
 const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
-export const NamespaceList = () => {
+export const NodeList = () => {
 	const { responsive } = useLayoutProvider();
 
 	// clusters
@@ -43,7 +45,20 @@ export const NamespaceList = () => {
 			key: "name",
 			fixed: responsive?.md ? "left" : undefined,
 			filterSearch: true,
-			render: (value, record) => record.metadata?.name,
+			render: (value, record) => {
+				return (
+					<>
+						<Typography.Text strong className="leading-8">
+							{record.metadata?.name}
+						</Typography.Text>
+						<br />
+						<Tag color="cyan">{record.status.nodeInfo?.osImage}</Tag>
+						<Tag color="cyan">{record.status.nodeInfo?.architecture}</Tag>
+						<Tag color="cyan">CPU: {record.status.capacity?.cpu}</Tag>
+						<Tag color="cyan">MEM: {round(toInteger(record.status.capacity?.memory?.replace("Ki", "")) / 1024 / 1024)}Gb</Tag>
+					</>
+				);
+			},
 			// filters: [{ text: "goon", value: "goon" }],
 			onFilter: (value, record) => (record.metadata?.name ? record.metadata?.name.indexOf(value.toString()) > -1 : true),
 		},
@@ -62,6 +77,40 @@ export const NamespaceList = () => {
 				return { text: cluster.shortName || "", value: cluster.shortName || "" };
 			}),
 			onFilter: (value, record) => (record.clusterShortName ? record.clusterShortName.indexOf(value.toString()) > -1 : true),
+		},
+		{
+			title: "Capacity",
+			dataIndex: "capacity",
+			key: "capacity",
+			width: 35,
+			render: (value, record) => {
+				const cpuPer = toInteger(record.cpuPercent?.replace("%", ""));
+				const memPer = toInteger(record.memoryPercent?.replace("%", ""));
+				return (
+					<>
+						<Row gutter={[0, 0]}>
+							<Col>
+								<Tag style={{ width: 44, textAlign: "center" }}>CPU</Tag>
+							</Col>
+							<Col flex="auto">
+								<Progress percent={cpuPer} size="small" strokeColor={cpuPer > 90 ? "red" : cpuPer > 70 ? "orange" : "#1668dc"} />
+							</Col>
+						</Row>
+						<Row gutter={[0, 0]}>
+							<Col>
+								<Tag>MEM</Tag>
+							</Col>
+							<Col flex="auto">
+								<Progress
+									percent={memPer > 99 ? 99 : memPer}
+									size="small"
+									strokeColor={memPer > 90 ? "red" : memPer > 70 ? "orange" : "#1668dc"}
+								/>
+							</Col>
+						</Row>
+					</>
+				);
+			},
 		},
 		{
 			title: "Created at",
@@ -84,7 +133,7 @@ export const NamespaceList = () => {
 
 	const [amountFiltered, setAmountFiltered] = useState(0);
 	const [page, setPage] = useState(1);
-	const { data, status } = useMonitorNamespaceApi({ filter: { clusterShortName } });
+	const { data, status } = useMonitorNodeApi({ filter: { clusterShortName } });
 	const { list, pagination } = data || {};
 	const { total_items } = pagination || {};
 
@@ -125,7 +174,7 @@ export const NamespaceList = () => {
 	return (
 		<>
 			{/* Page title & desc here */}
-			<PageTitle title={`Namespaces (${amountFiltered})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
+			<PageTitle title={`Nodes (${amountFiltered})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
 			<div>
 				<Table
 					loading={status === "loading"}
