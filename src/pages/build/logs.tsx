@@ -1,9 +1,18 @@
 /* eslint-disable no-nested-ternary */
-import { CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined, LoadingOutlined } from "@ant-design/icons";
-import { Tag } from "antd";
+import {
+	BuildOutlined,
+	CalendarOutlined,
+	CheckCircleOutlined,
+	ClockCircleOutlined,
+	ExclamationCircleOutlined,
+	LoadingOutlined,
+	UserOutlined,
+} from "@ant-design/icons";
+import { Space, Tag } from "antd";
 import dayjs from "dayjs";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { HumanizeDuration, HumanizeDurationLanguage } from "humanize-duration-ts";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useInterval } from "usehooks-ts";
@@ -69,9 +78,6 @@ const BuildDetailPage = () => {
 					<Tag key="duration" color="gold" icon={<ClockCircleOutlined />}>
 						Duration: {buildDuration}
 					</Tag>,
-					<Tag key="created-date" color="geekblue" icon={<CalendarOutlined />}>
-						{dayjs(build?.createdAt).format("LLL")}
-					</Tag>,
 					<Tag
 						key="status"
 						color="green"
@@ -90,7 +96,21 @@ const BuildDetailPage = () => {
 						{build?.status}
 					</Tag>,
 				]}
-			/>
+			>
+				<Space wrap className="mt-2">
+					<Tag key="created-date" color="geekblue" icon={<CalendarOutlined />}>
+						{dayjs(build?.createdAt).format("LLL")}
+					</Tag>
+					<Tag key="created-by" color="magenta" icon={<UserOutlined />}>
+						{build?.createdBy}
+					</Tag>
+					<Link href={`https://${build?.image}:${build?.tag}`} target="_blank">
+						<Tag key="image-tag" color="volcano" icon={<BuildOutlined />}>
+							click to view image url
+						</Tag>
+					</Link>
+				</Space>
+			</PageTitle>
 
 			{/* Page Content */}
 			<div className="p-5">

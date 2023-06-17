@@ -5,9 +5,8 @@ import parser from "html-react-parser";
 import { isEmpty } from "lodash";
 import React, { useEffect, useState } from "react";
 import sanitizeHtml from "sanitize-html";
-// eslint-disable-next-line import/no-extraneous-dependencies
-import isURL from "validator/lib/isURL";
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { useBuildSlugApi } from "@/api/api-build";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { Config } from "@/utils/AppConfig";
@@ -153,11 +152,14 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 								children: <span className="text-red-600">{parser(`${message}`)}</span>,
 							};
 
-						if (msg.indexOf("http://") > -1 || msg.indexOf("https://")) {
+						if (msg.indexOf("http://") > -1 || msg.indexOf("https://") > -1) {
+							console.log("msg :>> ", msg);
 							const words = msg.split(" ");
 							const msgWithLink = words
 								.map((m) =>
-									isURL(m, { require_protocol: true }) ? `<a href="${m}" target="_blank" style="color: #008dff">${m}</a>` : m
+									m.indexOf("http://") > -1 || m.indexOf("https://") > -1
+										? `<a href="${m}" target="_blank" style="color: #008dff">${m}</a>`
+										: m
 								)
 								.join(" ");
 							return { children: parser(msgWithLink) };

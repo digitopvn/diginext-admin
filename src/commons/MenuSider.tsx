@@ -9,6 +9,7 @@ import {
 	DashboardOutlined,
 	DatabaseOutlined,
 	DeploymentUnitOutlined,
+	FundOutlined,
 	LockOutlined,
 	ProjectOutlined,
 	SettingOutlined,
@@ -58,6 +59,46 @@ const items: MenuProps["items"] = [
 		key: `menu/git`,
 		icon: <BranchesOutlined />,
 		label: "Git Providers",
+	},
+	{
+		key: `menu/monitor`,
+		icon: <FundOutlined />,
+		label: "Monitoring",
+		children: [
+			{
+				key: `menu/monitor/namespace`,
+				label: "Namespaces",
+			},
+			{
+				key: `menu/monitor/service`,
+				label: "Services",
+				disabled: true,
+			},
+			{
+				key: `menu/monitor/ingress`,
+				label: "Ingresses",
+				disabled: true,
+				title: "Coming soon",
+			},
+			{
+				key: `menu/monitor/deployment`,
+				label: "Deployments",
+				disabled: true,
+				title: "Coming soon",
+			},
+			{
+				key: `menu/monitor/pod`,
+				label: "Pods",
+				disabled: true,
+				title: "Coming soon",
+			},
+			{
+				key: `menu/monitor/secret`,
+				label: "Secrets",
+				disabled: true,
+				title: "Coming soon",
+			},
+		],
 	},
 	{
 		key: `menu/infrastructure`,
@@ -157,6 +198,8 @@ export const MenuSider = () => {
 			collapsed={sidebarCollapsed}
 			onCollapse={(value) => toggleSidebar && toggleSidebar(value)}
 			breakpoint="lg"
+			width={250}
+			style={{ height: "100%" }}
 			collapsedWidth="0"
 		>
 			{sidebarCollapsed ? (
@@ -194,6 +237,7 @@ export const MenuSider = () => {
 				defaultSelectedKeys={[pageLv0, menuPath]}
 				items={items}
 				onSelect={onMenuSelected}
+				// className="md:w-[250px] md:min-w-[250px] md:max-w-[250px] md:flex-[0_0_250px]"
 			/>
 		</Sider>
 	);

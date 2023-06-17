@@ -30,6 +30,7 @@ export const PageTitle = (props: IPageTitleProps = {}) => {
 	const router = useRouter();
 
 	const {
+		children,
 		breadcrumbs = [],
 		title = "Page Title",
 		actions = [
@@ -72,6 +73,7 @@ export const PageTitle = (props: IPageTitleProps = {}) => {
 					</Space>
 				</div>
 			</div>
+			{children}
 		</div>
 	);
 };

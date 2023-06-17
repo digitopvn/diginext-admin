@@ -149,22 +149,22 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 	// }, [drawerVisibility?.lv1, drawerVisibility?.lv2]);
 
 	return (
-		<Layout hasSider>
+		<Layout hasSider className="h-screen">
 			{/* Meta tags */}
 			{props.meta}
 
 			{/* Sidebar here */}
-			{useSidebar && <MenuSider />}
+			<div className="fixed z-[102] h-screen md:relative">{useSidebar && <MenuSider />}</div>
 
 			<Layout
-				className="min-h-screen transition-all"
+				className="min-h-screen overflow-auto transition-all"
 				// style={{ marginLeft }}
 			>
 				{/* Site Header */}
 				{useSidebar && <SiteHeader />}
 
 				{/* Page content here */}
-				<div className="grow px-2">{props.children}</div>
+				<div className="grow">{props.children}</div>
 
 				{/* Site/Page Footer */}
 				<PageFooter />
