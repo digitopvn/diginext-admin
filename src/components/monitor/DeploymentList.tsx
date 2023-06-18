@@ -1,17 +1,19 @@
+/* eslint-disable no-nested-ternary */
 import { DeleteOutlined } from "@ant-design/icons";
-import { Button, notification, Popconfirm, Space, Table, Typography } from "antd";
+import { Button, notification, Popconfirm, Space, Table, Tag, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
+import Link from "next/link";
 import React, { useState } from "react";
 
 import { useClusterListApi } from "@/api/api-cluster";
-import { useMonitorNamespaceApi } from "@/api/api-monitor-namespace";
+import { useMonitorDeploymentApi } from "@/api/api-monitor-deployment";
 import { useUserDeleteApi } from "@/api/api-user";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
-import type { KubeNamespace } from "@/types/KubeNamespace";
+import type { KubeDeployment } from "@/types/KubeDeployment";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -19,7 +21,7 @@ const relativeTime = require("dayjs/plugin/relativeTime");
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
-interface DataType extends KubeNamespace {
+interface DataType extends KubeDeployment {
 	key?: React.Key;
 	id?: string;
 	actions?: any;
@@ -27,7 +29,7 @@ interface DataType extends KubeNamespace {
 
 const pageSize = 200;
 
-export const NamespaceList = () => {
+export const DeploymentList = () => {
 	const { responsive } = useLayoutProvider();
 
 	// clusters
@@ -38,7 +40,7 @@ export const NamespaceList = () => {
 
 	const [amountFiltered, setAmountFiltered] = useState(0);
 	const [page, setPage] = useState(1);
-	const { data, status } = useMonitorNamespaceApi({ filter: { clusterShortName } });
+	const { data, status } = useMonitorDeploymentApi({ filter: { clusterShortName } });
 	const { list, pagination } = data || {};
 	const { total_items } = pagination || {};
 
@@ -55,6 +57,46 @@ export const NamespaceList = () => {
 		if (current) setPage(current);
 	};
 
+	const displayedList: DataType[] =
+		list?.map((item, i) => {
+			return {
+				...item,
+				key: `ns-${i}`,
+				actions: (
+					<Space.Compact>
+						{/* <Button icon={<EditOutlined />} onClick={() => setQuery({ lv1: "edit", type: "user", user: item.metadata?.name })}></Button> */}
+						<Popconfirm
+							title="Are you sure to delete this item?"
+							description={<span className="text-red-500">Caution: this is permanent and cannot be rolled back.</span>}
+							// onConfirm={() => deleteItem(item._id as string)}
+							okText="Yes"
+							cancelText="No"
+						>
+							<Button icon={<DeleteOutlined />}></Button>
+						</Popconfirm>
+					</Space.Compact>
+				),
+			};
+		}) || [];
+
+	const nameFilterList = list
+		?.map((item) => {
+			return { text: item.metadata?.name || "", value: item.metadata?.name || "" };
+		})
+		// filter empty values
+		.filter((item) => item.value !== "")
+		// filter unique values
+		.filter((current, index, self) => index === self.findIndex((item) => item.text === current.text));
+
+	const namespaceFilterList = list
+		?.map((item) => {
+			return { text: item.metadata?.namespace || "", value: item.metadata?.namespace || "" };
+		})
+		// filter empty values
+		.filter((item) => item.value !== "")
+		// filter unique values
+		.filter((current, index, self) => index === self.findIndex((item) => item.text === current.text));
+
 	const columns: ColumnsType<DataType> = [
 		{
 			title: "Name",
@@ -64,10 +106,52 @@ export const NamespaceList = () => {
 			fixed: responsive?.md ? "left" : undefined,
 			filterSearch: true,
 			render: (value, record) => record.metadata?.name,
-			filters: list?.map((item) => {
-				return { text: item.metadata?.name || "", value: item.metadata?.name || "" };
-			}),
+			filters: nameFilterList,
 			onFilter: (value, record) => (record.metadata?.name ? record.metadata?.name.indexOf(value.toString()) > -1 : true),
+		},
+		{
+			title: "Pods",
+			dataIndex: "pods",
+			key: "pods",
+			width: 15,
+			render: (value, record) => {
+				const ready =
+					record.status?.availableReplicas ??
+					record.status?.readyReplicas ??
+					(record.status?.replicas ?? 0) - (record.status?.unavailableReplicas ?? 0);
+				const total = record.status?.replicas ?? 0;
+				return (
+					<Tag color={ready === 0 ? "error" : ready < total ? "warning" : "default"}>
+						{ready}/{total}
+					</Tag>
+				);
+			},
+			filterSearch: true,
+			filters: [
+				{ text: "Ready", value: "ready" },
+				{ text: "Partial", value: "partial" },
+				{ text: "Failed", value: "failed" },
+			],
+			onFilter: (value, record) => {
+				const ready =
+					record.status?.availableReplicas ??
+					record.status?.readyReplicas ??
+					(record.status?.replicas ?? 0) - (record.status?.unavailableReplicas ?? 0);
+				const total = record.status?.replicas ?? 0;
+				if (value === "failed") return ready === 0;
+				if (value === "partial") return ready > 0 && ready < total;
+				return ready === total;
+			},
+		},
+		{
+			title: "Namespace",
+			dataIndex: "namespace",
+			key: "namespace",
+			width: 30,
+			render: (value, record) => <Link href="#">{record.metadata?.namespace}</Link>,
+			filterSearch: true,
+			filters: namespaceFilterList,
+			onFilter: (value, record) => (record.metadata?.namespace ? record.metadata?.namespace.indexOf(value.toString()) > -1 : true),
 		},
 		{
 			title: "Cluster",
@@ -102,32 +186,10 @@ export const NamespaceList = () => {
 		},
 	];
 
-	const displayedList: DataType[] =
-		list?.map((item, i) => {
-			return {
-				...item,
-				key: `ns-${i}`,
-				actions: (
-					<Space.Compact>
-						{/* <Button icon={<EditOutlined />} onClick={() => setQuery({ lv1: "edit", type: "user", user: item.metadata?.name })}></Button> */}
-						<Popconfirm
-							title="Are you sure to delete this item?"
-							description={<span className="text-red-500">Caution: this is permanent and cannot be rolled back.</span>}
-							// onConfirm={() => deleteItem(item._id as string)}
-							okText="Yes"
-							cancelText="No"
-						>
-							<Button icon={<DeleteOutlined />}></Button>
-						</Popconfirm>
-					</Space.Compact>
-				),
-			};
-		}) || [];
-
 	return (
 		<>
 			{/* Page title & desc here */}
-			<PageTitle title={`Namespaces (${amountFiltered})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
+			<PageTitle title={`Deployments (${amountFiltered})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
 			<div>
 				<Table
 					loading={status === "loading"}

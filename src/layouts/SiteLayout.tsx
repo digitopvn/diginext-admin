@@ -154,7 +154,7 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 			{props.meta}
 
 			{/* Sidebar here */}
-			<div className="fixed z-[102] h-screen md:relative">{useSidebar && <MenuSider />}</div>
+			<div className="fixed z-[102] h-screen overflow-auto md:relative">{useSidebar && <MenuSider />}</div>
 
 			<Layout
 				className="min-h-screen overflow-auto transition-all"

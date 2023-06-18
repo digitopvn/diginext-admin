@@ -3,7 +3,7 @@ import { NamespaceList } from "@/components/monitor/NamespaceList";
 import { Main } from "@/templates/Main";
 import { Meta } from "@/templates/Meta";
 
-const UserListPage = () => (
+const MonitorNamespacePage = () => (
 	<AuthPage>
 		<Main meta={<Meta title="Namespaces" description="List of namespaces." />}>
 			{/* Page Content */}
@@ -12,4 +12,4 @@ const UserListPage = () => (
 	</AuthPage>
 );
 
-export default UserListPage;
+export default MonitorNamespacePage;

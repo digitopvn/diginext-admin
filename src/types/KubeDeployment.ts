@@ -4,11 +4,13 @@ export interface KubeDeployment {
 	apiVersion?: string;
 	kind?: string;
 	metadata?: {
+		creationTimestamp?: string;
 		name?: string;
 		namespace?: string;
 		labels: {
 			[key: string]: string;
 		};
+		uid?: string;
 	};
 	spec?: {
 		replicas?: number;

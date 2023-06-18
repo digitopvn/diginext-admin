@@ -3,7 +3,7 @@ import { NodeList } from "@/components/monitor/NodeList";
 import { Main } from "@/templates/Main";
 import { Meta } from "@/templates/Meta";
 
-const UserListPage = () => (
+const MonitorNodePage = () => (
 	<AuthPage>
 		<Main meta={<Meta title="Nodes" description="List of cluster's nodes." />}>
 			{/* Page Content */}
@@ -12,4 +12,4 @@ const UserListPage = () => (
 	</AuthPage>
 );
 
-export default UserListPage;
+export default MonitorNodePage;

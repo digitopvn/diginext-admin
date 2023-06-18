@@ -5,6 +5,8 @@ export interface KubeSecret {
 	metadata?: {
 		name?: string;
 		namespace?: string;
+		creationTimestamp?: string;
+		uid?: string;
 	};
 	data?: {
 		[key: string]: string;

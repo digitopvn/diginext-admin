@@ -66,6 +66,11 @@ const items: MenuProps["items"] = [
 		label: "Monitoring",
 		children: [
 			{
+				key: `menu/monitor/cluster`,
+				label: "Clusters",
+				disabled: true,
+			},
+			{
 				key: `menu/monitor/node`,
 				label: "Nodes",
 			},
@@ -76,31 +81,38 @@ const items: MenuProps["items"] = [
 			{
 				key: `menu/monitor/service`,
 				label: "Services",
-				disabled: true,
 			},
 			{
 				key: `menu/monitor/ingress`,
 				label: "Ingresses",
-				disabled: true,
-				title: "Coming soon",
 			},
 			{
 				key: `menu/monitor/deployment`,
 				label: "Deployments",
-				disabled: true,
-				title: "Coming soon",
 			},
 			{
 				key: `menu/monitor/pod`,
 				label: "Pods",
-				disabled: true,
-				title: "Coming soon",
 			},
 			{
 				key: `menu/monitor/secret`,
 				label: "Secrets",
 				disabled: true,
-				title: "Coming soon",
+			},
+			{
+				key: `menu/monitor/configmap`,
+				label: "ConfigMaps",
+				disabled: true,
+			},
+			{
+				key: `menu/monitor/volume`,
+				label: "Persistent Volumes",
+				disabled: true,
+			},
+			{
+				key: `menu/monitor/certmanager`,
+				label: "Cert-Manager CRDs",
+				disabled: true,
 			},
 		],
 	},

@@ -5,6 +5,8 @@ export interface KubeIngress {
 	apiVersion?: string;
 	kind?: "Ingress";
 	metadata?: {
+		creationTimestamp?: string;
+		uid?: string;
 		name?: string;
 		namespace?: string;
 		labels?: {

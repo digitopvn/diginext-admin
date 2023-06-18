@@ -56,6 +56,9 @@ export const NodeList = () => {
 						<Tag color="cyan">{record.status.nodeInfo?.architecture}</Tag>
 						<Tag color="cyan">CPU: {record.status.capacity?.cpu}</Tag>
 						<Tag color="cyan">MEM: {round(toInteger(record.status.capacity?.memory?.replace("Ki", "")) / 1024 / 1024)}Gb</Tag>
+						<Tag color="cyan">
+							Pods: {record.podCount}/{record.status.capacity?.pods}
+						</Tag>
 					</>
 				);
 			},
@@ -154,6 +157,7 @@ export const NodeList = () => {
 		list?.map((item, i) => {
 			return {
 				...item,
+				key: `ns-${i}`,
 				actions: (
 					<Space.Compact>
 						{/* <Button icon={<EditOutlined />} onClick={() => setQuery({ lv1: "edit", type: "user", user: item.metadata?.name })}></Button> */}

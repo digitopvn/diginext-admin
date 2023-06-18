@@ -2,16 +2,17 @@ import { DeleteOutlined } from "@ant-design/icons";
 import { Button, notification, Popconfirm, Space, Table, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
+import Link from "next/link";
 import React, { useState } from "react";
 
 import { useClusterListApi } from "@/api/api-cluster";
-import { useMonitorNamespaceApi } from "@/api/api-monitor-namespace";
+import { useMonitorPodApi } from "@/api/api-monitor-pod";
 import { useUserDeleteApi } from "@/api/api-user";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
-import type { KubeNamespace } from "@/types/KubeNamespace";
+import type { KubePod } from "@/types/KubePod";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -19,7 +20,7 @@ const relativeTime = require("dayjs/plugin/relativeTime");
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
-interface DataType extends KubeNamespace {
+interface DataType extends KubePod {
 	key?: React.Key;
 	id?: string;
 	actions?: any;
@@ -27,7 +28,7 @@ interface DataType extends KubeNamespace {
 
 const pageSize = 200;
 
-export const NamespaceList = () => {
+export const PodList = () => {
 	const { responsive } = useLayoutProvider();
 
 	// clusters
@@ -38,7 +39,7 @@ export const NamespaceList = () => {
 
 	const [amountFiltered, setAmountFiltered] = useState(0);
 	const [page, setPage] = useState(1);
-	const { data, status } = useMonitorNamespaceApi({ filter: { clusterShortName } });
+	const { data, status } = useMonitorPodApi({ filter: { clusterShortName } });
 	const { list, pagination } = data || {};
 	const { total_items } = pagination || {};
 
@@ -54,53 +55,6 @@ export const NamespaceList = () => {
 		const { current } = _pagination;
 		if (current) setPage(current);
 	};
-
-	const columns: ColumnsType<DataType> = [
-		{
-			title: "Name",
-			width: 60,
-			dataIndex: "name",
-			key: "name",
-			fixed: responsive?.md ? "left" : undefined,
-			filterSearch: true,
-			render: (value, record) => record.metadata?.name,
-			filters: list?.map((item) => {
-				return { text: item.metadata?.name || "", value: item.metadata?.name || "" };
-			}),
-			onFilter: (value, record) => (record.metadata?.name ? record.metadata?.name.indexOf(value.toString()) > -1 : true),
-		},
-		{
-			title: "Cluster",
-			dataIndex: "clusterShortName",
-			key: "clusterShortName",
-			width: 30,
-			render: (value) => (
-				<Button type="link" style={{ padding: 0 }}>
-					{value}
-				</Button>
-			),
-			filterSearch: true,
-			filters: clusters.map((cluster) => {
-				return { text: cluster.shortName || "", value: cluster.shortName || "" };
-			}),
-			onFilter: (value, record) => (record.clusterShortName ? record.clusterShortName.indexOf(value.toString()) > -1 : true),
-		},
-		{
-			title: "Created at",
-			dataIndex: "createdAt",
-			key: "createdAt",
-			width: 30,
-			render: (value, record) => <DateDisplay date={record.metadata?.creationTimestamp} />,
-			sorter: (a, b) => dayjs(a.metadata?.creationTimestamp).diff(dayjs(b.metadata?.creationTimestamp)),
-		},
-		{
-			title: <Typography.Text className="text-xs md:text-sm">Action</Typography.Text>,
-			key: "action",
-			fixed: "right",
-			width: responsive?.md ? 30 : 26,
-			render: (value, record) => record.actions,
-		},
-	];
 
 	const displayedList: DataType[] =
 		list?.map((item, i) => {
@@ -124,10 +78,103 @@ export const NamespaceList = () => {
 			};
 		}) || [];
 
+	const nameFilterList = list
+		?.map((item) => {
+			return { text: item.metadata?.name || "", value: item.metadata?.name || "" };
+		})
+		// filter empty values
+		.filter((item) => item.value !== "")
+		// filter unique values
+		.filter((current, index, self) => index === self.findIndex((item) => item.text === current.text));
+
+	const namespaceFilterList = list
+		?.map((item) => {
+			return { text: item.metadata?.namespace || "", value: item.metadata?.namespace || "" };
+		})
+		// filter empty values
+		.filter((item) => item.value !== "")
+		// filter unique values
+		.filter((current, index, self) => index === self.findIndex((item) => item.text === current.text));
+
+	const columns: ColumnsType<DataType> = [
+		{
+			title: "Name",
+			width: 60,
+			dataIndex: "name",
+			key: "name",
+			fixed: responsive?.md ? "left" : undefined,
+			filterSearch: true,
+			render: (value, record) => record.metadata?.name,
+			filters: nameFilterList,
+			onFilter: (value, record) => (record.metadata?.name ? record.metadata?.name.indexOf(value.toString()) > -1 : true),
+		},
+		{
+			title: "Phase",
+			dataIndex: "phase",
+			key: "phase",
+			width: 16,
+			render: (value, record) => <Link href="#">{record.status?.phase}</Link>,
+			// filterSearch: true,
+			// filters: namespaceFilterList,
+			// onFilter: (value, record) => (record.metadata?.namespace ? record.metadata?.namespace.indexOf(value.toString()) > -1 : true),
+		},
+		{
+			title: "Namespace",
+			dataIndex: "namespace",
+			key: "namespace",
+			width: 25,
+			render: (value, record) => <Link href="#">{record.metadata?.namespace}</Link>,
+			filterSearch: true,
+			filters: namespaceFilterList,
+			onFilter: (value, record) => (record.metadata?.namespace ? record.metadata?.namespace.indexOf(value.toString()) > -1 : true),
+		},
+		{
+			title: "Node",
+			dataIndex: "node",
+			key: "node",
+			width: 25,
+			render: (value, record) => <Link href="#">{record.spec?.nodeName}</Link>,
+			// filterSearch: true,
+			// filters: namespaceFilterList,
+			// onFilter: (value, record) => (record.metadata?.namespace ? record.metadata?.namespace.indexOf(value.toString()) > -1 : true),
+		},
+		{
+			title: "Cluster",
+			dataIndex: "clusterShortName",
+			key: "clusterShortName",
+			width: 25,
+			render: (value) => (
+				<Button type="link" style={{ padding: 0 }}>
+					{value}
+				</Button>
+			),
+			filterSearch: true,
+			filters: clusters.map((cluster) => {
+				return { text: cluster.shortName || "", value: cluster.shortName || "" };
+			}),
+			onFilter: (value, record) => (record.clusterShortName ? record.clusterShortName.indexOf(value.toString()) > -1 : true),
+		},
+		{
+			title: "Created at",
+			dataIndex: "createdAt",
+			key: "createdAt",
+			width: 25,
+			render: (value, record) => <DateDisplay date={record.metadata?.creationTimestamp} />,
+			sorter: (a, b) => dayjs(a.metadata?.creationTimestamp).diff(dayjs(b.metadata?.creationTimestamp)),
+		},
+		{
+			title: <Typography.Text className="text-xs md:text-sm">Action</Typography.Text>,
+			key: "action",
+			fixed: "right",
+			width: responsive?.md ? 22 : 18,
+			render: (value, record) => record.actions,
+		},
+	];
+
 	return (
 		<>
 			{/* Page title & desc here */}
-			<PageTitle title={`Namespaces (${amountFiltered})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
+			<PageTitle title={`Pods (${amountFiltered})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
 			<div>
 				<Table
 					loading={status === "loading"}
