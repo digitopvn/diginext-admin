@@ -1,8 +1,9 @@
 /* eslint-disable no-nested-ternary */
 import { DeleteOutlined } from "@ant-design/icons";
-import { Button, notification, Popconfirm, Space, Table, Tag, Typography } from "antd";
+import { Button, notification, Popconfirm, Space, Table, Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
+import { toInteger } from "lodash";
 import Link from "next/link";
 import React, { useState } from "react";
 
@@ -142,6 +143,48 @@ export const DeploymentList = () => {
 				if (value === "partial") return ready > 0 && ready < total;
 				return ready === total;
 			},
+		},
+		{
+			title: "CPU",
+			dataIndex: "cpu",
+			key: "cpu",
+			width: 17,
+			render: (value, record) => {
+				const cpu = toInteger(record.cpuAvg?.replace("m", "")) || 0;
+				const cpuMax = toInteger(record.cpuCapacity?.replace("m", "")) || 0;
+				return cpuMax === 0 ? (
+					<Tooltip overlay={<>Recommend: {record.cpuRecommend}</>}>
+						<Tag color={cpuMax === 0 ? "default" : cpu > cpuMax * 0.8 ? "warning" : "success"}>{record.cpuAvg}</Tag>
+					</Tooltip>
+				) : (
+					<Tag color={cpuMax === 0 ? "default" : cpu > cpuMax * 0.8 ? "warning" : "success"}>{record.cpuAvg}</Tag>
+				);
+			},
+			// filterSearch: true,
+			// filters: namespaceFilterList,
+			// onFilter: (value, record) => (record.metadata?.namespace ? record.metadata?.namespace.indexOf(value.toString()) > -1 : true),
+			sorter: (a, b) => toInteger(a.cpuAvg?.replace("m", "")) - toInteger(b.cpuAvg?.replace("m", "")),
+		},
+		{
+			title: "MEM",
+			dataIndex: "memory",
+			key: "memory",
+			width: 17,
+			render: (value, record) => {
+				const mem = toInteger(record.memoryAvg?.replace("Mi", "")) || 0;
+				const memMax = toInteger(record.memoryCapacity?.replace("Mi", "")) || 0;
+				return memMax === 0 ? (
+					<Tooltip overlay={<>Recommend: {record.memoryRecommend}</>}>
+						<Tag color={memMax === 0 ? "default" : mem > memMax * 0.8 ? "warning" : "success"}>{record.memoryAvg}</Tag>
+					</Tooltip>
+				) : (
+					<Tag color={memMax === 0 ? "default" : mem > memMax * 0.8 ? "warning" : "success"}>{record.memoryAvg}</Tag>
+				);
+			},
+			// filterSearch: true,
+			// filters: namespaceFilterList,
+			// onFilter: (value, record) => (record.metadata?.namespace ? record.metadata?.namespace.indexOf(value.toString()) > -1 : true),
+			sorter: (a, b) => toInteger(a.memoryAvg?.replace("Mi", "")) - toInteger(b.memoryAvg?.replace("Mi", "")),
 		},
 		{
 			title: "Namespace",

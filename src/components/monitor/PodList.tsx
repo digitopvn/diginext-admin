@@ -1,7 +1,9 @@
+/* eslint-disable no-nested-ternary */
 import { DeleteOutlined } from "@ant-design/icons";
-import { Button, notification, Popconfirm, Space, Table, Typography } from "antd";
+import { Button, notification, Popconfirm, Space, Table, Tag, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
+import { toInteger } from "lodash";
 import Link from "next/link";
 import React, { useState } from "react";
 
@@ -96,6 +98,16 @@ export const PodList = () => {
 		// filter unique values
 		.filter((current, index, self) => index === self.findIndex((item) => item.text === current.text));
 
+	const phaseFilterList = list
+		?.map((record) => {
+			const phase = record.status?.containerStatuses?.find((cont) => cont.ready === false) ? "Crashed" : record.status?.phase;
+			return { text: phase || "", value: phase || "" };
+		})
+		// filter empty values
+		.filter((item) => item.value !== "")
+		// filter unique values
+		.filter((current, index, self) => index === self.findIndex((item) => item.text === current.text));
+
 	const columns: ColumnsType<DataType> = [
 		{
 			title: "Name",
@@ -112,11 +124,47 @@ export const PodList = () => {
 			title: "Phase",
 			dataIndex: "phase",
 			key: "phase",
-			width: 16,
-			render: (value, record) => <Link href="#">{record.status?.phase}</Link>,
+			width: 18,
+			render: (value, record) => {
+				const phase = record.status?.containerStatuses?.find((cont) => cont.ready === false) ? "Crashed" : record.status?.phase;
+				return (
+					<Tag
+						color={
+							phase === "Running" || phase === "Succeeded" ? "success" : phase === "Crashed" || phase === "Failed" ? "error" : "blue"
+						}
+					>
+						{phase}
+					</Tag>
+				);
+			},
+			filterSearch: true,
+			filters: phaseFilterList,
+			onFilter: (value, record) => {
+				const phase = record.status?.containerStatuses?.find((cont) => cont.ready === false) ? "Crashed" : record.status?.phase;
+				return value === phase;
+			},
+		},
+		{
+			title: "CPU",
+			dataIndex: "cpu",
+			key: "cpu",
+			width: 17,
+			render: (value, record) => <Tag>{record.cpu}</Tag>,
 			// filterSearch: true,
 			// filters: namespaceFilterList,
 			// onFilter: (value, record) => (record.metadata?.namespace ? record.metadata?.namespace.indexOf(value.toString()) > -1 : true),
+			sorter: (a, b) => toInteger(a.cpu?.replace("m", "")) - toInteger(b.cpu?.replace("m", "")),
+		},
+		{
+			title: "MEM",
+			dataIndex: "memory",
+			key: "memory",
+			width: 17,
+			render: (value, record) => <Tag>{record.memory}</Tag>,
+			// filterSearch: true,
+			// filters: namespaceFilterList,
+			// onFilter: (value, record) => (record.metadata?.namespace ? record.metadata?.namespace.indexOf(value.toString()) > -1 : true),
+			sorter: (a, b) => toInteger(a.memory?.replace("Mi", "")) - toInteger(b.memory?.replace("Mi", "")),
 		},
 		{
 			title: "Namespace",
@@ -138,6 +186,7 @@ export const PodList = () => {
 			// filters: namespaceFilterList,
 			// onFilter: (value, record) => (record.metadata?.namespace ? record.metadata?.namespace.indexOf(value.toString()) > -1 : true),
 		},
+
 		{
 			title: "Cluster",
 			dataIndex: "clusterShortName",
