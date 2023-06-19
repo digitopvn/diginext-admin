@@ -179,7 +179,7 @@ const items: MenuProps["items"] = [
 
 export const MenuSider = () => {
 	const router = useRouter();
-	const { sidebarCollapsed, toggleSidebar } = useLayoutProvider();
+	const { sidebarCollapsed, toggleSidebar, responsive } = useLayoutProvider();
 	const { isDarkMode } = useDarkMode();
 
 	const [user] = useAuth();
@@ -216,7 +216,7 @@ export const MenuSider = () => {
 			breakpoint="lg"
 			width={250}
 			style={{ height: "100%" }}
-			collapsedWidth="0"
+			collapsedWidth={responsive?.md ? "50" : "0"}
 		>
 			{sidebarCollapsed ? (
 				<div className="mx-auto my-5 w-[32px]">
