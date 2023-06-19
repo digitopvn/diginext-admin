@@ -1,8 +1,9 @@
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { useSize } from "ahooks";
 import { Button, Space, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import { useTeamListApi } from "@/api/api-team";
 import type { ITeam, IUser } from "@/api/api-types";
@@ -113,16 +114,19 @@ export const TeamList = () => {
 		const { current } = _pagination;
 		if (current) setPage(current);
 	};
+	const ref = useRef(null);
+	const size = useSize(ref);
 
 	return (
-		<div>
+		<div className="h-full flex-auto overflow-hidden" ref={ref}>
 			<Table
+				sticky
+				size="small"
 				loading={status === "loading"}
 				columns={columns}
 				dataSource={teams}
-				scroll={{ x: 1200 }}
-				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize, total: total_items }}
+				scroll={{ x: 1000, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+				pagination={{ pageSize, total: total_items, position: ["bottomCenter"] }}
 				onChange={onTableChange}
 			/>
 		</div>

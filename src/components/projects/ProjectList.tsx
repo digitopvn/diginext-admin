@@ -11,13 +11,14 @@ import {
 	QrcodeOutlined,
 	RocketOutlined,
 } from "@ant-design/icons";
+import { useSize } from "ahooks";
 import { Button, Dropdown, Modal, notification, Popconfirm, Space, Table, Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { useAppDeleteApi, useAppEnvVarsDeleteApi } from "@/api/api-app";
 import { useProjectDeleteApi, useProjectListWithAppsApi } from "@/api/api-project";
@@ -465,16 +466,19 @@ export const ProjectList = () => {
 		setQuery({ page: current ?? 1 });
 	};
 
+	const ref = useRef(null);
+	const size = useSize(ref);
+
 	return (
-		<div>
+		<div className="h-full flex-auto overflow-hidden" ref={ref}>
 			<Table
+				size="small"
 				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedProjects}
 				// scroll={{ x: window?.innerWidth >= 728 ? 1500 : 600 }}
-				scroll={{ x: 1600 }}
-				sticky={{ offsetHeader: 48 }}
-				defaultExpandAllRows
+				scroll={{ x: 1600, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+				sticky={{ offsetHeader: 0 }}
 				pagination={{
 					showSizeChanger: true,
 					current: page,
@@ -483,6 +487,7 @@ export const ProjectList = () => {
 					total: total_items,
 					// total: total_pages,
 					// , pageSize
+					position: ["bottomCenter"],
 				}}
 				onChange={onTableChange}
 			/>

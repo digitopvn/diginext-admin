@@ -9,6 +9,7 @@ import {
 	RocketOutlined,
 	StopOutlined,
 } from "@ant-design/icons";
+import { useSize } from "ahooks";
 import { App, Button, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
@@ -17,12 +18,13 @@ import { HumanizeDuration, HumanizeDurationLanguage } from "humanize-duration-ts
 import { isEmpty } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import { useBuildListApi, useBuildStopApi } from "@/api/api-build";
 import { useCreateReleaseFromBuildApi } from "@/api/api-release";
 import type { IBuild, IRelease, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
+import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
@@ -273,17 +275,26 @@ export const BuildList = () => {
 		setPage(current ?? 1);
 	};
 
+	const ref = useRef(null);
+	const size = useSize(ref);
+
 	return (
-		<div className="h-full overflow-auto">
-			<Table
-				loading={status === "loading"}
-				columns={columns}
-				dataSource={displayedBuilds}
-				scroll={{ x: 550 }}
-				sticky={{ offsetHeader: 0 }}
-				pagination={{ current: page, pageSize, total: total_items }}
-				onChange={onTableChange}
-			/>
-		</div>
+		<>
+			{/* Page title & desc here */}
+			<PageTitle title={`Builds (${total_items ?? "-"})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
+			{/* Page Content */}
+			<div className="h-full flex-auto overflow-hidden" ref={ref}>
+				<Table
+					size="small"
+					loading={status === "loading"}
+					columns={columns}
+					dataSource={displayedBuilds}
+					scroll={{ x: 550, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+					sticky={{ offsetHeader: 0 }}
+					pagination={{ current: page, pageSize, total: total_items, position: ["bottomCenter"] }}
+					onChange={onTableChange}
+				/>
+			</div>
+		</>
 	);
 };

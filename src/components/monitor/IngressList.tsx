@@ -1,9 +1,11 @@
 import { DeleteOutlined } from "@ant-design/icons";
+import { useSize } from "ahooks";
 import { Button, notification, Popconfirm, Space, Table, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
+import type { TableCurrentDataSource } from "antd/es/table/interface";
 import dayjs from "dayjs";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { useClusterListApi } from "@/api/api-cluster";
 import { useMonitorIngressApi } from "@/api/api-monitor-ingress";
@@ -51,10 +53,12 @@ export const IngressList = () => {
 		if (res?.status) notification.success({ message: `Item deleted successfully.` });
 	};
 
-	const onTableChange = (_pagination: TablePaginationConfig) => {
+	const onTableChange = (_pagination: TablePaginationConfig, extra: TableCurrentDataSource<DataType>) => {
 		const { current } = _pagination;
+		setAmountFiltered(extra.currentDataSource?.length ?? 0);
 		if (current) setPage(current);
 	};
+	useEffect(() => setAmountFiltered(list?.length ?? 0), [list]);
 
 	const displayedList: DataType[] =
 		list?.map((item, i) => {
@@ -151,26 +155,27 @@ export const IngressList = () => {
 		},
 	];
 
+	const ref = useRef(null);
+	const size = useSize(ref);
+
 	return (
 		<>
 			{/* Page title & desc here */}
 			<PageTitle title={`Ingresses (${amountFiltered})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
-			<div>
+
+			<div className="h-full flex-auto overflow-hidden" ref={ref}>
 				<Table
+					sticky
+					size="small"
 					loading={status === "loading"}
 					columns={columns}
 					dataSource={displayedList}
-					scroll={{ x: 1000 }}
-					sticky={{ offsetHeader: 48 }}
+					scroll={{ x: 1000, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
 					pagination={{
 						pageSize,
-						total: total_items,
-						showTotal: (total) => {
-							setAmountFiltered(total);
-							return <>{total} items</>;
-						},
+						position: ["bottomCenter"],
 					}}
-					onChange={onTableChange}
+					onChange={(_pagination, filters, sorter, extra) => onTableChange(_pagination, extra)}
 				/>
 			</div>
 		</>

@@ -116,7 +116,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 	};
 
 	return (
-		<div className="p-6 pb-16">
+		<div className="overflow-x-hidden p-6 pb-16">
 			{/* LOADING */}
 			{status === "loading" && isNew === false && <Skeleton active />}
 			{createStatus === "loading" && isNew === true && <Skeleton active />}
@@ -126,7 +126,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 			{/* INITIAL */}
 			{(status === "success" || (isNew === true && createStatus !== "loading")) && (
 				<Form
-					className={["h-full", "overflow-auto", className].join(" ")}
+					className={["h-full", "overflow-x-hidden", className].join(" ")}
 					layout="vertical"
 					// name="edit"
 					// initialValues={initialValues}

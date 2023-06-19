@@ -43,40 +43,40 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 		token: { colorText },
 	} = theme.useToken();
 
-	const openBuildList = () => {
-		if (showDrawer) showDrawer({ title: "Builds", content: <BuildList /> }, { level: 1 });
+	const openBuildList = (level = 1) => {
+		if (showDrawer) showDrawer({ title: "Builds", content: <BuildList /> }, { level });
 	};
 
-	const openReleaseList = () => {
-		if (showDrawer) showDrawer({ title: "Releases", content: <ReleaseList /> }, { level: 1 });
+	const openReleaseList = (level = 1) => {
+		if (showDrawer) showDrawer({ title: "Releases", content: <ReleaseList /> }, { level });
 	};
 
-	const openBuildLogs = (lv = 1) => {
-		if (showDrawer) showDrawer({ title: "Build Logs", content: <BuildLogs /> }, { level: lv });
+	const openBuildLogs = (level = 1) => {
+		if (showDrawer) showDrawer({ title: "Build Logs", content: <BuildLogs /> }, { level });
 	};
 
-	const openEnvVarsPage = (lv = 1) => {
-		if (showDrawer) showDrawer({ title: "Environment Variables", content: <EnvVarsNewEdit /> }, { level: lv });
+	const openEnvVarsPage = (level = 1) => {
+		if (showDrawer) showDrawer({ title: "Environment Variables", content: <EnvVarsNewEdit /> }, { level });
 	};
 
-	const openAppDeployEnvLogsPage = (lv = 1) => {
-		if (showDrawer) showDrawer({ title: `Application Logs (env: ${env || "unknown"})`, content: <AppLogs /> }, { level: lv });
+	const openAppDeployEnvLogsPage = (level = 1) => {
+		if (showDrawer) showDrawer({ title: `Application Logs (env: ${env || "unknown"})`, content: <AppLogs /> }, { level });
 	};
 
-	const openDeploymentYamlPage = (lv = 1) => {
-		if (showDrawer) showDrawer({ title: `Deployment YAML: ${env.toUpperCase()}`, content: <DeploymentYaml /> }, { level: lv });
+	const openDeploymentYamlPage = (level = 1) => {
+		if (showDrawer) showDrawer({ title: `Deployment YAML: ${env.toUpperCase()}`, content: <DeploymentYaml /> }, { level });
 	};
 
-	const openDeployEnvironment = (lv = 1) => {
-		if (showDrawer) showDrawer({ title: `Deploy Environment: ${env.toUpperCase()}`, content: <DeployEnvironment /> }, { level: lv });
+	const openDeployEnvironment = (level = 1) => {
+		if (showDrawer) showDrawer({ title: `Deploy Environment: ${env.toUpperCase()}`, content: <DeployEnvironment /> }, { level });
 	};
 
-	const openEditPage = () => {
-		if (showDrawer) showDrawer({ title: "Edit", content: <NewEditPage /> }, { level: 1 });
+	const openEditPage = (level = 1) => {
+		if (showDrawer) showDrawer({ title: "Edit", content: <NewEditPage /> }, { level });
 	};
 
-	const openCreatePage = () => {
-		if (showDrawer) showDrawer({ title: "Create", content: <NewEditPage /> }, { level: 1 });
+	const openCreatePage = (level = 1) => {
+		if (showDrawer) showDrawer({ title: "Create", content: <NewEditPage /> }, { level });
 	};
 
 	useEffect(() => {
@@ -118,8 +118,16 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 		}
 
 		switch (lv2) {
+			case "build":
+				openBuildList(2);
+				break;
+
 			case "build_logs":
 				openBuildLogs(2);
+				break;
+
+			case "release":
+				openReleaseList(2);
 				break;
 
 			case "app_logs":
@@ -158,15 +166,12 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 				{useSidebar && <MenuSider />}
 			</div>
 
-			<Layout
-				className="min-h-screen overflow-auto transition-all"
-				// style={{ marginLeft }}
-			>
+			<Layout className="h-screen overflow-auto transition-all">
 				{/* Site Header */}
 				{useSidebar && <SiteHeader />}
 
 				{/* Page content here */}
-				<div className="grow">{props.children}</div>
+				<div className="flex flex-auto flex-col overflow-auto">{props.children}</div>
 
 				{/* Site/Page Footer */}
 				<PageFooter />

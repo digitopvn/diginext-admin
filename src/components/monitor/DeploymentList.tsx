@@ -1,11 +1,13 @@
 /* eslint-disable no-nested-ternary */
-import { DeleteOutlined } from "@ant-design/icons";
-import { Button, notification, Popconfirm, Space, Table, Tag, Tooltip, Typography } from "antd";
+import { MoreOutlined } from "@ant-design/icons";
+import { useSize } from "ahooks";
+import { Button, notification, Table, Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
+import type { TableCurrentDataSource } from "antd/es/table/interface";
 import dayjs from "dayjs";
 import { toInteger } from "lodash";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { useClusterListApi } from "@/api/api-cluster";
 import { useMonitorDeploymentApi } from "@/api/api-monitor-deployment";
@@ -43,7 +45,7 @@ export const DeploymentList = () => {
 	const [page, setPage] = useState(1);
 	const { data, status } = useMonitorDeploymentApi({ filter: { clusterShortName } });
 	const { list, pagination } = data || {};
-	const { total_items } = pagination || {};
+	const { total_items = list?.length ?? 0 } = pagination || {};
 
 	const [deleteApi] = useUserDeleteApi();
 	const [query, { setQuery }] = useRouterQuery();
@@ -53,30 +55,20 @@ export const DeploymentList = () => {
 		if (res?.status) notification.success({ message: `Item deleted successfully.` });
 	};
 
-	const onTableChange = (_pagination: TablePaginationConfig) => {
+	const onTableChange = (_pagination: TablePaginationConfig, extra: TableCurrentDataSource<DataType>) => {
 		const { current } = _pagination;
+		setAmountFiltered(extra.currentDataSource?.length ?? 0);
 		if (current) setPage(current);
 	};
+
+	useEffect(() => setAmountFiltered(list?.length ?? 0), [list]);
 
 	const displayedList: DataType[] =
 		list?.map((item, i) => {
 			return {
 				...item,
 				key: `ns-${i}`,
-				actions: (
-					<Space.Compact>
-						{/* <Button icon={<EditOutlined />} onClick={() => setQuery({ lv1: "edit", type: "user", user: item.metadata?.name })}></Button> */}
-						<Popconfirm
-							title="Are you sure to delete this item?"
-							description={<span className="text-red-500">Caution: this is permanent and cannot be rolled back.</span>}
-							// onConfirm={() => deleteItem(item._id as string)}
-							okText="Yes"
-							cancelText="No"
-						>
-							<Button icon={<DeleteOutlined />}></Button>
-						</Popconfirm>
-					</Space.Compact>
-				),
+				actions: [<Button size="small" key="more-btn" icon={<MoreOutlined />} />],
 			};
 		}) || [];
 
@@ -201,11 +193,7 @@ export const DeploymentList = () => {
 			dataIndex: "clusterShortName",
 			key: "clusterShortName",
 			width: 30,
-			render: (value) => (
-				<Button type="link" style={{ padding: 0 }}>
-					{value}
-				</Button>
-			),
+			render: (value) => <Link href="#">{value}</Link>,
 			filterSearch: true,
 			filters: clusters.map((cluster) => {
 				return { text: cluster.shortName || "", value: cluster.shortName || "" };
@@ -224,31 +212,31 @@ export const DeploymentList = () => {
 			title: <Typography.Text className="text-xs md:text-sm">Action</Typography.Text>,
 			key: "action",
 			fixed: "right",
-			width: responsive?.md ? 30 : 26,
+			width: responsive?.md ? 12 : 12,
 			render: (value, record) => record.actions,
 		},
 	];
 
+	const ref = useRef(null);
+	const size = useSize(ref);
+	// console.log("size :>> ", size);
 	return (
 		<>
 			{/* Page title & desc here */}
 			<PageTitle title={`Deployments (${amountFiltered})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
-			<div>
+			<div className="flex-auto overflow-auto" ref={ref}>
 				<Table
+					sticky
 					loading={status === "loading"}
+					size="small"
 					columns={columns}
 					dataSource={displayedList}
-					scroll={{ x: 1000 }}
-					sticky={{ offsetHeader: 48 }}
+					scroll={{ x: 1000, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
 					pagination={{
 						pageSize,
-						total: total_items,
-						showTotal: (total) => {
-							setAmountFiltered(total);
-							return <>{total} items</>;
-						},
+						position: ["bottomCenter"],
 					}}
-					onChange={onTableChange}
+					onChange={(_pagination, filters, sorter, extra) => onTableChange(_pagination, extra)}
 				/>
 			</div>
 		</>

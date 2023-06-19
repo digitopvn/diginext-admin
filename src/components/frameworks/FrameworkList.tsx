@@ -1,12 +1,14 @@
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { useSize } from "ahooks";
 import { Button, notification, Popconfirm, Space, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import { useFrameworkDeleteApi, useFrameworkListApi } from "@/api/api-framework";
 import type { IFramework, IGitProvider, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
+import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { AppConfig } from "@/utils/AppConfig";
 
@@ -147,17 +149,40 @@ export const FrameworkList = () => {
 		if (current) setPage(current);
 	};
 
+	const ref = useRef(null);
+	const size = useSize(ref);
+
 	return (
-		<div>
-			<Table
-				loading={status === "loading"}
-				columns={columns}
-				dataSource={displayedData}
-				scroll={{ x: 1200 }}
-				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize, total: total_items }}
-				onChange={onTableChange}
+		<>
+			{/* Page title & desc here */}
+			<PageTitle
+				title="Frameworks"
+				breadcrumbs={[{ name: "Workspace" }]}
+				actions={[
+					<Button
+						key="workspace-setting-btn"
+						type="default"
+						icon={<PlusOutlined className="align-middle" />}
+						onClick={() => setQuery({ lv1: "new", type: "framework" })}
+					>
+						New
+					</Button>,
+				]}
 			/>
-		</div>
+
+			{/* Page Content */}
+			<div className="h-full flex-auto overflow-hidden" ref={ref}>
+				<Table
+					size="small"
+					loading={status === "loading"}
+					columns={columns}
+					dataSource={displayedData}
+					scroll={{ x: 1200, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+					sticky
+					pagination={{ pageSize, total: total_items, position: ["bottomCenter"] }}
+					onChange={onTableChange}
+				/>
+			</div>
+		</>
 	);
 };

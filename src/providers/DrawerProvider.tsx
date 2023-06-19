@@ -106,12 +106,21 @@ export const DrawerProvider = (props: { children?: ReactNode } = {}) => {
 				onClose={onCloseLv1}
 				open={drawerVisibility.lv1}
 				size="large"
-				bodyStyle={{ overflow: "hidden", padding: 0 }}
+				bodyStyle={{ overflow: "auto", overflowX: "hidden", flex: "auto", padding: 0 }}
 				destroyOnClose
 			>
 				{content?.content}
+
 				{/* LEVEL 2 */}
-				<Drawer title={contentLv2?.title} placement="right" onClose={onCloseLv2} open={drawerVisibility.lv2} size="large" destroyOnClose>
+				<Drawer
+					title={contentLv2?.title}
+					placement="right"
+					onClose={onCloseLv2}
+					open={drawerVisibility.lv2}
+					size="large"
+					bodyStyle={{ overflow: "auto", overflowX: "hidden", flex: "auto", padding: 0 }}
+					destroyOnClose
+				>
 					{contentLv2?.content}
 				</Drawer>
 			</Drawer>

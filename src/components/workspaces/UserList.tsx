@@ -1,8 +1,9 @@
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { useSize } from "ahooks";
 import { Button, notification, Popconfirm, Space, Table, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import type { IUser } from "@/api/api-types";
 import { useUserDeleteApi, useUserListApi } from "@/api/api-user";
@@ -156,17 +157,20 @@ export const UserList = () => {
 				),
 			};
 		}) || [];
-	console.log("displayedUsers :>> ", displayedList);
+
+	const ref = useRef(null);
+	const size = useSize(ref);
 
 	return (
-		<div>
+		<div className="h-full flex-auto overflow-hidden" ref={ref}>
 			<Table
+				sticky
+				size="small"
 				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedList}
-				scroll={{ x: 1200 }}
-				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize, total: total_items }}
+				scroll={{ x: 1000, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+				pagination={{ pageSize, total: total_items, position: ["bottomCenter"] }}
 				onChange={onTableChange}
 			/>
 		</div>

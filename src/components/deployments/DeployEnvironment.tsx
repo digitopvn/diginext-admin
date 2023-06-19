@@ -98,12 +98,12 @@ const DeployEnvironment = () => {
 				<div className="w-full">
 					<Row gutter={[16, 16]} align="stretch">
 						<Col span={12}>
-							<Button block onClick={() => setQuery({ lv2: "app_logs", project: projectSlug, app: appSlug, env })}>
+							<Button block onClick={() => setQuery({ lv2: "build", project: projectSlug, app: appSlug })}>
 								Builds
 							</Button>
 						</Col>
 						<Col span={12}>
-							<Button block onClick={() => setQuery({ lv2: "app_logs", project: projectSlug, app: appSlug, env })}>
+							<Button block onClick={() => setQuery({ lv2: "release", project: projectSlug, app: appSlug, env })}>
 								Releases
 							</Button>
 						</Col>
