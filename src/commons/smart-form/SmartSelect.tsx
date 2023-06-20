@@ -93,14 +93,14 @@ const SmartSelect = (props: SmartFormElementProps) => {
 			rules={[{ required, message: requiredMessage }]}
 			style={{ display: visible ? "block" : "none", ...wrapperStyle }}
 		>
-			<Space direction="horizontal" className="w-full">
+			<Space.Compact direction="horizontal" className="w-full">
 				<Select className={className} style={style} value={_value} onChange={_onChange} options={options} disabled={disabled} />
 
 				{postLabel}
 
 				{/* Display manual save controller if auto save is off */}
 				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
-			</Space>
+			</Space.Compact>
 		</Form.Item>
 	);
 };

@@ -86,7 +86,7 @@ export const ProjectList = () => {
 		},
 		{
 			title: "Cluster",
-			width: 40,
+			width: 30,
 			dataIndex: "cluster",
 			key: "cluster",
 			render: (value) => (
@@ -116,7 +116,7 @@ export const ProjectList = () => {
 			title: "Last updated by",
 			dataIndex: "owner",
 			key: "owner",
-			width: 45,
+			width: 35,
 			filterSearch: true,
 			filters: [{ text: "goon", value: "goon" }],
 			onFilter: (value, record) => (record.owner && record.owner.indexOf(value.toString()) > -1) || true,
@@ -126,7 +126,7 @@ export const ProjectList = () => {
 			title: "Last updated",
 			dataIndex: "updatedAt",
 			key: "updatedAt",
-			width: 40,
+			width: 30,
 			render: (value) => <DateDisplay date={value} />,
 			sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
 		},
@@ -134,7 +134,7 @@ export const ProjectList = () => {
 			title: "Created at",
 			dataIndex: "createdAt",
 			key: "createdAt",
-			width: 40,
+			width: 30,
 			render: (value) => <DateDisplay date={value} />,
 			sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
 		},
@@ -477,7 +477,7 @@ export const ProjectList = () => {
 				columns={columns}
 				dataSource={displayedProjects}
 				// scroll={{ x: window?.innerWidth >= 728 ? 1500 : 600 }}
-				scroll={{ x: 1600, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+				scroll={{ x: responsive?.md ? 1600 : 1200, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
 				sticky={{ offsetHeader: 0 }}
 				pagination={{
 					showSizeChanger: true,

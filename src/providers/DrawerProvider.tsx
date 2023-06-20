@@ -1,3 +1,4 @@
+import { useResponsive } from "ahooks";
 import { Drawer } from "antd";
 import type { ReactNode } from "react";
 import { createContext, useContext, useState } from "react";
@@ -39,6 +40,7 @@ export const DrawerProvider = (props: { children?: ReactNode } = {}) => {
 	const [content, setContent] = useState<DrawerContentParams>();
 	const [contentLv2, setContentLv2] = useState<DrawerContentParams>();
 	const [query, { setQuery, deleteQuery, deleteAllQueryKeys }] = useRouterQuery();
+	const responsive = useResponsive();
 
 	const toggleDrawer = (lv: "lv1" | "lv2" = "lv1", flag?: boolean) => {
 		if (typeof flag !== "undefined")
@@ -105,7 +107,8 @@ export const DrawerProvider = (props: { children?: ReactNode } = {}) => {
 				placement="right"
 				onClose={onCloseLv1}
 				open={drawerVisibility.lv1}
-				size="large"
+				// size="large"
+				width={responsive.md ? 736 : "100%"}
 				bodyStyle={{ overflow: "auto", overflowX: "hidden", flex: "auto", padding: 0 }}
 				destroyOnClose
 			>
@@ -117,7 +120,8 @@ export const DrawerProvider = (props: { children?: ReactNode } = {}) => {
 					placement="right"
 					onClose={onCloseLv2}
 					open={drawerVisibility.lv2}
-					size="large"
+					// size="large"
+					width={responsive.md ? 736 : "100%"}
 					bodyStyle={{ overflow: "auto", overflowX: "hidden", flex: "auto", padding: 0 }}
 					destroyOnClose
 				>

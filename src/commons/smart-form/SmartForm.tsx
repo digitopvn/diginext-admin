@@ -205,7 +205,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 									<SmartSelect
 										key={`${name}-${field.name}`}
 										{...field}
-										style={{ minWidth: 300, ...field?.style }}
+										style={{ flex: "auto", ...field?.style }}
 										value={selectedValue}
 										status={fieldsStatus}
 										isNew={isNew}
