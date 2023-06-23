@@ -1,3 +1,4 @@
+import { PlusOutlined } from "@ant-design/icons";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { Alert, App, Button, Form, Popconfirm, Skeleton, Space, theme } from "antd";
 import _, { isEmpty } from "lodash";
@@ -234,10 +235,10 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 					{children}
 
 					{isNew && (
-						<div className="fixed bottom-0 w-full px-6 py-3" style={{ backgroundColor: colorBgContainer }}>
-							<Space>
+						<div className="absolute left-0 bottom-0 w-full px-6 py-3" style={{ backgroundColor: colorBgContainer }}>
+							<Space align="center">
 								<Form.Item style={{ marginBottom: 0 }}>
-									<Button type="primary" htmlType="submit">
+									<Button type="primary" htmlType="submit" icon={<PlusOutlined />}>
 										Submit
 									</Button>
 								</Form.Item>

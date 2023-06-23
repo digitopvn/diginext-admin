@@ -37,6 +37,17 @@ export interface ApiResponse<T = any> extends ApiPagination {
 	token?: AccessTokenInfo;
 }
 
+export interface HiddenBodyKeys {
+	id?: unknown;
+	_id?: unknown;
+	metadata?: unknown;
+	owner?: unknown;
+	workspace?: unknown;
+	createdAt?: unknown;
+	deletedAt?: unknown;
+	updatedAt?: unknown;
+}
+
 export const registryProviderList = ["gcloud", "digitalocean", "dockerhub"] as const;
 export type RegistryProvider = { name: string; slug: (typeof registryProviderList)[number] };
 export const registryProviders = registryProviderList.map((provider) => {
@@ -56,6 +67,16 @@ export type RegistryProviderType = (typeof registryProviderList)[number];
 // cloud providers
 export const cloudProviderList = ["gcloud", "digitalocean", "custom"] as const;
 export type CloudProviderType = (typeof cloudProviderList)[number];
+
+// database providers
+export const cloudDatabaseList = [
+	"mongodb",
+	"mysql",
+	"mariadb",
+	"postgresql",
+	// "sqlserver", "sqlite", "redis", "dynamodb"
+] as const;
+export type CloudDatabaseType = (typeof cloudDatabaseList)[number];
 
 // git providers
 export const availableGitProviders = ["bitbucket", "github"] as const;
@@ -121,6 +142,7 @@ export interface IGeneral {
 	updatedAt?: string;
 	createdBy?: string;
 	metadata?: any;
+	active?: boolean;
 	/**
 	 * User ID of the owner
 	 *
@@ -1111,3 +1133,94 @@ export interface IRelease extends IGeneral {
 	 */
 	workspace?: IWorkspace | string;
 }
+
+// http methods
+export const requestMethodList = ["GET", "POST", "PATCH", "DELETE"] as const;
+export type RequestMethodType = (typeof requestMethodList)[number];
+
+export const weekDays = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
+export type WeekDay = (typeof weekDays)[number];
+
+export const cronjobRepeatUnitList = ["second", "minute", "hour", "day", "month", "year"] as const;
+export type CronjobRepeatUnit = (typeof cronjobRepeatUnitList)[number];
+
+// cronjob status
+export const cronjobStatusList = ["failed", "success"] as const;
+export type CronjobStatus = (typeof cronjobStatusList)[number];
+
+export type CronjobRequest = {
+	url?: string;
+	method?: RequestMethodType;
+	params?: Record<string, string>;
+	body?: Record<string, string>;
+	headers?: Record<string, string>;
+};
+
+export type CronjobRepeat = {
+	range?: number;
+	unit?: CronjobRepeatUnit;
+};
+
+export type CronjonRepeatCondition = {
+	/**
+	 * Array of hours from 0 to 23
+	 */
+	atHours?: number[];
+	/**
+	 * Array of minutes from 0 to 59
+	 */
+	atMins?: number[];
+	/**
+	 * Array of weekdays
+	 */
+	atWeekDays?: WeekDay[];
+	/**
+	 * Array of days from 1 to 31
+	 */
+	atDays?: number[];
+	/**
+	 * Array of days from 0 to 11
+	 */
+	atMonths?: number[];
+};
+
+export type CronjobHistory = {
+	runAt: Date;
+	status: CronjobStatus;
+	responseStatus: string | number;
+	message: string;
+};
+
+export interface ICronjob extends IBase {
+	name?: string;
+	// api request
+	url?: string;
+	method?: RequestMethodType;
+	params?: Record<string, string>;
+	body?: Record<string, string>;
+	headers?: Record<string, string>;
+	// schedule
+	nextRunAt?: Date;
+	repeat?: CronjobRepeat;
+	repeatCondition?: CronjonRepeatCondition;
+	// history
+	history?: CronjobHistory[];
+}
+export type CronjobDto = Omit<ICronjob, keyof HiddenBodyKeys>;
+
+export interface ICloudDatabase extends IBase {
+	name?: string;
+	verified?: boolean;
+	type?: CloudDatabaseType;
+	provider?: string;
+	user?: string;
+	pass?: string;
+	host?: string;
+	port?: number;
+	url?: string;
+	/**
+	 * Cronjob ID
+	 */
+	autoBackup?: string | ICronjob;
+}
+export type CloudDatabaseDto = Omit<ICloudDatabase, keyof HiddenBodyKeys>;

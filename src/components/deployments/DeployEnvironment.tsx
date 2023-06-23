@@ -43,7 +43,7 @@ const DeployEnvironment = () => {
 			options: availableResourceSizes.map((size) => {
 				return { label: size || "", value: size };
 			}),
-			wrapperStyle: { float: responsive.md ? "left" : "none", marginRight: responsive.md ? 15 : 0 },
+			wrapperStyle: { float: responsive?.md ? "left" : "none", marginRight: responsive?.md ? 15 : 0 },
 		},
 		{ type: "number", label: "Replicas", name: "replicas", placeholder: "1" },
 		{
@@ -56,7 +56,7 @@ const DeployEnvironment = () => {
 				return { label: cluster.name || "", value: cluster.shortName };
 			}),
 			// onChange: (value) => setProviderShortName(providers.find((provider) => provider._id === value)?.shortName || ""),
-			wrapperStyle: { float: responsive.md ? "left" : "none", marginRight: responsive.md ? 15 : 0 },
+			wrapperStyle: { float: responsive?.md ? "left" : "none", marginRight: responsive?.md ? 15 : 0 },
 		},
 		{ type: "input", label: "PORT", name: "port", placeholder: "3000" },
 		{
@@ -68,7 +68,7 @@ const DeployEnvironment = () => {
 			options: sslIssuers.map((issuer) => {
 				return { label: issuer || "", value: issuer };
 			}),
-			wrapperStyle: { float: responsive.md ? "left" : "none", marginRight: responsive.md ? 15 : 0 },
+			wrapperStyle: { float: responsive?.md ? "left" : "none", marginRight: responsive?.md ? 15 : 0 },
 			onChange: (value) => {
 				setSSLIssuer(value);
 			},

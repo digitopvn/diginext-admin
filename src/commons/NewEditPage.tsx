@@ -1,4 +1,5 @@
 import ClusterNewEdit from "@/components/clusters/ClusterNewEdit";
+import DatabaseNewEdit from "@/components/databases/DatabaseNewEdit";
 import FrameworkNewEdit from "@/components/frameworks/FrameworkNewEdit";
 import GitProviderNewEdit from "@/components/gits/GitProviderNewEdit";
 import ContainerRegistryNewEdit from "@/components/registries/ContainerRegistryNewEdit";
@@ -25,6 +26,10 @@ const NewEditPage = () => {
 
 		case "registry":
 			children = <ContainerRegistryNewEdit />;
+			break;
+
+		case "database":
+			children = <DatabaseNewEdit />;
 			break;
 
 		case "user":

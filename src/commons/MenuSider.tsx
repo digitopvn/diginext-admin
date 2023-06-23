@@ -2,6 +2,7 @@ import {
 	ApartmentOutlined,
 	BranchesOutlined,
 	BuildOutlined,
+	ClockCircleOutlined,
 	CloudOutlined,
 	CloudServerOutlined,
 	ClusterOutlined,
@@ -59,6 +60,11 @@ const items: MenuProps["items"] = [
 		key: `menu/git`,
 		icon: <BranchesOutlined />,
 		label: "Git Providers",
+	},
+	{
+		key: `menu/cronjob`,
+		icon: <ClockCircleOutlined />,
+		label: "Cronjobs",
 	},
 	{
 		key: `menu/monitor`,

@@ -37,9 +37,14 @@ export const useAuthApi = (props: { access_token?: string } = {}) => {
 			const token = access_token ?? getCookie("x-auth-cookie") ?? queryToken;
 
 			const headers = token ? { Authorization: `Bearer ${token}` } : {};
-			const { data } = await axios.get(`${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile`, { headers });
-
-			return data;
+			try {
+				const { data } = await axios.get(`${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile`, { headers });
+				console.log("useAuthApi > data :>> ", data);
+				return data;
+			} catch (e) {
+				console.error("useAuthApi >", e);
+				return undefined;
+			}
 		},
 	});
 };

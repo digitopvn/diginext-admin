@@ -1,12 +1,12 @@
 import { AuthPage } from "@/api/api-auth";
-import { DatabaseList } from "@/components/databases/DatabaseList";
+import { CronjobList } from "@/components/cronjobs/CronjobList";
 import { Main } from "@/templates/Main";
 import { Meta } from "@/templates/Meta";
 
 /**
  * Next.js Page
  */
-const DatabaseListPage = () => {
+const CronjobListPage = () => {
 	// const test = true;
 	// if (test)
 	// 	return (
@@ -17,11 +17,11 @@ const DatabaseListPage = () => {
 
 	return (
 		<AuthPage>
-			<Main meta={<Meta title="Databases" description="List of cloud databases." />}>
-				<DatabaseList />
+			<Main meta={<Meta title="Cronjobs" description="List of cronjobs." />}>
+				<CronjobList />
 			</Main>
 		</AuthPage>
 	);
 };
 
-export default DatabaseListPage;
+export default CronjobListPage;

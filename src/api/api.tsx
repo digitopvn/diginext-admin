@@ -192,13 +192,17 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptio
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
-	const { populate, sort, pagination, filter } = options;
-	const filterParams = filter ? `${new URLSearchParams(filter).toString()}&` : "";
-	const populateParams = populate ? `populate=${populate}` : "";
-	const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}${populateParams}`;
-
 	const mutation = useMutation<ApiResponse<T>, Error, T>({
 		mutationFn: async (newData) => {
+			const { populate, sort, pagination, filter = (newData as any)._id ? { _id: (newData as any)._id } : undefined } = options;
+			if ((newData as any)._id) {
+				// eslint-disable-next-line no-param-reassign
+				delete (newData as any)._id;
+			}
+			const filterParams = filter ? `${new URLSearchParams(filter).toString()}&` : "";
+			const populateParams = populate ? `populate=${populate}` : "";
+			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}${populateParams}`;
+
 			const { data, status } = await axios.post<ApiResponse<T>>(apiURL, newData, { ...options, headers });
 			if (status === 429) throw new Error("Too many requests.");
 
