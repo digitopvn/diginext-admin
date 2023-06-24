@@ -1,7 +1,6 @@
 import { useState } from "react";
 
-import { useCloudDatabaseSlugApi, useCloudDatabaseUpdateApi } from "@/api/api-cloud-database";
-import { useClusterCreateApi } from "@/api/api-cluster";
+import { useCloudDatabaseCreateApi, useCloudDatabaseSlugApi, useCloudDatabaseUpdateApi } from "@/api/api-cloud-database";
 import type { CloudDatabaseType } from "@/api/api-types";
 import { type ICluster as ICloudDatabase, cloudDatabaseList } from "@/api/api-types";
 import SmartForm from "@/commons/smart-form/SmartForm";
@@ -18,7 +17,7 @@ const DatabaseNewEdit = (props: DatabaseNewEditProps = {}) => {
 	const { data: db } = useSlugApi;
 
 	const useUpdateApi = useCloudDatabaseUpdateApi({ filter: { id: db?._id } });
-	const useCreateApi = useClusterCreateApi();
+	const useCreateApi = useCloudDatabaseCreateApi();
 	// console.log("cluster :>> ", cluster);
 
 	// providers
