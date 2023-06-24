@@ -141,9 +141,9 @@ export const ReleaseList = () => {
 	// const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 	const [page, setPage] = useState(1);
 
-	const { data } = useReleaseListApi({ populate: "owner", pagination: { page, size: pageSize }, filter });
+	const { data, status } = useReleaseListApi({ populate: "owner", pagination: { page, size: pageSize }, filter });
 	const { list: releases = [], pagination } = data || {};
-	const { total_pages } = pagination || {};
+	const { total_items } = pagination || {};
 
 	const [rolloutApi, rolloutApiStatus] = useReleaseRollOutApi();
 	console.log("rolloutApiStatus :>> ", rolloutApiStatus);
@@ -166,20 +166,22 @@ export const ReleaseList = () => {
 		setRolloutId(id);
 
 		try {
-			const release = await rolloutApi({ id });
+			const res = await rolloutApi({ id });
+			const release = res?.data;
 
-			root.notification.success({
-				message: `Congrats, the release has been rolled out successfully!`,
-				description: (
-					<>
-						Your website is ready to access on PRODUCTION environment:{" "}
-						<a href={`https://${release?.productionUrl}`} target="_blank" rel="noreferrer">
-							{release?.productionUrl}
-						</a>
-					</>
-				),
-				placement: "top",
-			});
+			if (res?.status)
+				root.notification.success({
+					message: `Congrats, the release has been rolled out successfully!`,
+					description: (
+						<>
+							Your website is ready to access on PRODUCTION environment:{" "}
+							<a href={`https://${release?.productionUrl}`} target="_blank" rel="noreferrer">
+								{release?.productionUrl}
+							</a>
+						</>
+					),
+					placement: "top",
+				});
 		} catch (e) {
 			console.error(`Could not process rolling out this release:`, e);
 
@@ -204,20 +206,22 @@ export const ReleaseList = () => {
 		}
 
 		try {
-			const release = await previewApi({ id });
+			const releaseRes = await previewApi({ id });
+			const release = releaseRes?.data;
 
-			root.notification.success({
-				message: `Congrats!`,
-				description: (
-					<>
-						The PRE-RELEASE environment has been setup successfully at:{" "}
-						<a href={`https://${release?.prereleaseUrl}`} target="_blank" rel="noreferrer">
-							{release?.prereleaseUrl}
-						</a>
-					</>
-				),
-				placement: "top",
-			});
+			if (releaseRes?.status)
+				root.notification.success({
+					message: `Congrats!`,
+					description: (
+						<>
+							The PRE-RELEASE environment has been setup successfully at:{" "}
+							<a href={`https://${release?.prereleaseUrl}`} target="_blank" rel="noreferrer">
+								{release?.prereleaseUrl}
+							</a>
+						</>
+					),
+					placement: "top",
+				});
 		} catch (e) {
 			root.notification.error({
 				message: `Failed to start preview.`,
@@ -260,11 +264,12 @@ export const ReleaseList = () => {
 	return (
 		<div>
 			<Table
+				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedReleases}
 				scroll={{ x: 600 }}
 				sticky={{ offsetHeader }}
-				pagination={{ current: page, pageSize, total: total_pages }}
+				pagination={{ current: page, pageSize, total: total_items }}
 				onChange={onTableChange}
 			/>
 		</div>

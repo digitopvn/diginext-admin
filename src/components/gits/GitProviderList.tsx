@@ -1,12 +1,14 @@
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { Button, Space, Table } from "antd";
+import { useSize } from "ahooks";
+import { Button, notification, Popconfirm, Space, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
-import { useGitProviderListApi } from "@/api/api-git-provider";
+import { useGitProviderDeleteApi, useGitProviderListApi } from "@/api/api-git-provider";
 import type { IGitProvider, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
+import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { AppConfig } from "@/utils/AppConfig";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
@@ -15,16 +17,13 @@ const relativeTime = require("dayjs/plugin/relativeTime");
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
-interface DataType {
-	key: React.Key;
-	name: string;
-	git: string;
-	version: string;
-	username: string;
-	createdAt: string;
+interface DataType extends IGitProvider {
+	key?: React.Key;
+	id?: string;
+	actions?: any;
 }
 
-const columns: ColumnsType<IGitProvider> = [
+const columns: ColumnsType<DataType> = [
 	{
 		title: "Name",
 		width: 70,
@@ -46,9 +45,9 @@ const columns: ColumnsType<IGitProvider> = [
 		width: 50,
 		dataIndex: "gitWorkspace",
 		key: "gitWorkspace",
-		render: (value) => (
-			<Button type="link" style={{ padding: 0 }}>
-				{value.id}
+		render: (value, record) => (
+			<Button type="link" style={{ padding: 0 }} href={record.repo?.url} target="_blank">
+				{value}
 			</Button>
 		),
 		filterSearch: true,
@@ -78,50 +77,81 @@ const columns: ColumnsType<IGitProvider> = [
 		key: "action",
 		width: 50,
 		fixed: "right",
-		render: () => (
-			<Space.Compact>
-				<Button icon={<EditOutlined />}></Button>
-				<Button icon={<DeleteOutlined />}></Button>
-			</Space.Compact>
-		),
+		render: (value, record) => record.actions,
 	},
 ];
 
-// const data: DataType[] = [];
-// for (let i = 0; i < 100; i++) {
-// 	data.push({
-// 		key: i,
-// 		name: `Framework #${i}`,
-// 		git: `Github`,
-// 		version: "main",
-// 		username: `goon`,
-// 		createdAt: dayjs().format("LLL"),
-// 	});
-// }
 const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const GitProviderList = () => {
 	const [page, setPage] = useState(1);
-	const { data } = useGitProviderListApi({ populate: "owner", pagination: { page, size: pageSize } });
+
+	const { data, status } = useGitProviderListApi({
+		filter: { verified: true },
+		populate: "owner",
+		pagination: { page, size: pageSize },
+	});
+
 	const { list: gitProviders, pagination } = data || {};
-	const { total_pages } = pagination || {};
-	console.log("gitProviders :>> ", gitProviders);
+	const { total_items } = pagination || {};
+	// console.log("gitProviders :>> ", gitProviders);
+
+	const [deleteApi] = useGitProviderDeleteApi();
+
+	const [query, { setQuery }] = useRouterQuery();
+
+	const deleteItem = async (id: string) => {
+		const res = await deleteApi({ _id: id });
+		if (res?.status) notification.success({ message: `Item deleted successfully.` });
+	};
+
+	const displayedData =
+		gitProviders?.map((gitProvider) => {
+			return {
+				...gitProvider,
+				actions: (
+					<Space.Compact>
+						<Button
+							icon={<EditOutlined />}
+							onClick={() => setQuery({ lv1: "edit", type: "git-provider", git_provider_slug: gitProvider.slug })}
+						></Button>
+						<Popconfirm
+							title="Are you sure to delete this git provider?"
+							description={<span className="text-red-500">Caution: this is permanent and cannot be rolled back.</span>}
+							onConfirm={() => deleteItem(gitProvider._id as string)}
+							okText="Yes"
+							cancelText="No"
+						>
+							<Button icon={<DeleteOutlined />}></Button>
+						</Popconfirm>
+					</Space.Compact>
+				),
+			} as DataType;
+		}) || [];
 
 	const onTableChange = (_pagination: TablePaginationConfig) => {
 		const { current } = _pagination;
 		if (current) setPage(current);
 	};
 
+	const ref = useRef(null);
+	const size = useSize(ref);
+
 	return (
-		<div>
-			<Table
-				columns={columns}
-				dataSource={gitProviders || []}
-				scroll={{ x: 1200 }}
-				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize, total: total_pages }}
-				onChange={onTableChange}
-			/>
-		</div>
+		<>
+			{/* Page title & desc here */}
+			<div className="h-full flex-auto overflow-hidden" ref={ref}>
+				<Table
+					sticky
+					size="small"
+					loading={status === "loading"}
+					columns={columns}
+					dataSource={displayedData}
+					scroll={{ x: 1200, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+					pagination={{ pageSize, total: total_items, position: ["bottomCenter"] }}
+					onChange={onTableChange}
+				/>
+			</div>
+		</>
 	);
 };

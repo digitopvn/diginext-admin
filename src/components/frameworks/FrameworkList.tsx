@@ -1,12 +1,15 @@
-import { DeleteOutlined, EditOutlined, PauseCircleOutlined } from "@ant-design/icons";
-import { Button, Space, Table } from "antd";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { useSize } from "ahooks";
+import { Button, notification, Popconfirm, Space, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
-import { useFrameworkListApi } from "@/api/api-framework";
+import { useFrameworkDeleteApi, useFrameworkListApi } from "@/api/api-framework";
 import type { IFramework, IGitProvider, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
+import { PageTitle } from "@/commons/PageTitle";
+import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { AppConfig } from "@/utils/AppConfig";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
@@ -15,16 +18,13 @@ const relativeTime = require("dayjs/plugin/relativeTime");
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
-interface DataType {
-	key: React.Key;
-	name: string;
-	git: string;
-	version: string;
-	username: string;
-	createdAt: string;
+interface DataType extends IFramework {
+	key?: React.Key;
+	id?: string;
+	actions?: any;
 }
 
-const columns: ColumnsType<IFramework> = [
+const columns: ColumnsType<DataType> = [
 	{
 		title: "Name",
 		width: 70,
@@ -33,7 +33,7 @@ const columns: ColumnsType<IFramework> = [
 		fixed: "left",
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => record.name.indexOf(value.toString()) > -1,
+		onFilter: (value, record) => (record.name ? record.name.indexOf(value.toString()) > -1 : true),
 	},
 	{
 		title: "Git",
@@ -41,9 +41,17 @@ const columns: ColumnsType<IFramework> = [
 		dataIndex: "git",
 		key: "git",
 		render: (value, record) => (
-			<Button type="link" style={{ padding: 0 }}>
-				{record.git?.name}
-			</Button>
+			<>
+				{record.git?.name ? (
+					<Button type="link" style={{ padding: 0 }}>
+						{record.git?.name}
+					</Button>
+				) : (
+					<Button type="link" style={{ padding: 0 }}>
+						{record.gitProvider}
+					</Button>
+				)}
+			</>
 		),
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
@@ -78,13 +86,7 @@ const columns: ColumnsType<IFramework> = [
 		key: "action",
 		width: 50,
 		fixed: "right",
-		render: () => (
-			<Space.Compact>
-				<Button icon={<EditOutlined />}></Button>
-				<Button icon={<DeleteOutlined />}></Button>
-				<Button icon={<PauseCircleOutlined />}></Button>
-			</Space.Compact>
-		),
+		render: (value, record) => record.actions,
 	},
 ];
 
@@ -103,25 +105,84 @@ const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const FrameworkList = () => {
 	const [page, setPage] = useState(1);
-	const { data } = useFrameworkListApi({ populate: "git,owner", pagination: { page, size: pageSize } });
+	const { data, status } = useFrameworkListApi({ populate: "git,owner", pagination: { page, size: pageSize } });
 	const { list: frameworks, pagination } = data || {};
-	const { total_pages } = pagination || {};
+	const { total_items } = pagination || {};
 	console.log("frameworks :>> ", frameworks);
+
+	const [deleteApi] = useFrameworkDeleteApi();
+
+	const [query, { setQuery }] = useRouterQuery();
+
+	const deleteItem = async (id: string) => {
+		const res = await deleteApi({ _id: id });
+		// console.log("deleteItem :>> ", res);
+		if (res?.status) notification.success({ message: `Item deleted successfully.` });
+	};
+
+	const displayedData =
+		frameworks?.map((framework) => {
+			return {
+				...framework,
+				actions: (
+					<Space.Compact>
+						<Button
+							icon={<EditOutlined />}
+							onClick={() => setQuery({ lv1: "edit", type: "framework", framework_slug: framework.slug })}
+						></Button>
+						<Popconfirm
+							title="Are you sure to delete this framework?"
+							description={<span className="text-red-500">Caution: this is permanent and cannot be rolled back.</span>}
+							onConfirm={() => deleteItem(framework._id as string)}
+							okText="Yes"
+							cancelText="No"
+						>
+							<Button icon={<DeleteOutlined />}></Button>
+						</Popconfirm>
+					</Space.Compact>
+				),
+			} as DataType;
+		}) || [];
 
 	const onTableChange = (_pagination: TablePaginationConfig) => {
 		const { current } = _pagination;
 		if (current) setPage(current);
 	};
+
+	const ref = useRef(null);
+	const size = useSize(ref);
+
 	return (
-		<div>
-			<Table
-				columns={columns}
-				dataSource={frameworks}
-				scroll={{ x: 1200 }}
-				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize, total: total_pages }}
-				onChange={onTableChange}
+		<>
+			{/* Page title & desc here */}
+			<PageTitle
+				title="Frameworks"
+				breadcrumbs={[{ name: "Workspace" }]}
+				actions={[
+					<Button
+						key="workspace-setting-btn"
+						type="default"
+						icon={<PlusOutlined className="align-middle" />}
+						onClick={() => setQuery({ lv1: "new", type: "framework" })}
+					>
+						New
+					</Button>,
+				]}
 			/>
-		</div>
+
+			{/* Page Content */}
+			<div className="h-full flex-auto overflow-hidden" ref={ref}>
+				<Table
+					size="small"
+					loading={status === "loading"}
+					columns={columns}
+					dataSource={displayedData}
+					scroll={{ x: 1200, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+					sticky
+					pagination={{ pageSize, total: total_items, position: ["bottomCenter"] }}
+					onChange={onTableChange}
+				/>
+			</div>
+		</>
 	);
 };

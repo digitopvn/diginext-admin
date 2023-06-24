@@ -10,8 +10,9 @@ import { useEffect } from "react";
 
 import CenterContainer from "@/commons/CenterContainer";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
-import { useWorkspace } from "@/providers/useWorkspace";
 import { Config } from "@/utils/AppConfig";
+
+import type { IUser } from "./api-types";
 
 export const login = (params: { redirectURL?: string } = {}) => {
 	const redirectURL = params.redirectURL ?? Config.NEXT_PUBLIC_API_BASE_URL;
@@ -21,20 +22,26 @@ export const login = (params: { redirectURL?: string } = {}) => {
 export const useAuthApi = (props: { access_token?: string } = {}) => {
 	const { access_token = getCookie("x-auth-cookie") } = props;
 	const router = useRouter();
-	const [query] = useRouterQuery();
 
 	return useQuery({
-		staleTime: 2 * 60 * 1000, // 2 minutes
+		staleTime: 5 * 60 * 1000, // 5 minutes
+		cacheTime: 60 * 1000,
 		queryKey: ["auth"],
+		// enabled: typeof access_token !== "undefined",
 		queryFn: async () => {
+			const urlParams = new URLSearchParams(router.asPath.split("?")[1]);
+			const query = Object.fromEntries(urlParams);
 			const { access_token: queryToken } = query;
 			const token = access_token ?? getCookie("x-auth-cookie") ?? queryToken;
 
 			const headers = token ? { Authorization: `Bearer ${token}` } : {};
-			const { data } = await axios.get(`${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile`, { headers });
-
-			console.log(`${router.asPath} > queryFn :>> `, { data });
-			return data;
+			try {
+				const { data } = await axios.get(`${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile`, { headers });
+				return data;
+			} catch (e) {
+				console.error("useAuthApi >", e);
+				return undefined;
+			}
 		},
 	});
 };
@@ -50,8 +57,10 @@ export const useAuth = (props: { redirectUrl?: string } = {}) => {
 	// const [user, setUser] = useState<IUser>();
 	// const [isSettled, setIsSettled] = useState<boolean>(false);
 
-	const { data: response, isError, isFetched, isLoading, isSuccess } = useAuthApi({ access_token: access_token as string });
-	const { status, data: user } = response || {};
+	const authActions = useAuthApi({ access_token: access_token as string });
+	const { data: response, isError, isFetched, isLoading, isSuccess, refetch } = authActions;
+	const { status, data } = response || {};
+	const user = response?.data as IUser;
 	const queryClient = useQueryClient();
 
 	const reload = async () => {
@@ -60,19 +69,20 @@ export const useAuth = (props: { redirectUrl?: string } = {}) => {
 
 	useEffect(() => {
 		if (typeof status === "undefined") return;
+		if (isFetched === false) return;
 
 		setTimeout(() => {
 			const cookieToken = getCookie("x-auth-cookie");
 
-			if (!cookieToken) {
-				router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
-			} else {
-				reload();
-			}
+			if (!cookieToken || !status) return router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
+
+			if (!user.activeWorkspace) return router.push(`/workspace/select`);
+
+			return reload();
 		}, 200);
 	}, [status]);
 
-	return [user, { reload, isError, isLoading, isFetched, isSuccess, status }];
+	return [user, authActions] as [IUser, typeof authActions];
 };
 
 export const AuthPage = (props: { children?: ReactNode } = {}) => {
@@ -84,7 +94,14 @@ export const AuthPage = (props: { children?: ReactNode } = {}) => {
 
 	const { workspaces = [] } = user || {};
 
-	const workspace = useWorkspace({ name: workspaces[0]?.slug });
+	// const workspaceSlug = workspaces[0]?.slug;
+	// const workspace = useWorkspace({ name: workspaceSlug });
+	const workspace = user?.activeWorkspace;
+
+	// useEffect(() => {
+	// 	if (!workspaces) return;
+	// 	if (workspaces.length === 0) router.push(`/workspace/setup`);
+	// }, [workspaces]);
 
 	if (isLoading)
 		return (

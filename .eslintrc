@@ -45,6 +45,7 @@
 				"no-plusplus": "off",
 				"no-underscore-dangle": "off",
 				"no-console": "off",
+				"no-control-regex": "off",
 				// react
 				"react/destructuring-assignment": "off", // Vscode doesn't support automatically destructuring, it's a pain to add a new variable
 				"react/require-default-props": "off", // Allow non-defined react props as undefined
@@ -53,7 +54,7 @@
 				"react/jsx-filename-extension": "off", //
 				"react/no-unescaped-entities": "off",
 				"react/display-name": "off",
-				// typescrypt
+				// typescript
 				"@typescript-eslint/naming-convention": "off",
 				"@typescript-eslint/comma-dangle": "off", // Avoid conflict rule between Eslint and Prettier
 				"@typescript-eslint/consistent-type-imports": "error", // Ensure `import type` is used when it's necessary

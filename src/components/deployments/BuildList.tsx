@@ -1,24 +1,30 @@
 import {
-	BugOutlined,
 	CheckCircleOutlined,
+	ClockCircleOutlined,
 	CloseCircleOutlined,
+	CodeOutlined,
 	EyeOutlined,
 	InfoCircleOutlined,
 	LoadingOutlined,
 	RocketOutlined,
+	StopOutlined,
 } from "@ant-design/icons";
+import { useSize } from "ahooks";
 import { App, Button, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { HumanizeDuration, HumanizeDurationLanguage } from "humanize-duration-ts";
 import { isEmpty } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
-import { useBuildListApi } from "@/api/api-build";
+import { useBuildListApi, useBuildStopApi } from "@/api/api-build";
 import { useCreateReleaseFromBuildApi } from "@/api/api-release";
 import type { IBuild, IRelease, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
+import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
@@ -26,6 +32,9 @@ const relativeTime = require("dayjs/plugin/relativeTime");
 
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
+
+const humanrizerLang = new HumanizeDurationLanguage();
+const humanrizer = new HumanizeDuration(humanrizerLang);
 
 const { useApp } = App;
 
@@ -48,13 +57,34 @@ const columns: ColumnsType<IBuild & DataType> = [
 		render: (value, record) => (
 			<>
 				<p>
-					<Link href={{ pathname: `/build/[...slugs]`, query: { slugs: [record.slug as string] } }}>
+					<Link href={`/build/logs?build_slug=${record.slug}`}>
 						<strong>{value}</strong>
 					</Link>
 				</p>
-				<p>
-					Created <DateDisplay date={record.createdAt} />
-				</p>
+				<ul className="ml-4 list-disc">
+					<li>
+						Project: <Tag color="blue">{record.projectSlug}</Tag>
+					</li>
+					<li>
+						App: <Tag color="cyan">{record.appSlug}</Tag>
+					</li>
+					{record.duration ? (
+						<li>
+							Duration:{" "}
+							<Tag key="duration" color="gold" icon={<ClockCircleOutlined />}>
+								{humanrizer.humanize(record.duration || 0, { round: true })}
+							</Tag>
+						</li>
+					) : (
+						<></>
+					)}
+					<li>
+						Created{" "}
+						<strong>
+							<DateDisplay date={record.createdAt} />
+						</strong>
+					</li>
+				</ul>
 			</>
 		),
 	},
@@ -138,17 +168,24 @@ export const BuildList = () => {
 	const filter: any = {};
 	if (project) filter.projectSlug = project;
 	if (app) filter.appSlug = app;
-	if (env) filter.env = env;
+	// if (env) filter.env = env;
 
 	// const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 	const [page, setPage] = useState(1);
 
-	const { data } = useBuildListApi({ populate: "owner", pagination: { page, size: pageSize }, filter });
+	const [stopBuildApi, stopBuildStatus] = useBuildStopApi();
+
+	const { data, status } = useBuildListApi({ sort: "-createdAt", populate: "owner", pagination: { page, size: pageSize }, filter });
 	const { list: builds, pagination } = data || {};
-	const { total_pages } = pagination || {};
+	const { total_items } = pagination || {};
 
 	const openBuildLogs = (slug?: string) => {
-		setQuery({ lv2: "build_logs", build_slug: slug });
+		const _query: any = { build_slug: slug };
+
+		if (!query.lv1) _query.lv1 = "build_logs";
+		else _query.lv2 = "build_logs";
+
+		setQuery(_query);
 	};
 
 	// release
@@ -164,17 +201,21 @@ export const BuildList = () => {
 		}
 
 		try {
-			const release = await releaseCreateFromBuildApi({ build: buildId } as IRelease);
+			const createRes = await releaseCreateFromBuildApi({ build: buildId, env } as IRelease);
 
-			root.notification.success({
-				message: `Congrats, the release has been created successfully!`,
-				description: (
-					<>
-						You can now preview it on <a href={`https://${release?.prereleaseUrl}`}>PRE-RELEASE</a> endpoint.
-					</>
-				),
-				placement: "top",
-			});
+			if (createRes?.status) {
+				const release = createRes?.data;
+				root.notification.success({
+					message: `Congrats, the release has been created successfully!`,
+					description: (
+						<>
+							You can now preview it on <a href={`https://${release?.prereleaseUrl}`}>PRE-RELEASE</a> endpoint.
+						</>
+					),
+					placement: "top",
+				});
+				return;
+			}
 		} catch (e) {
 			console.error(`Could not process releasing this build:`, e);
 
@@ -186,20 +227,38 @@ export const BuildList = () => {
 		}
 	};
 
+	const stopBuild = async (slug?: string) => {
+		const result = await stopBuildApi({ slug });
+		console.log("[BuildList] stopBuild :>> ", result);
+
+		if (!result?.status) {
+			root.notification.error({
+				message: `Failed to proceed.`,
+				description: `Could not stop this build due to server issue. Please try again later.`,
+				placement: "top",
+			});
+		}
+	};
+
 	const displayedBuilds = builds?.map((build) => {
 		return {
 			id: build._id,
 			...build,
 			action: (
 				<Space.Compact>
-					<Tooltip title="View log history">
-						<Button icon={<BugOutlined />} onClick={() => openBuildLogs(build.slug)} />
+					{build.status === "building" && (
+						<Tooltip title="Stop building">
+							<Button danger icon={<StopOutlined />} onClick={() => stopBuild(build?.slug)} />
+						</Tooltip>
+					)}
+					<Tooltip title="View logs">
+						<Button icon={<CodeOutlined />} onClick={() => openBuildLogs(build.slug)} />
 					</Tooltip>
-					<Tooltip title="Go to image link">
+					<Tooltip title="Open image URL">
 						<Button icon={<EyeOutlined />} href={`https://${build.image}`} target="_blank" />
 					</Tooltip>
 					{build.env === "prod" && (
-						<Tooltip title="Release this build">
+						<Tooltip title="Create a release from this build">
 							<Button icon={<RocketOutlined />} onClick={() => releaseBuild(build._id?.toString())} />
 						</Tooltip>
 					)}
@@ -216,16 +275,26 @@ export const BuildList = () => {
 		setPage(current ?? 1);
 	};
 
+	const ref = useRef(null);
+	const size = useSize(ref);
+
 	return (
-		<div>
-			<Table
-				columns={columns}
-				dataSource={displayedBuilds}
-				scroll={{ x: 600 }}
-				sticky={{ offsetHeader: 0 }}
-				pagination={{ current: page, pageSize, total: total_pages }}
-				onChange={onTableChange}
-			/>
-		</div>
+		<>
+			{/* Page title & desc here */}
+			<PageTitle title={`Builds (${total_items ?? "-"})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
+			{/* Page Content */}
+			<div className="h-full flex-auto overflow-hidden" ref={ref}>
+				<Table
+					size="small"
+					loading={status === "loading"}
+					columns={columns}
+					dataSource={displayedBuilds}
+					scroll={{ x: 550, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+					sticky={{ offsetHeader: 0 }}
+					pagination={{ current: page, pageSize, total: total_items, position: ["bottomCenter"] }}
+					onChange={onTableChange}
+				/>
+			</div>
+		</>
 	);
 };

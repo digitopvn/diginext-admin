@@ -5,6 +5,7 @@
 /.pnp
 .pnp.js
 .yarn/
+pnpm-lock.yaml
 
 # testing
 /coverage
@@ -41,6 +42,7 @@ yarn-error.log*
 
 # dotenv local files
 .env*
+!.env.example
 
 # local folder
 local

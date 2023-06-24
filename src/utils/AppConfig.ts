@@ -16,7 +16,7 @@ export const AppConfig = {
 	description: "Welcome to an Admin Panel of Diginext.",
 	locale: "en",
 	tableConfig: {
-		defaultPageSize: 20,
+		defaultPageSize: 50,
 	},
 };
 
@@ -25,6 +25,10 @@ export class Config {
 		const env = { ...process.env };
 		return env[key] ?? defaultValue;
 	};
+
+	static get DX_SITE() {
+		return this.NEXT_PUBLIC_ENV === "development" ? "http://localhost:4000" : "https://diginext.site";
+	}
 
 	static get ENV() {
 		return this.grab("NODE_ENV", "development").toUpperCase();
@@ -48,7 +52,14 @@ export class Config {
 	}
 
 	static get NEXT_PUBLIC_API_BASE_URL() {
-		return trimEnd(process.env.NEXT_PUBLIC_API_BASE_URL || "", "/") || "/";
+		if (typeof window !== "undefined") {
+			if (window.location.origin.indexOf("localhost") > -1) {
+				return "http://localhost:6969";
+				// return "https://topgroup.diginext.site";
+			}
+			return window.location.origin;
+		}
+		return "/";
 	}
 
 	static get NEXT_PUBLIC_DOMAIN() {
@@ -56,7 +67,7 @@ export class Config {
 	}
 
 	static get NEXT_PUBLIC_BASE_URL() {
-		return trimEnd(process.env.NEXT_PUBLIC_BASE_URL || "", "/") || "/";
+		return typeof window !== "undefined" ? window.location.origin : trimEnd(process.env.NEXT_PUBLIC_BASE_URL || "", "/") || "/";
 	}
 
 	static get DISABLE_INPECT_MEMORY() {

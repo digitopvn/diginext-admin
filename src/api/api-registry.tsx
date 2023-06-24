@@ -1,20 +1,24 @@
-import { useCreateApi, useDeleteApi, useItemApi, useListApi, useUpdateApi } from "./api";
+import { useCreateApi, useDeleteApi, useItemApi, useItemSlugApi, useListApi, useUpdateApi } from "./api";
 import type { ApiOptions, IContainerRegistry } from "./api-types";
 
 export const useContainerRegistryListApi = (options?: ApiOptions) => {
-	return useListApi<IContainerRegistry>(["registries"], `/api/v1/registry`, options);
+	return useListApi<IContainerRegistry>(["registries", "list"], `/api/v1/registry`, options);
 };
 
-export const useContainerRegistryApi = (id: string) => {
-	return useItemApi<IContainerRegistry>(["registries"], `/api/v1/registry`, id);
+export const useContainerRegistryApi = (id: string, options?: ApiOptions) => {
+	return useItemApi<IContainerRegistry>(["registries", id], `/api/v1/registry`, id, options);
 };
 
-export const useContainerRegistryCreateApi = () => {
-	return useCreateApi<IContainerRegistry>(["registries"], `/api/v1/registry`);
+export const useContainerRegistrySlugApi = (slug: string, options?: ApiOptions) => {
+	return useItemSlugApi<IContainerRegistry>(["registries", slug], `/api/v1/registry`, slug, options);
 };
 
-export const useContainerRegistryUpdateApi = () => {
-	return useUpdateApi<IContainerRegistry>(["registries"], `/api/v1/registry`);
+export const useContainerRegistryCreateApi = (options?: ApiOptions) => {
+	return useCreateApi<IContainerRegistry>(["registries"], `/api/v1/registry`, options);
+};
+
+export const useContainerRegistryUpdateApi = (options?: ApiOptions) => {
+	return useUpdateApi<IContainerRegistry>(["registries"], `/api/v1/registry`, options);
 };
 
 export const useContainerRegistryDeleteApi = () => {

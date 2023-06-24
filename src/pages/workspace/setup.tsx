@@ -15,17 +15,18 @@ import { Config, isDev } from "@/utils/AppConfig";
 const WorkspaceSetupPage = () => {
 	const [wsName, setWsName] = useState("");
 	const onChange = (e: SyntheticEvent) => setWsName((e.currentTarget as any).value);
-	const [user, reload] = useAuth();
+	const [user, { refetch }] = useAuth();
 
 	const [createWorkspace, status] = useWorkspaceCreateApi();
 
 	const onFinish = async (values: any) => {
 		console.log("Submit:", values);
 		const result = await createWorkspace({ ...values, owner: user?._id });
+		const workspace = result?.data;
 
-		await reload();
+		await refetch();
 
-		Router.push(isDev() ? `${Config.NEXT_PUBLIC_BASE_URL}` : `https://${result?.slug}.${Config.NEXT_PUBLIC_DOMAIN}`);
+		Router.push(isDev() ? `${Config.NEXT_PUBLIC_BASE_URL}` : `https://${workspace?.slug}.${Config.NEXT_PUBLIC_DOMAIN}`);
 	};
 
 	const onFinishFailed = (errorInfo: any) => {
@@ -43,7 +44,7 @@ const WorkspaceSetupPage = () => {
 					<Title value="Set up your first workspace!" />
 					<p>It's great to see you here, now create your first workspace to get started.</p>
 
-					<Form name="basic" initialValues={{ remember: true }} onFinish={onFinish} onFinishFailed={onFinishFailed} autoComplete="off">
+					<Form name="basic" onFinish={onFinish} onFinishFailed={onFinishFailed} autoComplete="off">
 						<Form.Item name="name" rules={[{ required: true, message: "Please input your workspace name!" }]}>
 							<Input className="text-center text-lg" onChange={onChange} />
 						</Form.Item>

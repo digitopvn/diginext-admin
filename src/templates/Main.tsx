@@ -2,6 +2,7 @@ import { App, ConfigProvider, theme } from "antd";
 import type { ReactNode } from "react";
 import { useDarkMode } from "usehooks-ts";
 
+import GtagScript from "@/commons/measure/GtagScript";
 import { SiteLayout } from "@/layouts/SiteLayout";
 import Compose from "@/providers/Compose";
 import DrawerProvider from "@/providers/DrawerProvider";
@@ -12,8 +13,6 @@ type IMainProps = {
 	children?: ReactNode;
 	useSidebar?: boolean;
 };
-
-// const SiteLayout = dynamic(() => import("../layouts/SiteLayout").then((mod) => mod.SiteLayout), { ssr: false });
 
 const Main = (props: IMainProps) => {
 	const { isDarkMode } = useDarkMode();
@@ -26,13 +25,16 @@ const Main = (props: IMainProps) => {
 				algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
 			}}
 		>
-			<Compose components={[LayoutProvider, DrawerProvider]}>
-				<App>
+			<App>
+				<Compose components={[LayoutProvider, DrawerProvider]}>
 					<SiteLayout meta={props.meta} useSidebar={useSidebar}>
 						{props.children}
 					</SiteLayout>
-				</App>
-			</Compose>
+				</Compose>
+			</App>
+
+			{/* Tracking Code */}
+			<GtagScript gaIds={["G-QC4124805Q"]} />
 		</ConfigProvider>
 	);
 };
