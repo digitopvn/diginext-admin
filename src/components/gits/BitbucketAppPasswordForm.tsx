@@ -15,7 +15,7 @@ const BitbucketAppPasswordForm = (props: { next?: (org: string) => void }) => {
 			bitbucket_oauth: values,
 		});
 
-		if (gitProvider && next && gitProvider.data.slug) next(gitProvider.data.slug);
+		if (gitProvider && next && gitProvider.data?.slug) next(gitProvider.data.slug);
 	};
 
 	const onFinishFailed = (errorInfo: any) => {

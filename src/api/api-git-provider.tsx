@@ -38,7 +38,7 @@ export const useGitOrgListApi = (options?: ApiOptions) => {
 };
 
 export const useGitOrgCreateApi = () => {
-	return useCreateApi<GitOrg>(["git-orgs", "list"], `/api/v1/git/orgs`);
+	return useCreateApi<GitOrg>(["git-orgs"], `/api/v1/git/orgs`);
 };
 
 export const useGitOrgRepoListApi = (options?: ApiOptions) => {
@@ -46,5 +46,5 @@ export const useGitOrgRepoListApi = (options?: ApiOptions) => {
 };
 
 export const useGitOrgRepoCreateApi = () => {
-	return useCreateApi<GitRepository>(["git-orgs-repos", "list"], `/api/v1/git/orgs/repos`);
+	return useCreateApi<GitRepository>(["git-orgs-repos"], `/api/v1/git/orgs/repos`);
 };

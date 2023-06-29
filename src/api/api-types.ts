@@ -484,6 +484,7 @@ export interface GitOrg {
 	name: string;
 	description: string;
 	url: string;
+	is_org: boolean;
 }
 
 export interface GitRepository {
@@ -568,6 +569,12 @@ export interface IGitProvider extends IBase {
 	 * @memberof IGitProvider
 	 */
 	type?: GitProviderType;
+
+	/**
+	 * - `TRUE` if the git provider which connected by "Administrator"
+	 * - `FALSE` if it was connected by workspace's members and won't be displayed on the dashboard.
+	 */
+	isOrg?: boolean;
 
 	/**
 	 * Bitbucket OAuth Information

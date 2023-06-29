@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { useCloudDatabaseCreateApi, useCloudDatabaseSlugApi, useCloudDatabaseUpdateApi } from "@/api/api-cloud-database";
 import type { CloudDatabaseType } from "@/api/api-types";
-import { type ICluster as ICloudDatabase, cloudDatabaseList } from "@/api/api-types";
+import { type ICloudDatabase, cloudDatabaseList } from "@/api/api-types";
 import SmartForm from "@/commons/smart-form/SmartForm";
 import type { SmartFormElementProps } from "@/commons/smart-form/SmartFormTypes";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -12,18 +12,14 @@ type DatabaseNewEditProps = { data?: ICloudDatabase; isNew?: boolean };
 const DatabaseNewEdit = (props: DatabaseNewEditProps = {}) => {
 	const [{ database }] = useRouterQuery();
 
-	// clusters
+	// APIs
 	const useSlugApi = useCloudDatabaseSlugApi(database, { populate: "owner" });
 	const { data: db } = useSlugApi;
-
 	const useUpdateApi = useCloudDatabaseUpdateApi({ filter: { id: db?._id } });
 	const useCreateApi = useCloudDatabaseCreateApi();
-	// console.log("cluster :>> ", cluster);
 
 	// providers
-	// const { data: { list: providers = [] } = {} } = useCloudProviderListApi();
 	const [databaseType, setDatabaseType] = useState<CloudDatabaseType>();
-	// console.log("providers :>> ", providers);
 
 	const smartFormConfigs: SmartFormElementProps[] = [
 		{ type: "input", label: "Name", name: "name", placeholder: "Give your database a name" },

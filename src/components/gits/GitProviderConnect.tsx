@@ -70,29 +70,31 @@ export const BitbucketConnectModal = () => {
 						{orgs.status === "success" && (
 							<Select
 								style={{ display: "block" }}
-								value={orgs.data?.list[0]?.name}
-								onSelect={(org) => {
-									console.log("org :>> ", org);
+								// value={orgs.data?.list[0]?.name}
+								onSelect={(label, option) => {
+									const org = orgs.data?.list.find((o) => o.id === option.value);
+									// console.log("org :>> ", org);
 									// update git provider
-									updateApi({ gitWorkspace: org })?.then((res) => {
-										// console.log("res :>> ", res);
-										if (isEmpty(res.data)) return;
+									updateApi({ name: `${org?.name.toUpperCase()} Github`, gitWorkspace: org?.name, isOrg: org?.is_org })?.then(
+										(res) => {
+											// console.log("res :>> ", res);
+											if (isEmpty(res.data)) return;
 
-										const gitProvider = res.data[0] || res.data;
-										console.log("gitProvider :>> ", gitProvider);
+											const gitProvider = res.data[0] || res.data;
+											console.log("gitProvider :>> ", gitProvider);
+											if (!gitProvider) {
+												notification.error({ message: `Oops...`, description: `Can't update git provider.` });
+												return;
+											}
 
-										if (!gitProvider) {
-											notification.error({ message: `Oops...`, description: `Can't update git provider.` });
-											return;
+											// go to finish step
+											setCurrent(2);
 										}
-
-										// go to finish step
-										setCurrent(2);
-									});
+									);
 								}}
 								options={
 									orgs.data?.list.map((_org) => {
-										return { value: _org.name, label: _org.name };
+										return { value: _org.id, label: _org.name };
 									}) || []
 								}
 							/>
@@ -193,33 +195,40 @@ export const GithubConnectModal = () => {
 						Select github organization
 					</Typography.Title>
 					<Card className="org-select">
-						<Select
-							style={{ display: "block" }}
-							value={orgs.data?.list[0]?.name}
-							onSelect={(org) => {
-								console.log("org :>> ", org);
-								// update git provider
-								updateApi({ gitWorkspace: org })?.then((res) => {
-									// console.log("res :>> ", res);
-									if (isEmpty(res.data)) return;
+						{orgs.status === "loading" && <LoadingOutlined />}
+						{orgs.status === "error" && <Alert type="error" message={<>{orgs.data?.messages || "Authenticated failed."}</>} />}
+						{orgs.status === "success" && (
+							<Select
+								style={{ display: "block" }}
+								// value={orgs.data?.list[0]?.name}
+								onSelect={(label, option) => {
+									const org = orgs.data?.list.find((o) => o.id === option.value);
+									// console.log("org :>> ", org);
+									// update git provider
+									updateApi({ name: `${org?.name.toUpperCase()} Github`, gitWorkspace: org?.name, isOrg: org?.is_org })?.then(
+										(res) => {
+											// console.log("res :>> ", res);
+											if (isEmpty(res.data)) return;
 
-									const gitProvider = res.data[0] || res.data;
-									console.log("gitProvider :>> ", gitProvider);
-									if (!gitProvider) {
-										notification.error({ message: `Oops...`, description: `Can't update git provider.` });
-										return;
-									}
+											const gitProvider = res.data[0] || res.data;
+											console.log("gitProvider :>> ", gitProvider);
+											if (!gitProvider) {
+												notification.error({ message: `Oops...`, description: `Can't update git provider.` });
+												return;
+											}
 
-									// go to finish step
-									setCurrent(2);
-								});
-							}}
-							options={
-								orgs.data?.list.map((_org) => {
-									return { value: _org.name, label: _org.name };
-								}) || []
-							}
-						/>
+											// go to finish step
+											setCurrent(2);
+										}
+									);
+								}}
+								options={
+									orgs.data?.list.map((_org) => {
+										return { value: _org.id, label: _org.name };
+									}) || []
+								}
+							/>
+						)}
 					</Card>
 				</>
 			)}

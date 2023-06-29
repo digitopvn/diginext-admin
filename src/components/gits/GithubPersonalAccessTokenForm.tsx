@@ -19,7 +19,7 @@ const GithubPersonalAccessTokenForm = (props: { next?: (org: string) => void }) 
 			},
 		});
 
-		if (gitProvider && next && gitProvider.data.slug) next(gitProvider.data.slug);
+		if (gitProvider && next && gitProvider.data?.slug) next(gitProvider.data.slug);
 	};
 
 	const onFinishFailed = (errorInfo: any) => {
