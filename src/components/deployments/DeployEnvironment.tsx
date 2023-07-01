@@ -15,7 +15,7 @@ const DeployEnvironment = () => {
 	const responsive = useResponsive();
 
 	const [sslIssuer, setSSLIssuer] = useState("");
-	console.log("sslIssuer :>> ", sslIssuer);
+	// console.log("sslIssuer :>> ", sslIssuer);
 	const { closeDrawer } = useDrawerProvider();
 
 	// clusters
@@ -28,7 +28,6 @@ const DeployEnvironment = () => {
 
 	const smartFormConfigs: SmartFormElementProps[] = [
 		// { type: "input", label: "Name", name: "name", placeholder: "Deploy environment name" },
-
 		{
 			type: "list_string",
 			label: "Domains",

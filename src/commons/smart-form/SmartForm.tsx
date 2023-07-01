@@ -3,7 +3,7 @@ import type { UseQueryResult } from "@tanstack/react-query";
 import { Alert, App, Button, Form, Popconfirm, Skeleton, Space, theme } from "antd";
 import _, { isEmpty } from "lodash";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { UseCreateApi, UseUpdateApi } from "@/api/api";
 import type { ApiResponse } from "@/api/api-types";
@@ -58,6 +58,11 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 
 	const { closeDrawer } = useDrawerProvider();
 
+	const [ready, setReady] = useState(false);
+	useEffect(() => {
+		if (status === "success") setReady(true);
+	}, [status]);
+
 	const onFinish = async (values: any) => {
 		console.log(isNew ? "[NEW]" : "[UPDATE]", "Submit:", values);
 		const postData = { ...values };
@@ -83,6 +88,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 			}
 		} else {
 			if (!updateApi) return;
+			if (!ready) return;
 			const statuses: Record<string, "error" | "idle" | "loading" | "success" | undefined> = {};
 			Object.entries(postData).forEach(([field, value]) => {
 				if (item && value !== (item as any)[field]) {
