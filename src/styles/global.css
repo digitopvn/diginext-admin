@@ -41,3 +41,13 @@
 a {
 	color: #1668dc;
 }
+
+/* Tailwind Plugin for correct full height on iOS */
+.full-height {
+	height: 100vh;
+}
+@supports (-webkit-touch-callout: none) {
+	.full-height {
+		height: -webkit-fill-available;
+	}
+}

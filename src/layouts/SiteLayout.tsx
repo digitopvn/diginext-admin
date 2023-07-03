@@ -1,5 +1,4 @@
 import { Layout, theme } from "antd";
-import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 
@@ -16,7 +15,6 @@ import EnvVarsNewEdit from "@/components/deployments/EnvVarsNewEdit";
 import { ReleaseList } from "@/components/deployments/ReleaseList";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useDrawerProvider } from "@/providers/DrawerProvider";
-import { useLayoutProvider } from "@/providers/LayoutProvider";
 
 type ISiteLayoutProps = {
 	meta: ReactNode;
@@ -27,10 +25,6 @@ type ISiteLayoutProps = {
 
 export const SiteLayout = (props: ISiteLayoutProps) => {
 	const { useSidebar } = props;
-	const router = useRouter();
-	const { sidebarCollapsed } = useLayoutProvider();
-	let marginLeft: string | number = "auto";
-	if (useSidebar) marginLeft = sidebarCollapsed ? 80 : 200;
 
 	// handling Drawers
 	const drawer = useDrawerProvider();
@@ -157,16 +151,16 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 	// }, [drawerVisibility?.lv1, drawerVisibility?.lv2]);
 
 	return (
-		<Layout hasSider className="h-screen">
+		<Layout hasSider className="full-height">
 			{/* Meta tags */}
 			{props.meta}
 
 			{/* Sidebar here */}
-			<div className="fixed z-[102] h-screen overflow-visible md:relative md:overflow-y-auto md:overflow-x-hidden">
+			<div className="full-height fixed z-[102] overflow-visible md:relative md:overflow-y-auto md:overflow-x-hidden">
 				{useSidebar && <MenuSider />}
 			</div>
 
-			<Layout className="h-screen overflow-auto transition-all">
+			<Layout className="full-height overflow-auto transition-all">
 				{/* Site Header */}
 				{useSidebar && <SiteHeader />}
 

@@ -383,6 +383,11 @@ export interface IUser extends IGeneral {
 	 * Active workspace ID which the user is logging into
 	 */
 	activeWorkspace?: IWorkspace;
+
+	/**
+	 * Active role ID in current workspace
+	 */
+	activeRole?: IRole;
 }
 
 export interface IServiceAccount extends IUser {}

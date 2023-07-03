@@ -1,4 +1,4 @@
-import { LoadingOutlined } from "@ant-design/icons";
+import { LoadingOutlined, LogoutOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, Select, Typography } from "antd";
 import { useRouter } from "next/router";
 import type { SyntheticEvent } from "react";
@@ -39,7 +39,7 @@ const WorkspaceSetupPage = () => {
 	const [err, setErr] = useState("");
 
 	const onChange = (e: SyntheticEvent) => setWsName((e.currentTarget as any).value);
-	const [user, { refetch }] = useAuth();
+	const [user, { refetch, status: authStatus }] = useAuth();
 
 	const [createWorkspaceApi, createStatus] = useWorkspaceCreateApi();
 	const [joinWorkspaceApi] = useUserJoinWorkspaceApi();
@@ -87,48 +87,53 @@ const WorkspaceSetupPage = () => {
 	return (
 		<>
 			<Main useSidebar={false} meta={<Meta title="Select/Create a Workspace" description="Select or create your workspace." />}>
-				{/* Page title & desc here */}
+				{authStatus === "loading" && (
+					<CenterContainer className="text-center">
+						<DiginextLogo />
+						<LoadingOutlined />
+					</CenterContainer>
+				)}
 
-				{/* Page Content */}
-				<CenterContainer className="text-center">
-					<DiginextLogo />
+				{authStatus === "success" && user && (
+					<CenterContainer className="text-center">
+						<DiginextLogo />
 
-					{workspaces.length > 0 && (
-						<div>
-							<Title level={3}>Select a workspace:</Title>
-							<p>Choose a workspace which you want to interact with:</p>
-							<Form name="select">
-								<Form.Item name="workspace">
-									<Select
-										size="large"
-										value={`${workspaces[0]?.name} (${workspaces[0]?.slug})`}
-										onChange={onSelectWorkspace}
-										options={workspaces?.map((workspace) => {
-											return { label: `${workspace.name} (${workspace.slug})`, value: workspace._id };
-										})}
-									/>
-								</Form.Item>
-							</Form>
-						</div>
-					)}
-
-					{createStatus === "loading" && <LoadingOutlined />}
-					{createStatus !== "loading" && (
-						<div>
-							<Title level={3}>Create a new workspace:</Title>
-							<Form name="create" onFinish={createWorkspace} onFinishFailed={onFinishFailed} autoComplete="off">
-								<div className="flex gap-2">
-									<Form.Item name="public" valuePropName="checked">
-										<Checkbox>Public</Checkbox>
+						{workspaces.length > 0 && (
+							<div>
+								<Title level={3}>Select a workspace:</Title>
+								<p>Choose a workspace which you want to interact with:</p>
+								<Form name="select">
+									<Form.Item name="workspace">
+										<Select
+											size="large"
+											value={`${workspaces[0]?.name} (${workspaces[0]?.slug})`}
+											onChange={onSelectWorkspace}
+											options={workspaces?.map((workspace) => {
+												return { label: `${workspace.name} (${workspace.slug})`, value: workspace._id };
+											})}
+										/>
 									</Form.Item>
-									<Form.Item
-										name="name"
-										style={{ flex: "auto" }}
-										rules={[{ required: true, message: "Workspace name is required." }]}
-									>
-										<Input className="text-center text-lg" placeholder="Workspace name" onChange={onChange} />
-									</Form.Item>
-									{/* <Form.Item name="dx_key" style={{ flex: "auto" }} rules={[{ required: true, message: "Diginext Key is required." }]}>
+								</Form>
+							</div>
+						)}
+
+						{createStatus === "loading" && <LoadingOutlined />}
+						{createStatus !== "loading" && (
+							<div>
+								<Title level={3}>Create a new workspace:</Title>
+								<Form name="create" onFinish={createWorkspace} onFinishFailed={onFinishFailed} autoComplete="off">
+									<div className="flex gap-2">
+										<Form.Item name="public" valuePropName="checked">
+											<Checkbox>Public</Checkbox>
+										</Form.Item>
+										<Form.Item
+											name="name"
+											style={{ flex: "auto" }}
+											rules={[{ required: true, message: "Workspace name is required." }]}
+										>
+											<Input className="text-center text-lg" placeholder="Workspace name" onChange={onChange} />
+										</Form.Item>
+										{/* <Form.Item name="dx_key" style={{ flex: "auto" }} rules={[{ required: true, message: "Diginext Key is required." }]}>
 									<Input
 										className="text-center text-lg"
 										placeholder="Diginext KEY"
@@ -142,17 +147,21 @@ const WorkspaceSetupPage = () => {
 										}
 									/>
 								</Form.Item> */}
-									<Form.Item>
-										<Button type="primary" htmlType="submit" disabled={wsName === ""} className="h-[38px]">
-											GO!
-										</Button>
-									</Form.Item>
-								</div>
-								<Form.ErrorList className="text-red-400" errors={[err]} />
-							</Form>
-						</div>
-					)}
-				</CenterContainer>
+										<Form.Item>
+											<Button type="primary" htmlType="submit" disabled={wsName === ""} className="h-[38px]">
+												GO!
+											</Button>
+										</Form.Item>
+									</div>
+									<Form.ErrorList className="text-red-400" errors={[err]} />
+								</Form>
+								<Button href="/logout" shape="round" size="large" type="primary" icon={<LogoutOutlined />}>
+									Sign out
+								</Button>
+							</div>
+						)}
+					</CenterContainer>
+				)}
 			</Main>
 		</>
 	);
