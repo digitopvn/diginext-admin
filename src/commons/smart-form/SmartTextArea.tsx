@@ -42,7 +42,6 @@ const SmartTextArea = (props: SmartFormElementProps) => {
 
 	// update the value immediatly:
 	useEffect(() => {
-		// console.log("value :>> ", value);
 		form.setFieldValue(name, value);
 		setValue(value);
 	}, [value]);

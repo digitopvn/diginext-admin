@@ -1,11 +1,10 @@
 import { CheckOutlined, CloseOutlined, LoadingOutlined } from "@ant-design/icons";
 import { basicSetup } from "@uiw/codemirror-extensions-basic-setup";
 import { langs } from "@uiw/codemirror-extensions-langs";
-import { abcdef } from "@uiw/codemirror-themes-all";
 import CodeMirror from "@uiw/react-codemirror";
 import { Form, Space } from "antd";
 import React, { useEffect, useState } from "react";
-import { useDebounce } from "usehooks-ts";
+import { useDarkMode, useDebounce } from "usehooks-ts";
 
 import ManualSaveController from "./ManualSaveController";
 import type { SmartCodeEditorProps, SmartFormElementProps } from "./SmartFormTypes";
@@ -34,6 +33,8 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 	const [_value, setValue] = useState(value ?? defaultValue);
 	const debouncedValue = useDebounce(_value, 500);
 
+	const { isDarkMode } = useDarkMode();
+
 	// callbacks
 
 	const onChange = (editorValue: string) => {
@@ -45,7 +46,6 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 
 	// update the value immediatly:
 	useEffect(() => {
-		// console.log("value :>> ", value);
 		form.setFieldValue(name, value);
 		setValue(value || "");
 	}, [value]);
@@ -84,7 +84,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 			<Space direction="vertical" className="w-full">
 				<CodeMirror
 					height={height}
-					theme={abcdef}
+					theme={isDarkMode ? "dark" : "light"}
 					extensions={[...lang.map((_lang) => langs[_lang]()), basicSetup({})]}
 					onChange={onChange}
 					value={_value}
@@ -94,7 +94,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 				{postLabel}
 
 				{/* Display manual save controller if auto save is off */}
-				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
+				{!disabled && !autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
 			</Space>
 		</Form.Item>
 	);

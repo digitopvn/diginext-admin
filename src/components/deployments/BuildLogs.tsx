@@ -5,9 +5,8 @@ import parser from "html-react-parser";
 import { isEmpty } from "lodash";
 import React, { useEffect, useState } from "react";
 import sanitizeHtml from "sanitize-html";
-// eslint-disable-next-line import/no-extraneous-dependencies
-import isURL from "validator/lib/isURL";
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { useBuildSlugApi } from "@/api/api-build";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { Config } from "@/utils/AppConfig";
@@ -131,15 +130,15 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 
 	return (
 		<div style={{ color: colorText }}>
-			{status === "failed" && (
+			{status === "in_progress" && (
 				<h3 className="text-xl text-blue-600">
 					<LoadingOutlined /> Building...
 				</h3>
 			)}
 
-			{status === "failed" && <h2 className="text-xl text-red-600">Build lỗi rồi má ơi!</h2>}
+			{status === "failed" && <h2 className="text-xl text-red-600">Build failed.</h2>}
 
-			{status === "success" && <h2 className="text-xl text-green-600">Build thành công rồi, đỉnh quá idol ơi!</h2>}
+			{status === "success" && <h2 className="text-xl text-green-600">Congrats, your build process has been finished successfully!</h2>}
 
 			<Timeline
 				items={messages
@@ -153,11 +152,14 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 								children: <span className="text-red-600">{parser(`${message}`)}</span>,
 							};
 
-						if (msg.indexOf("http://") > -1 || msg.indexOf("https://")) {
+						if (msg.indexOf("http://") > -1 || msg.indexOf("https://") > -1) {
+							console.log("msg :>> ", msg);
 							const words = msg.split(" ");
 							const msgWithLink = words
 								.map((m) =>
-									isURL(m, { require_protocol: true }) ? `<a href="${m}" target="_blank" style="color: #008dff">${m}</a>` : m
+									m.indexOf("http://") > -1 || m.indexOf("https://") > -1
+										? `<a href="${m}" target="_blank" style="color: #008dff">${m}</a>`
+										: m
 								)
 								.join(" ");
 							return { children: parser(msgWithLink) };

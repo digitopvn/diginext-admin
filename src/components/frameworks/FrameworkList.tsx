@@ -1,12 +1,14 @@
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { Button, Popconfirm, Space, Table } from "antd";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { useSize } from "ahooks";
+import { Button, notification, Popconfirm, Space, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import { useFrameworkDeleteApi, useFrameworkListApi } from "@/api/api-framework";
 import type { IFramework, IGitProvider, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
+import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { AppConfig } from "@/utils/AppConfig";
 
@@ -39,9 +41,17 @@ const columns: ColumnsType<DataType> = [
 		dataIndex: "git",
 		key: "git",
 		render: (value, record) => (
-			<Button type="link" style={{ padding: 0 }}>
-				{record.git?.name}
-			</Button>
+			<>
+				{record.git?.name ? (
+					<Button type="link" style={{ padding: 0 }}>
+						{record.git?.name}
+					</Button>
+				) : (
+					<Button type="link" style={{ padding: 0 }}>
+						{record.gitProvider}
+					</Button>
+				)}
+			</>
 		),
 		filterSearch: true,
 		filters: [{ text: "goon", value: "goon" }],
@@ -95,7 +105,7 @@ const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const FrameworkList = () => {
 	const [page, setPage] = useState(1);
-	const { data } = useFrameworkListApi({ populate: "git,owner", pagination: { page, size: pageSize } });
+	const { data, status } = useFrameworkListApi({ populate: "git,owner", pagination: { page, size: pageSize } });
 	const { list: frameworks, pagination } = data || {};
 	const { total_items } = pagination || {};
 	console.log("frameworks :>> ", frameworks);
@@ -106,7 +116,8 @@ export const FrameworkList = () => {
 
 	const deleteItem = async (id: string) => {
 		const res = await deleteApi({ _id: id });
-		console.log("deleteItem :>> ", res);
+		// console.log("deleteItem :>> ", res);
+		if (res?.status) notification.success({ message: `Item deleted successfully.` });
 	};
 
 	const displayedData =
@@ -138,16 +149,40 @@ export const FrameworkList = () => {
 		if (current) setPage(current);
 	};
 
+	const ref = useRef(null);
+	const size = useSize(ref);
+
 	return (
-		<div>
-			<Table
-				columns={columns}
-				dataSource={displayedData}
-				scroll={{ x: 1200 }}
-				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize, total: total_items }}
-				onChange={onTableChange}
+		<>
+			{/* Page title & desc here */}
+			<PageTitle
+				title="Frameworks"
+				breadcrumbs={[{ name: "Workspace" }]}
+				actions={[
+					<Button
+						key="workspace-setting-btn"
+						type="default"
+						icon={<PlusOutlined className="align-middle" />}
+						onClick={() => setQuery({ lv1: "new", type: "framework" })}
+					>
+						New
+					</Button>,
+				]}
 			/>
-		</div>
+
+			{/* Page Content */}
+			<div className="h-full flex-auto overflow-hidden" ref={ref}>
+				<Table
+					size="small"
+					loading={status === "loading"}
+					columns={columns}
+					dataSource={displayedData}
+					scroll={{ x: 1200, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+					sticky
+					pagination={{ pageSize, total: total_items, position: ["bottomCenter"] }}
+					onChange={onTableChange}
+				/>
+			</div>
+		</>
 	);
 };

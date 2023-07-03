@@ -1,5 +1,6 @@
 import {
 	CheckCircleOutlined,
+	ClockCircleOutlined,
 	CloseCircleOutlined,
 	CodeOutlined,
 	EyeOutlined,
@@ -8,18 +9,22 @@ import {
 	RocketOutlined,
 	StopOutlined,
 } from "@ant-design/icons";
+import { useSize } from "ahooks";
 import { App, Button, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { HumanizeDuration, HumanizeDurationLanguage } from "humanize-duration-ts";
 import { isEmpty } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import { useBuildListApi, useBuildStopApi } from "@/api/api-build";
 import { useCreateReleaseFromBuildApi } from "@/api/api-release";
 import type { IBuild, IRelease, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
+import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
@@ -27,6 +32,9 @@ const relativeTime = require("dayjs/plugin/relativeTime");
 
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
+
+const humanrizerLang = new HumanizeDurationLanguage();
+const humanrizer = new HumanizeDuration(humanrizerLang);
 
 const { useApp } = App;
 
@@ -53,9 +61,30 @@ const columns: ColumnsType<IBuild & DataType> = [
 						<strong>{value}</strong>
 					</Link>
 				</p>
-				<p>
-					Created <DateDisplay date={record.createdAt} />
-				</p>
+				<ul className="ml-4 list-disc">
+					<li>
+						Project: <Tag color="blue">{record.projectSlug}</Tag>
+					</li>
+					<li>
+						App: <Tag color="cyan">{record.appSlug}</Tag>
+					</li>
+					{record.duration ? (
+						<li>
+							Duration:{" "}
+							<Tag key="duration" color="gold" icon={<ClockCircleOutlined />}>
+								{humanrizer.humanize(record.duration || 0, { round: true })}
+							</Tag>
+						</li>
+					) : (
+						<></>
+					)}
+					<li>
+						Created{" "}
+						<strong>
+							<DateDisplay date={record.createdAt} />
+						</strong>
+					</li>
+				</ul>
 			</>
 		),
 	},
@@ -139,19 +168,24 @@ export const BuildList = () => {
 	const filter: any = {};
 	if (project) filter.projectSlug = project;
 	if (app) filter.appSlug = app;
-	if (env) filter.env = env;
+	// if (env) filter.env = env;
 
 	// const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 	const [page, setPage] = useState(1);
 
 	const [stopBuildApi, stopBuildStatus] = useBuildStopApi();
 
-	const { data } = useBuildListApi({ sort: "-createdAt", populate: "owner", pagination: { page, size: pageSize }, filter });
+	const { data, status } = useBuildListApi({ sort: "-createdAt", populate: "owner", pagination: { page, size: pageSize }, filter });
 	const { list: builds, pagination } = data || {};
 	const { total_items } = pagination || {};
 
 	const openBuildLogs = (slug?: string) => {
-		setQuery({ lv2: "build_logs", build_slug: slug });
+		const _query: any = { build_slug: slug };
+
+		if (!query.lv1) _query.lv1 = "build_logs";
+		else _query.lv2 = "build_logs";
+
+		setQuery(_query);
 	};
 
 	// release
@@ -241,16 +275,26 @@ export const BuildList = () => {
 		setPage(current ?? 1);
 	};
 
+	const ref = useRef(null);
+	const size = useSize(ref);
+
 	return (
-		<div className="h-full overflow-auto">
-			<Table
-				columns={columns}
-				dataSource={displayedBuilds}
-				scroll={{ x: 550 }}
-				sticky={{ offsetHeader: 0 }}
-				pagination={{ current: page, pageSize, total: total_items }}
-				onChange={onTableChange}
-			/>
-		</div>
+		<>
+			{/* Page title & desc here */}
+			<PageTitle title={`Builds (${total_items ?? "-"})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
+			{/* Page Content */}
+			<div className="h-full flex-auto overflow-hidden" ref={ref}>
+				<Table
+					size="small"
+					loading={status === "loading"}
+					columns={columns}
+					dataSource={displayedBuilds}
+					scroll={{ x: 550, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+					sticky={{ offsetHeader: 0 }}
+					pagination={{ current: page, pageSize, total: total_items, position: ["bottomCenter"] }}
+					onChange={onTableChange}
+				/>
+			</div>
+		</>
 	);
 };

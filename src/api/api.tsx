@@ -40,6 +40,7 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 		refetchOnWindowFocus: false,
 		queryKey: queryKeys,
 		staleTime: options?.staleTime,
+		enabled: options?.enabled,
 		queryFn: async () => {
 			const { data } = await axios.get<ApiResponse<T[]>>(
 				`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${sortParams}&${populateParams}&${paginationParams}`,
@@ -106,17 +107,17 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, o
 
 			// for token is about to expired
 			if (data.token?.access_token) setCookie("x-auth-cookie", data.token?.access_token);
-			// console.log("data :>> ", data);
 
 			if (isArray(data.data)) {
-				return data.data.map((d: any) => {
+				const _data = data.data.map((d: any) => {
 					return { ...d, key: d._id };
-				})[0];
+				});
+				return _data[0];
 			}
 
 			if (isString(data.data)) return { status: data.status, data: data.data, messages: data.messages };
 
-			return { status: data.status, data: data.data[0], messages: data.messages };
+			return data.data;
 		},
 	});
 };
@@ -130,7 +131,7 @@ export const useApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
-	console.log(apiPath, "> headers :>> ", headers);
+	// console.log(apiPath, "> headers :>> ", headers);
 
 	return useQuery<ApiResponse<T>, Error>({
 		queryKey: keys,
@@ -187,22 +188,33 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptio
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	// console.log("useCreateApi > access_token :>> ", access_token);
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
-	const { populate, sort, pagination, filter } = options;
-	const filterParams = filter ? `${new URLSearchParams(filter).toString()}&` : "";
-	const populateParams = populate ? `populate=${populate}` : "";
-	const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}${populateParams}`;
-
 	const mutation = useMutation<ApiResponse<T>, Error, T>({
 		mutationFn: async (newData) => {
-			const { data } = await axios.post<ApiResponse<T>>(apiURL, newData, { ...options, headers });
+			const { populate, sort, pagination, filter = (newData as any)._id ? { _id: (newData as any)._id } : undefined } = options;
+			if ((newData as any)._id) {
+				// eslint-disable-next-line no-param-reassign
+				delete (newData as any)._id;
+			}
+			const filterParams = filter ? `${new URLSearchParams(filter).toString()}&` : "";
+			const populateParams = populate ? `populate=${populate}` : "";
+			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}${populateParams}`;
+
+			const { data, status } = await axios.post<ApiResponse<T>>(apiURL, newData, { ...options, headers });
+			if (status === 429) throw new Error("Too many requests.");
 
 			if (!data.status) {
 				if (!isEmpty(data.messages)) {
 					data.messages.forEach((message) => {
-						if (message) notification.error({ message: "Failed.", description: message });
+						if (message)
+							try {
+								notification.error({ message: "Failed.", description: message });
+							} catch (e) {
+								console.error(e);
+							}
 					});
 				} else {
 					notification.error({ message: "Something is wrong..." });
@@ -210,6 +222,12 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptio
 			}
 
 			return data;
+		},
+
+		onError: async (error, variables, ctx) => {
+			console.log("error :>> ", error);
+			// console.log("ctx :>> ", ctx);
+			// console.log("variables :>> ", variables);
 		},
 
 		onMutate: async (newData) => {
@@ -278,12 +296,15 @@ export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, opt
 					notification.error({ message: "Something is wrong..." });
 				}
 			}
+
 			return data;
 		},
 
 		// [2] - FINISH & SUCCESS!
 		onSuccess: (updateData, variables, context) => {
 			queryClient.invalidateQueries({ queryKey: [keys[0], "list"] });
+
+			if (filter?.slug) queryClient.invalidateQueries({ queryKey: [keys[0], filter.slug] });
 		},
 	});
 

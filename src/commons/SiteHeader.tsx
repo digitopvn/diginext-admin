@@ -31,10 +31,12 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 			<div className="flex ">
 				{/* Open/close sidebar menu */}
 				<div className="grow">
-					{React.createElement(sidebarCollapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
-						className: "trigger",
-						onClick: () => toggleSidebar && toggleSidebar(),
-					})}
+					<div className="hidden md:block">
+						{React.createElement(sidebarCollapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+							className: "trigger",
+							onClick: () => toggleSidebar && toggleSidebar(),
+						})}
+					</div>
 				</div>
 
 				{/* User & notification */}
@@ -74,7 +76,7 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 								src={user?.image}
 								size={24}
 							/>
-							<span className="ml-2 inline-block">{user?.name}</span>
+							<span className="ml-2 hidden md:inline-block">{user?.name}</span>
 							<DownOutlined className="ml-2" />
 						</div>
 					</Popover>

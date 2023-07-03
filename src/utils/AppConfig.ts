@@ -26,6 +26,10 @@ export class Config {
 		return env[key] ?? defaultValue;
 	};
 
+	static get DX_SITE() {
+		return this.NEXT_PUBLIC_ENV === "development" ? "http://localhost:4000" : "https://diginext.site";
+	}
+
 	static get ENV() {
 		return this.grab("NODE_ENV", "development").toUpperCase();
 	}
@@ -49,9 +53,8 @@ export class Config {
 
 	static get NEXT_PUBLIC_API_BASE_URL() {
 		if (typeof window !== "undefined") {
-			if (window.location.origin.indexOf("localhost") > -1) {
-				return "http://localhost:6969";
-			}
+			if (window.location.origin.indexOf("localhost") > -1) return "http://localhost:6969";
+			if (window.location.origin.indexOf("192.168.50.74") > -1) return "http://192.168.50.74:6969";
 			return window.location.origin;
 		}
 		return "/";
@@ -62,7 +65,11 @@ export class Config {
 	}
 
 	static get NEXT_PUBLIC_BASE_URL() {
-		return typeof window !== "undefined" ? window.location.origin : trimEnd(process.env.NEXT_PUBLIC_BASE_URL || "", "/") || "/";
+		if (typeof window !== "undefined") {
+			if (window.location.origin.indexOf("localhost") > -1) return "http://localhost:3000";
+			if (window.location.origin.indexOf("192.168.50.74") > -1) return "http://192.168.50.74:3000";
+		}
+		return trimEnd(process.env.NEXT_PUBLIC_BASE_URL || "", "/") || "/";
 	}
 
 	static get DISABLE_INPECT_MEMORY() {

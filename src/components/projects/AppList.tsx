@@ -157,7 +157,7 @@ export const AppList = () => {
 	const [projectSlug] = (slugs as string[]) || [];
 	// console.log("projectSlug :>> ", projectSlug);
 
-	const { data } = useProjectListApi({ filter: { slug: projectSlug || "undefined" } });
+	const { data, status } = useProjectListApi({ filter: { slug: projectSlug || "undefined" } });
 	const { list: projects } = data || {};
 	// console.log("projects :>> ", projects);
 
@@ -192,6 +192,7 @@ export const AppList = () => {
 	return (
 		<div>
 			<Table
+				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedApps}
 				scroll={{ x: 1200 }}

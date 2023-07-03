@@ -1,6 +1,8 @@
 import {
 	ApartmentOutlined,
 	BranchesOutlined,
+	BuildOutlined,
+	ClockCircleOutlined,
 	CloudOutlined,
 	CloudServerOutlined,
 	ClusterOutlined,
@@ -8,6 +10,7 @@ import {
 	DashboardOutlined,
 	DatabaseOutlined,
 	DeploymentUnitOutlined,
+	FundOutlined,
 	LockOutlined,
 	ProjectOutlined,
 	SettingOutlined,
@@ -20,6 +23,7 @@ import Sider from "antd/lib/layout/Sider";
 import { trimEnd, trimStart } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useMemo } from "react";
 import { useDarkMode } from "usehooks-ts";
 
 import { useAuth } from "@/api/api-auth";
@@ -38,6 +42,16 @@ const items: MenuProps["items"] = [
 		label: "Projects",
 	},
 	{
+		key: `menu/build`,
+		icon: <BuildOutlined />,
+		label: "Builds",
+	},
+	// {
+	// 	key: `menu/release`,
+	// 	icon: <RocketOutlined />,
+	// 	label: "Releases",
+	// },
+	{
 		key: `menu/framework`,
 		icon: <CodepenOutlined />,
 		label: "Frameworks",
@@ -46,6 +60,67 @@ const items: MenuProps["items"] = [
 		key: `menu/git`,
 		icon: <BranchesOutlined />,
 		label: "Git Providers",
+	},
+	{
+		key: `menu/cronjob`,
+		icon: <ClockCircleOutlined />,
+		label: "Cronjobs",
+	},
+	{
+		key: `menu/monitor`,
+		icon: <FundOutlined />,
+		label: "Monitoring",
+		children: [
+			{
+				key: `menu/monitor/cluster`,
+				label: "Clusters",
+				disabled: true,
+			},
+			{
+				key: `menu/monitor/node`,
+				label: "Nodes",
+			},
+			{
+				key: `menu/monitor/namespace`,
+				label: "Namespaces",
+			},
+			{
+				key: `menu/monitor/service`,
+				label: "Services",
+			},
+			{
+				key: `menu/monitor/ingress`,
+				label: "Ingresses",
+			},
+			{
+				key: `menu/monitor/deployment`,
+				label: "Deployments",
+			},
+			{
+				key: `menu/monitor/pod`,
+				label: "Pods",
+			},
+			{
+				key: `menu/monitor/secret`,
+				label: "Secrets",
+				disabled: true,
+			},
+			{
+				key: `menu/monitor/configmap`,
+				label: "ConfigMaps",
+				disabled: true,
+			},
+			{
+				key: `menu/monitor/volume`,
+				label: "Persistent Volumes",
+				disabled: true,
+			},
+			{
+				key: `menu/monitor/certmanager`,
+				label: "Cert-Manager CRDs",
+				disabled: true,
+			},
+		],
 	},
 	{
 		key: `menu/infrastructure`,
@@ -99,18 +174,18 @@ const items: MenuProps["items"] = [
 				icon: <LockOutlined />,
 				label: "Roles",
 			},
-			{
-				key: `menu/workspace/settings`,
-				icon: <SettingOutlined />,
-				label: "Settings",
-			},
 		],
+	},
+	{
+		key: `menu/settings`,
+		icon: <SettingOutlined />,
+		label: "Settings",
 	},
 ];
 
 export const MenuSider = () => {
 	const router = useRouter();
-	const { sidebarCollapsed, toggleSidebar } = useLayoutProvider();
+	const { sidebarCollapsed, toggleSidebar, responsive } = useLayoutProvider();
 	const { isDarkMode } = useDarkMode();
 
 	const [user] = useAuth();
@@ -122,6 +197,16 @@ export const MenuSider = () => {
 	const menuPath = `menu${trimEnd(router.pathname, "/")}`;
 	// console.log("menuPath :>> ", menuPath);
 
+	const isCollapsible = useMemo(
+		() => typeof window !== "undefined" && window?.innerWidth >= 728,
+		[typeof window !== "undefined" ? window?.innerWidth : null]
+	);
+	// console.log("isCollapsible :>> ", isCollapsible);
+
+	useEffect(() => {
+		if (typeof window !== "undefined" && window?.innerWidth < 728 && !sidebarCollapsed && toggleSidebar) toggleSidebar(true);
+	}, [typeof window !== "undefined" ? window?.innerWidth : null]);
+
 	const onMenuSelected: MenuProps["onSelect"] = (e) => {
 		// console.log("e", e);
 		const path = trimStart(e.key, "menu");
@@ -131,17 +216,13 @@ export const MenuSider = () => {
 	return (
 		<Sider
 			theme="light"
-			collapsible
+			collapsible={isCollapsible}
 			collapsed={sidebarCollapsed}
 			onCollapse={(value) => toggleSidebar && toggleSidebar(value)}
-			style={{
-				overflow: "auto",
-				height: "100vh",
-				position: "fixed",
-				left: 0,
-				top: 0,
-				bottom: 0,
-			}}
+			breakpoint="lg"
+			width={250}
+			style={{ height: "100%" }}
+			collapsedWidth={responsive?.md ? "50" : "0"}
 		>
 			{sidebarCollapsed ? (
 				<div className="mx-auto my-5 w-[32px]">
@@ -178,6 +259,7 @@ export const MenuSider = () => {
 				defaultSelectedKeys={[pageLv0, menuPath]}
 				items={items}
 				onSelect={onMenuSelected}
+				// className="md:w-[250px] md:min-w-[250px] md:max-w-[250px] md:flex-[0_0_250px]"
 			/>
 		</Sider>
 	);

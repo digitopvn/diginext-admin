@@ -1,6 +1,9 @@
+import { useResponsive } from "ahooks";
 import { Drawer } from "antd";
 import type { ReactNode } from "react";
 import { createContext, useContext, useState } from "react";
+
+import { useRouterQuery } from "@/plugins/useRouterQuery";
 
 // import { useRouterQuery } from "@/plugins/useRouterQuery";
 
@@ -36,6 +39,8 @@ export const DrawerProvider = (props: { children?: ReactNode } = {}) => {
 	const [drawerVisibility, setDrawerVisibility] = useState<DrawerVisibility>({ lv1: false, lv2: false });
 	const [content, setContent] = useState<DrawerContentParams>();
 	const [contentLv2, setContentLv2] = useState<DrawerContentParams>();
+	const [query, { setQuery, deleteQuery, deleteAllQueryKeys }] = useRouterQuery();
+	const responsive = useResponsive();
 
 	const toggleDrawer = (lv: "lv1" | "lv2" = "lv1", flag?: boolean) => {
 		if (typeof flag !== "undefined")
@@ -54,19 +59,23 @@ export const DrawerProvider = (props: { children?: ReactNode } = {}) => {
 
 	const closeDrawer = (lv?: "lv1" | "lv2") => {
 		if (lv) {
+			deleteQuery([lv]);
 			toggleDrawer(lv, false);
 		} else {
+			deleteAllQueryKeys();
 			setDrawerVisibility({ lv1: false, lv2: false });
 		}
 	};
 
 	const onCloseLv1 = () => {
+		deleteAllQueryKeys();
 		setDrawerVisibility((_drawerVisibility) => {
 			return { ..._drawerVisibility, lv1: false };
 		});
 	};
 
 	const onCloseLv2 = () => {
+		deleteQuery(["lv2"]);
 		setDrawerVisibility((_drawerVisibility) => {
 			return { ..._drawerVisibility, lv2: false };
 		});
@@ -98,13 +107,24 @@ export const DrawerProvider = (props: { children?: ReactNode } = {}) => {
 				placement="right"
 				onClose={onCloseLv1}
 				open={drawerVisibility.lv1}
-				size="large"
-				bodyStyle={{ overflow: "hidden", padding: 0 }}
+				// size="large"
+				width={responsive?.md ? 736 : "100%"}
+				bodyStyle={{ overflow: "auto", overflowX: "hidden", flex: "auto", padding: 0 }}
 				destroyOnClose
 			>
 				{content?.content}
+
 				{/* LEVEL 2 */}
-				<Drawer title={contentLv2?.title} placement="right" onClose={onCloseLv2} open={drawerVisibility.lv2} size="large" destroyOnClose>
+				<Drawer
+					title={contentLv2?.title}
+					placement="right"
+					onClose={onCloseLv2}
+					open={drawerVisibility.lv2}
+					// size="large"
+					width={responsive?.md ? 736 : "100%"}
+					bodyStyle={{ overflow: "auto", overflowX: "hidden", flex: "auto", padding: 0 }}
+					destroyOnClose
+				>
 					{contentLv2?.content}
 				</Drawer>
 			</Drawer>

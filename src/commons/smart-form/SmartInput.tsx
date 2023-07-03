@@ -23,6 +23,7 @@ const SmartInput = (props: SmartFormElementProps) => {
 		placeholder,
 		disabled = false,
 		visible = true,
+		wrapperStyle,
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -86,10 +87,10 @@ const SmartInput = (props: SmartFormElementProps) => {
 			}
 			name={name}
 			rules={[{ required, message: requiredMessage }]}
-			style={{ display: visible ? "block" : "none" }}
+			style={{ display: visible ? "block" : "none", ...wrapperStyle }}
 		>
 			<Space direction="vertical" className="w-full">
-				<Input placeholder={placeholder} onChange={onChange} value={_value} disabled={disabled} />
+				<Input autoComplete="off" placeholder={placeholder} onChange={onChange} value={_value} disabled={disabled} />
 
 				{/* Display manual save controller if auto save is off */}
 				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}

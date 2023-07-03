@@ -1,6 +1,6 @@
 import { CloseOutlined } from "@ant-design/icons";
-import { Button, Empty, Form, Input, Space, Typography } from "antd";
-import { isEmpty } from "lodash";
+import { Alert, Button, Empty, Form, Input, Skeleton, Space, Typography } from "antd";
+import { isArray, isEmpty } from "lodash";
 import { useEffect, useState } from "react";
 
 import { useAppEnvVarsCreateApi, useAppSlugApi } from "@/api/api-app";
@@ -24,8 +24,9 @@ const EnvVarsNewEdit = () => {
 	// frameworks
 	// const useUpdateApi = useFrameworkUpdateApi({ filter: { id: app?._id } });
 	const [createApi, createStatus] = useAppEnvVarsCreateApi();
-	const { data: app = {} } = useAppSlugApi(appSlug, { populate: "project,owner,workspace" });
+	const { data: app = {}, status } = useAppSlugApi(appSlug, { populate: "project,owner,workspace" });
 
+	console.log("EnvVarsNewEdit > app :>> ", app);
 	const envVars = !isEmpty(app) ? (app.deployEnvironment || {})[env]?.envVars || [] : [];
 	// console.log("envVars :>> ", envVars);
 
@@ -35,13 +36,20 @@ const EnvVarsNewEdit = () => {
 	// This function to use for clearing forms
 	const setEnvVars = (values: KubeEnvironmentVariable[] = []) => _setEnvVars([...values]);
 
-	useEffect(() => setEnvVars(envVars), [JSON.stringify(envVars)]);
+	useEffect(() => {
+		let initialEnvVars = envVars;
+		if (!isArray(envVars) && typeof envVars[0] !== "undefined") {
+			initialEnvVars = [];
+			Object.entries(envVars).forEach(([, val]) => {
+				initialEnvVars.push(val as KubeEnvironmentVariable);
+			});
+		}
+		console.log("envVars :>> ", envVars);
+		console.log("initialEnvVars :>> ", initialEnvVars);
+		setEnvVars(initialEnvVars);
+	}, [JSON.stringify(envVars)]);
 
-	const deleteEnvVarAtIndex = (index: number) =>
-		_setEnvVars((_arr) => {
-			_arr.splice(index, 1);
-			return [..._arr];
-		});
+	const deleteEnvVarAtIndex = (index: number) => _setEnvVars((_arr) => _arr.filter((item, i) => index !== i));
 
 	const addEnvVar = (value: KubeEnvironmentVariable = { name: "", value: "" }) => _setEnvVars((_arr) => [..._arr, value]);
 
@@ -82,78 +90,84 @@ const EnvVarsNewEdit = () => {
 	};
 
 	return (
-		<Form
-			className="h-full overflow-auto p-6"
-			layout="vertical"
-			name={`deployEnvironment.${env}.envVars`}
-			form={form}
-			onFinish={onFinish}
-			onFinishFailed={onFinishFailed}
-			autoComplete="off"
-		>
-			<Space className="w-full" direction="vertical" size="small">
-				<Space.Compact block>
-					<Typography.Text className="w-1/2">Name</Typography.Text>
-					<Typography.Text className="w-1/2">Value</Typography.Text>
-					<span className="w-[32px]" />
-				</Space.Compact>
+		<>
+			{status === "loading" && <Skeleton active />}
+			{status === "error" && <Alert message="Unable to get data at the moment." type="error" showIcon />}
+			{status === "success" && (
+				<Form
+					className="h-full overflow-auto p-6"
+					layout="vertical"
+					name={`deployEnvironment.${env}.envVars`}
+					form={form}
+					onFinish={onFinish}
+					onFinishFailed={onFinishFailed}
+					autoComplete="off"
+				>
+					<Space className="w-full" direction="vertical" size="small">
+						<Space.Compact block>
+							<Typography.Text className="w-1/2">Name</Typography.Text>
+							<Typography.Text className="w-1/2">Value</Typography.Text>
+							<span className="w-[32px]" />
+						</Space.Compact>
 
-				{isEmpty(_envVars) && <Empty />}
+						{isEmpty(_envVars) && <Empty />}
 
-				{(_envVars || []).map((envVar, index) => (
-					<Space.Compact block key={`env-var-${index}`}>
-						<Form.Item
-							className="mb-0 w-1/2"
-							name={[`envVars[${index}]`, "name"]}
-							rules={[
-								{ required: true, message: `Variable name is required` },
-								{
-									validator: (__, value) =>
-										value.indexOf(" ") === -1
-											? Promise.resolve()
-											: Promise.reject(new Error("Variable name should not contain spacing.")),
-								},
-								{
-									validator: (__, value) =>
-										// eslint-disable-next-line no-useless-escape
-										/[`!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/g.test(value) === false
-											? Promise.resolve()
-											: Promise.reject(new Error("Variable name should not contain special character.")),
-								},
-							]}
-							initialValue={envVar.name}
-						>
-							<Input
-								className="!flex-auto"
-								placeholder={"NAME"}
-								value={envVar.name}
-								onChange={(e) => updateVarNameAtIndex(index, e.currentTarget.value)}
-							/>
-						</Form.Item>
-						<Form.Item
-							className="mb-0 w-1/2"
-							name={[`envVars[${index}]`, "value"]}
-							rules={[{ required: true, message: `Variable value is required` }]}
-							initialValue={envVar.value}
-						>
-							<Input
-								className="!flex-auto"
-								placeholder={"VALUE"}
-								value={envVar.value}
-								onChange={(e) => updateVarValueAtIndex(index, e.currentTarget.value)}
-							/>
-						</Form.Item>
-						<Button tabIndex={-1} icon={<CloseOutlined />} onClick={() => deleteEnvVarAtIndex(index)} />
-					</Space.Compact>
-				))}
-			</Space>
+						{(_envVars || []).map((envVar, index) => (
+							<Space.Compact block key={`env-var-${index}`}>
+								<Form.Item
+									className="mb-0 w-1/2"
+									name={[`envVars[${index}]`, "name"]}
+									rules={[
+										{ required: true, message: `Variable name is required` },
+										{
+											validator: (__, value) =>
+												value.indexOf(" ") === -1
+													? Promise.resolve()
+													: Promise.reject(new Error("Variable name should not contain spacing.")),
+										},
+										{
+											validator: (__, value) =>
+												// eslint-disable-next-line no-useless-escape
+												/[`!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/g.test(value) === false
+													? Promise.resolve()
+													: Promise.reject(new Error("Variable name should not contain special character.")),
+										},
+									]}
+									initialValue={envVar.name}
+								>
+									<Input
+										className="!flex-auto"
+										placeholder={"NAME"}
+										value={envVar.name}
+										onChange={(e) => updateVarNameAtIndex(index, e.currentTarget.value)}
+									/>
+								</Form.Item>
+								<Form.Item
+									className="mb-0 w-1/2"
+									name={[`envVars[${index}]`, "value"]}
+									// rules={[{ required: true, message: `Variable value is required` }]}
+									initialValue={envVar.value || ""}
+								>
+									<Input
+										className="!flex-auto"
+										placeholder={"VALUE"}
+										value={envVar.value}
+										onChange={(e) => updateVarValueAtIndex(index, e.currentTarget.value)}
+									/>
+								</Form.Item>
+								<Button tabIndex={-1} icon={<CloseOutlined />} onClick={() => deleteEnvVarAtIndex(index)} />
+							</Space.Compact>
+						))}
+					</Space>
 
-			<div className="py-6">
-				<Button onClick={() => addEnvVar()}>+ Add variable</Button>
-			</div>
+					<div className="py-6">
+						<Button onClick={() => addEnvVar()}>+ Add variable</Button>
+					</div>
 
-			<ManualSaveController name="envVars" apiStatus={createStatus} initialValue={envVars} setValue={setEnvVars} />
-		</Form>
+					<ManualSaveController name="envVars" apiStatus={createStatus} initialValue={envVars} setValue={setEnvVars} />
+				</Form>
+			)}
+		</>
 	);
 };
 

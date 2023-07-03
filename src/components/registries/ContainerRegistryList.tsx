@@ -1,8 +1,9 @@
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { Button, Popconfirm, Space, Table } from "antd";
+import { useSize } from "ahooks";
+import { Button, notification, Popconfirm, Space, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import { useContainerRegistryDeleteApi, useContainerRegistryListApi } from "@/api/api-registry";
 import type { IContainerRegistry, IUser } from "@/api/api-types";
@@ -93,7 +94,7 @@ const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const ContainerRegistryList = () => {
 	const [page, setPage] = useState(1);
-	const { data } = useContainerRegistryListApi({ populate: "owner", pagination: { page, size: pageSize } });
+	const { data, status } = useContainerRegistryListApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: containerRegistries, pagination } = data || {};
 	const { total_items } = pagination || {};
 	// console.log("containerRegistries :>> ", containerRegistries);
@@ -104,7 +105,7 @@ export const ContainerRegistryList = () => {
 
 	const deleteItem = async (id: string) => {
 		const res = await deleteApi({ _id: id });
-		console.log("deleteItem :>> ", res);
+		if (res?.status) notification.success({ message: `Item deleted successfully.` });
 	};
 
 	const displayedData =
@@ -136,14 +137,19 @@ export const ContainerRegistryList = () => {
 		if (current) setPage(current);
 	};
 
+	const ref = useRef(null);
+	const size = useSize(ref);
+
 	return (
-		<div>
+		<div className="h-full flex-auto overflow-hidden" ref={ref}>
 			<Table
+				sticky
+				size="small"
+				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedData}
-				scroll={{ x: 1200 }}
-				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize, total: total_items }}
+				scroll={{ x: 1000, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+				pagination={{ pageSize, total: total_items, position: ["bottomCenter"] }}
 				onChange={onTableChange}
 			/>
 		</div>

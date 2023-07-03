@@ -4,7 +4,7 @@
 	"search.exclude": {
 		"package-lock.json": true
 	},
-	"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+	// "editor.defaultFormatter": "dbaeumer.vscode-eslint",
 	"editor.formatOnSave": true,
 	"editor.codeActionsOnSave": ["source.addMissingImports", "source.fixAll.eslint"],
 	"jest.autoRun": {
@@ -26,5 +26,8 @@
 	},
 	"[dotenv]": {
 		"editor.defaultFormatter": "foxundermoon.shell-format"
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	}
 }

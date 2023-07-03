@@ -1,26 +1,33 @@
 import {
+	AppstoreAddOutlined,
 	BuildOutlined,
 	DeleteOutlined,
 	EditOutlined,
 	EyeOutlined,
 	GlobalOutlined,
 	InfoCircleOutlined,
+	MoreOutlined,
+	PlusCircleFilled,
 	QrcodeOutlined,
 	RocketOutlined,
 } from "@ant-design/icons";
-import { Button, Popconfirm, Space, Table, Tag, Tooltip } from "antd";
+import { useSize } from "ahooks";
+import { Button, Dropdown, Modal, notification, Popconfirm, Space, Table, Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { useAppDeleteApi, useAppEnvVarsDeleteApi } from "@/api/api-app";
 import { useProjectDeleteApi, useProjectListWithAppsApi } from "@/api/api-project";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
+import { useLayoutProvider } from "@/providers/LayoutProvider";
 import { AppConfig } from "@/utils/AppConfig";
+
+import AddDomainForm from "./AddDomainForm";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -34,6 +41,7 @@ interface DataType {
 	name?: string;
 	slug?: string;
 	cluster?: string;
+	replicas?: number;
 	owner?: string;
 	updatedAt?: string;
 	createdAt?: string;
@@ -45,93 +53,138 @@ interface DataType {
 	children?: DataType[];
 }
 
-const columns: ColumnsType<DataType> = [
-	{
-		title: "Project/app",
-		width: 70,
-		dataIndex: "name",
-		key: "name",
-		fixed: "left",
-		filterSearch: true,
-		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
-		render: (value, record) => (record.type === "project" ? <Link href={`/project/${record.slug}`}>{value}</Link> : <>{value}</>),
-	},
-	{
-		title: "Cluster",
-		width: 60,
-		dataIndex: "cluster",
-		key: "cluster",
-		render: (value) => (
-			<Button type="link" style={{ padding: 0 }}>
-				{value}
-			</Button>
-		),
-		filterSearch: true,
-		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.cluster && record.cluster.indexOf(value.toString()) > -1) || true,
-	},
-	{
-		title: "Last updated by",
-		dataIndex: "owner",
-		key: "owner",
-		width: 50,
-		filterSearch: true,
-		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.owner && record.owner.indexOf(value.toString()) > -1) || true,
-		render: (value) => <>{value?.name}</>,
-	},
-	{
-		title: "Last updated",
-		dataIndex: "updatedAt",
-		key: "updatedAt",
-		width: 50,
-		render: (value) => <DateDisplay date={value} />,
-		sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
-	},
-	{
-		title: "Created at",
-		dataIndex: "createdAt",
-		key: "createdAt",
-		width: 50,
-		render: (value) => <DateDisplay date={value} />,
-		sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
-	},
-	{
-		title: "Status",
-		dataIndex: "status",
-		fixed: "right",
-		key: "status",
-		width: 30,
-		filters: [{ text: "live", value: "live" }],
-		render: (value) => (
-			// <Tag color="success" icon={<CheckCircleOutlined className="align-middle" />}>
-			<Tag color="warning" icon={<InfoCircleOutlined className="align-middle" />}>
-				{value}
-			</Tag>
-		),
-	},
-	{
-		title: "Action",
-		key: "action",
-		fixed: "right",
-		width: 70,
-		dataIndex: "action",
-		render: (value, record) => record.actions,
-	},
-];
-
 const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const ProjectList = () => {
 	const router = useRouter();
 	const [query, { setQuery }] = useRouterQuery();
 
+	const { responsive } = useLayoutProvider();
+
+	// table config
+	const columns: ColumnsType<DataType> = [
+		{
+			title: "Project/app",
+			width: responsive?.md ? 60 : 40,
+			dataIndex: "name",
+			key: "name",
+			fixed: responsive?.md ? "left" : undefined,
+			// filterSearch: true,
+			// filters: [{ text: "goon", value: "goon" }],
+			// onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
+			render: (value, record) =>
+				// eslint-disable-next-line no-nested-ternary
+				record.type === "project" ? (
+					<Link href={`/apps?project=${record.slug}`}>
+						<strong>{record.slug}</strong>
+					</Link>
+				) : record.type === "app" ? (
+					<>{record.slug}</>
+				) : (
+					value
+				),
+		},
+		{
+			title: "Cluster",
+			width: 30,
+			dataIndex: "cluster",
+			key: "cluster",
+			render: (value) => (
+				<Button type="link" style={{ padding: 0 }}>
+					{value}
+				</Button>
+			),
+			filterSearch: true,
+			filters: [{ text: "goon", value: "goon" }],
+			onFilter: (value, record) => (record.cluster && record.cluster.indexOf(value.toString()) > -1) || true,
+		},
+		{
+			title: "Ready",
+			width: 20,
+			dataIndex: "readyCount",
+			key: "readyCount",
+			render: (value, record) =>
+				value && record.replicas ? (
+					<Tag>
+						{value}/{record.replicas}
+					</Tag>
+				) : (
+					<></>
+				),
+		},
+		{
+			title: "Last updated by",
+			dataIndex: "owner",
+			key: "owner",
+			width: 35,
+			filterSearch: true,
+			filters: [{ text: "goon", value: "goon" }],
+			onFilter: (value, record) => (record.owner && record.owner.indexOf(value.toString()) > -1) || true,
+			render: (value) => <>{value?.name}</>,
+		},
+		{
+			title: "Last updated",
+			dataIndex: "updatedAt",
+			key: "updatedAt",
+			width: 30,
+			render: (value) => <DateDisplay date={value} />,
+			sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
+		},
+		{
+			title: "Created at",
+			dataIndex: "createdAt",
+			key: "createdAt",
+			width: 30,
+			render: (value) => <DateDisplay date={value} />,
+			sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
+		},
+		{
+			title: "Status",
+			dataIndex: "status",
+			fixed: responsive?.md ? "right" : undefined,
+			key: "status",
+			width: responsive?.md ? 20 : 15,
+			filters: [
+				{ text: "healthy", value: "healthy" },
+				{ text: "undeployed", value: "undeployed" },
+				{ text: "partial_healthy", value: "partial_healthy" },
+				{ text: "failed", value: "failed" },
+				{ text: "crashed", value: "crashed" },
+				{ text: "unknown", value: "unknown" },
+			],
+			filterSearch: true,
+			onFilter: (value, record) => {
+				if (record.type === "project" || record.type === "app") return true;
+				console.log("record.status === value :>> ", record.status, value);
+				if (record.status) return record.status === value;
+				return false;
+			},
+			render: (value) => (
+				// <Tag color="success" icon={<CheckCircleOutlined className="align-middle" />}>
+				<Tag
+					// eslint-disable-next-line no-nested-ternary
+					color={value === "healthy" ? "success" : value === "undeployed" ? "pink" : "default"}
+					icon={<InfoCircleOutlined className="align-middle" />}
+				>
+					{value}
+				</Tag>
+			),
+		},
+		{
+			title: <Typography.Text className="text-xs md:text-sm">Action</Typography.Text>,
+			key: "action",
+			fixed: "right",
+			width: responsive?.md ? 18 : 13,
+			dataIndex: "action",
+			render: (value, record) => record.actions,
+		},
+	];
+
 	// pagination
 	const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 
 	// fetch projects
-	const { data } = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
+	const { data, status } = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: projects, pagination } = data || {};
 	const { total_pages, total_items } = pagination || {};
 
@@ -139,9 +192,33 @@ export const ProjectList = () => {
 	const [deleteAppApi, deleteAppApiStatus] = useAppDeleteApi();
 	const [deleteAppEnvApi, deleteAppEnvApiStatus] = useAppEnvVarsDeleteApi();
 
+	// modals
+	const [modal, contextHolder] = Modal.useModal();
+	const openAddDomains = (app: string, env: string) => {
+		console.log("env :>> ", env);
+		const instance = modal.info({
+			title: "Add new domains",
+			icon: <PlusCircleFilled />,
+			content: (
+				<AddDomainForm
+					app={app}
+					env={env}
+					next={() => {
+						instance.destroy();
+						notification.success({ message: "Congrats!", description: `New domain was added successfully!` });
+					}}
+				/>
+			),
+			footer: null,
+			closable: true,
+			maskClosable: true,
+			onOk() {},
+		});
+	};
+
 	// console.log({ total_pages });
 	const openBuildList = (project: string, app: string, env: string) => {
-		setQuery({ lv1: "build", project, app, env });
+		setQuery({ lv1: "build", project, app });
 	};
 
 	const openReleaseList = (project: string, app: string, env: string) => {
@@ -174,15 +251,15 @@ export const ProjectList = () => {
 		setPage(newPage);
 	}, [query.page]);
 
-	const displayedProjects = projects?.map((p) => {
+	const displayedProjects = projects?.map((p: any) => {
 		return {
 			...p,
 			type: "project",
 			actions: (
 				<Space.Compact>
-					<Tooltip title="Edit project">
+					{/* <Tooltip title="Edit project">
 						<Button icon={<EditOutlined />} />
-					</Tooltip>
+					</Tooltip> */}
 					{/* <Button icon={<PauseCircleOutlined />} /> */}
 					<Popconfirm
 						title="Are you sure to delete this project?"
@@ -201,14 +278,21 @@ export const ProjectList = () => {
 			id: p._id,
 			status: "N/A",
 			children: p.apps
-				? p.apps.map((app) => {
+				? p.apps.map((app: any) => {
 						const envList = Object.keys(app.deployEnvironment ?? {});
 						const environments: DataType[] = envList.map((envName) => {
 							// console.log("envStr :>> ", envStr);
 							const deployEnvironment = (app.deployEnvironment || {})[envName] || {};
 
 							const record: any = {
-								name: envName.toUpperCase(),
+								name: (
+									<Button
+										type="link"
+										onClick={() => setQuery({ lv1: "deploy_environment", project: p.slug, app: app.slug, env: envName })}
+									>
+										{envName.toUpperCase()}
+									</Button>
+								),
 								key: `${p.slug}-${app.slug}-${envName}`,
 								id: envName,
 								slug: envName,
@@ -241,24 +325,40 @@ export const ProjectList = () => {
 										{/* <Tooltip title="Take down">
 											<Button icon={<PauseCircleOutlined />} />
 										</Tooltip> */}
-										<Tooltip title="List of builds">
-											<Button
-												icon={<BuildOutlined />}
-												onClick={() => openBuildList(record.projectSlug, record.appSlug, envName)}
-											/>
-										</Tooltip>
-										<Tooltip title="All releases">
-											<Button
-												icon={<RocketOutlined />}
-												onClick={() => openReleaseList(record.projectSlug, record.appSlug, envName)}
-											/>
-										</Tooltip>
-										<Tooltip title="Modify environment variables" placement="topRight">
-											<Button
-												icon={<QrcodeOutlined />}
-												onClick={() => openEnvVarsEdit(record.projectSlug, record.appSlug, envName)}
-											/>
-										</Tooltip>
+										<Dropdown
+											menu={{
+												items: [
+													{
+														label: "List of builds",
+														key: "list-of-builds",
+														icon: <BuildOutlined />,
+														onClick: () => openBuildList(record.projectSlug, record.appSlug, record.id),
+													},
+													{
+														label: "List of releases",
+														key: "list-of-releases",
+														icon: <RocketOutlined />,
+														onClick: () => openReleaseList(record.projectSlug, record.appSlug, envName),
+													},
+													{
+														label: "Modify environment variables",
+														key: "env-vars",
+														icon: <QrcodeOutlined />,
+														onClick: () => openEnvVarsEdit(record.projectSlug, record.appSlug, envName),
+													},
+													{
+														label: "Add domains",
+														key: "add-domains",
+														icon: <AppstoreAddOutlined />,
+														onClick: () => openAddDomains(record.appSlug, envName),
+													},
+												],
+											}}
+										>
+											<Button style={{ padding: "4px 4px" }}>
+												<MoreOutlined />
+											</Button>
+										</Dropdown>
 										<Popconfirm
 											title="Are you sure to delete this environment?"
 											description={
@@ -279,18 +379,34 @@ export const ProjectList = () => {
 											<Button icon={<EyeOutlined />} href={record.url} target="_blank" disabled={isEmpty(record.url)} />
 										</Tooltip>
 										{/* <Button icon={<PauseCircleOutlined />} /> */}
-										<Tooltip title="List of builds">
-											<Button
-												icon={<BuildOutlined />}
-												onClick={() => openBuildList(record.projectSlug, record.appSlug, record.id)}
-											/>
-										</Tooltip>
-										<Tooltip title="Modify environment variables" placement="topRight">
-											<Button
-												icon={<QrcodeOutlined />}
-												onClick={() => openEnvVarsEdit(record.projectSlug, record.appSlug, envName)}
-											/>
-										</Tooltip>
+										<Dropdown
+											menu={{
+												items: [
+													{
+														label: "List of builds",
+														key: "list-of-builds",
+														icon: <BuildOutlined />,
+														onClick: () => openBuildList(record.projectSlug, record.appSlug, record.id),
+													},
+													{
+														label: "Modify environment variables",
+														key: "env-vars",
+														icon: <QrcodeOutlined />,
+														onClick: () => openEnvVarsEdit(record.projectSlug, record.appSlug, envName),
+													},
+													{
+														label: "Add domains",
+														key: "add-domains",
+														icon: <AppstoreAddOutlined />,
+														onClick: () => openAddDomains(record.appSlug, envName),
+													},
+												],
+											}}
+										>
+											<Button style={{ padding: "4px 4px" }}>
+												<MoreOutlined />
+											</Button>
+										</Dropdown>
 										<Popconfirm
 											title="Are you sure to delete this environment?"
 											description={
@@ -350,13 +466,19 @@ export const ProjectList = () => {
 		setQuery({ page: current ?? 1 });
 	};
 
+	const ref = useRef(null);
+	const size = useSize(ref);
+
 	return (
-		<div>
+		<div className="h-full flex-auto overflow-hidden" ref={ref}>
 			<Table
+				size="small"
+				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedProjects}
-				scroll={{ x: 1200 }}
-				sticky={{ offsetHeader: 48 }}
+				// scroll={{ x: window?.innerWidth >= 728 ? 1500 : 600 }}
+				scroll={{ x: responsive?.md ? 1600 : 1200, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+				sticky={{ offsetHeader: 0 }}
 				pagination={{
 					showSizeChanger: true,
 					current: page,
@@ -365,13 +487,11 @@ export const ProjectList = () => {
 					total: total_items,
 					// total: total_pages,
 					// , pageSize
+					position: ["bottomCenter"],
 				}}
 				onChange={onTableChange}
 			/>
-			{/* <Drawer title={query.type === "build" ? "Builds" : "Releases"} placement="right" onClose={onClose} open={open} size="large">
-				{query.type === "build" && <BuildList project={query.project} app={query.app} env={query.env} />}
-				{query.type === "release" && <ReleaseList project={query.project} app={query.app} env={query.env} />}
-			</Drawer> */}
+			{contextHolder}
 		</div>
 	);
 };

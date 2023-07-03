@@ -1,5 +1,4 @@
 import { Layout, theme } from "antd";
-import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 
@@ -7,13 +6,15 @@ import { MenuSider } from "@/commons/MenuSider";
 import NewEditPage from "@/commons/NewEditPage";
 import { PageFooter } from "@/commons/PageFooter";
 import { SiteHeader } from "@/commons/SiteHeader";
+import { AppLogs } from "@/components/deployments/AppLogs";
 import { BuildList } from "@/components/deployments/BuildList";
 import { BuildLogs } from "@/components/deployments/BuildLogs";
+import DeployEnvironment from "@/components/deployments/DeployEnvironment";
+import DeploymentYaml from "@/components/deployments/DeploymentYaml";
 import EnvVarsNewEdit from "@/components/deployments/EnvVarsNewEdit";
 import { ReleaseList } from "@/components/deployments/ReleaseList";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useDrawerProvider } from "@/providers/DrawerProvider";
-import { useLayoutProvider } from "@/providers/LayoutProvider";
 
 type ISiteLayoutProps = {
 	meta: ReactNode;
@@ -24,10 +25,6 @@ type ISiteLayoutProps = {
 
 export const SiteLayout = (props: ISiteLayoutProps) => {
 	const { useSidebar } = props;
-	const router = useRouter();
-	const { sidebarCollapsed } = useLayoutProvider();
-	let marginLeft: string | number = "auto";
-	if (useSidebar) marginLeft = sidebarCollapsed ? 80 : 200;
 
 	// handling Drawers
 	const drawer = useDrawerProvider();
@@ -40,28 +37,40 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 		token: { colorText },
 	} = theme.useToken();
 
-	const openBuildList = () => {
-		if (showDrawer) showDrawer({ title: "Builds", content: <BuildList /> }, { level: 1 });
+	const openBuildList = (level = 1) => {
+		if (showDrawer) showDrawer({ title: "Builds", content: <BuildList /> }, { level });
 	};
 
-	const openReleaseList = () => {
-		if (showDrawer) showDrawer({ title: "Releases", content: <ReleaseList /> }, { level: 1 });
+	const openReleaseList = (level = 1) => {
+		if (showDrawer) showDrawer({ title: "Releases", content: <ReleaseList /> }, { level });
 	};
 
-	const openBuildLogs = () => {
-		if (showDrawer) showDrawer({ title: "Build Logs", content: <BuildLogs /> }, { level: 2 });
+	const openBuildLogs = (level = 1) => {
+		if (showDrawer) showDrawer({ title: "Build Logs", content: <BuildLogs /> }, { level });
 	};
 
-	const openEnvVarsPage = () => {
-		if (showDrawer) showDrawer({ title: "Environment Variables", content: <EnvVarsNewEdit /> }, { level: 1 });
+	const openEnvVarsPage = (level = 1) => {
+		if (showDrawer) showDrawer({ title: "Environment Variables", content: <EnvVarsNewEdit /> }, { level });
 	};
 
-	const openEditPage = () => {
-		if (showDrawer) showDrawer({ title: "Edit", content: <NewEditPage /> }, { level: 1 });
+	const openAppDeployEnvLogsPage = (level = 1) => {
+		if (showDrawer) showDrawer({ title: `Application Logs (env: ${env || "unknown"})`, content: <AppLogs /> }, { level });
 	};
 
-	const openCreatePage = () => {
-		if (showDrawer) showDrawer({ title: "Create", content: <NewEditPage /> }, { level: 1 });
+	const openDeploymentYamlPage = (level = 1) => {
+		if (showDrawer) showDrawer({ title: `Deployment YAML: ${env.toUpperCase()}`, content: <DeploymentYaml /> }, { level });
+	};
+
+	const openDeployEnvironment = (level = 1) => {
+		if (showDrawer) showDrawer({ title: `Deploy Environment: ${env.toUpperCase()}`, content: <DeployEnvironment /> }, { level });
+	};
+
+	const openEditPage = (level = 1) => {
+		if (showDrawer) showDrawer({ title: "Edit", content: <NewEditPage /> }, { level });
+	};
+
+	const openCreatePage = (level = 1) => {
+		if (showDrawer) showDrawer({ title: "Create", content: <NewEditPage /> }, { level });
 	};
 
 	useEffect(() => {
@@ -83,64 +92,80 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 				openEditPage();
 				break;
 
+			case "deploy_environment":
+				openDeployEnvironment();
+				break;
+
 			case "env_vars":
 				openEnvVarsPage();
 				break;
 
+			case "app_logs":
+				openAppDeployEnvLogsPage();
+				break;
+
 			default:
 				// close drawer lv1
+				deleteQuery(["lv1"]);
 				if (closeDrawer) closeDrawer("lv1");
 				break;
 		}
 
 		switch (lv2) {
+			case "build":
+				openBuildList(2);
+				break;
+
 			case "build_logs":
-				openBuildLogs();
+				openBuildLogs(2);
+				break;
+
+			case "release":
+				openReleaseList(2);
+				break;
+
+			case "app_logs":
+				openAppDeployEnvLogsPage(2);
+				break;
+
+			case "env_vars":
+				openEnvVarsPage(2);
+				break;
+
+			case "deployment_yaml":
+				openDeploymentYamlPage(2);
 				break;
 
 			default:
 				// close drawer lv2
+				deleteQuery(["lv2"]);
 				if (closeDrawer) closeDrawer("lv2");
 				break;
 		}
 	}, [lv1, lv2, project, app, env]);
 
-	useEffect(() => {
-		if (drawerVisibility?.lv1 === false)
-			deleteQuery([
-				"lv1",
-				"project",
-				"app",
-				"env",
-				"release",
-				"type",
-				"cluster_slug",
-				"framework_slug",
-				"git_provider_slug",
-				"registry_slug",
-				"user",
-				"role",
-			]);
-	}, [drawerVisibility?.lv1]);
-
-	useEffect(() => {
-		if (drawerVisibility?.lv2 === false) deleteQuery(["lv2", "build_slug"]);
-	}, [drawerVisibility?.lv2]);
+	// useEffect(() => {
+	// 	if (drawerVisibility?.lv1 === false) deleteQuery(["lv1"]);
+	// 	if (drawerVisibility?.lv2 === false) deleteQuery(["lv2"]);
+	// 	if (drawerVisibility?.lv1 === false && drawerVisibility?.lv2 === false) deleteAllQueryKeys();
+	// }, [drawerVisibility?.lv1, drawerVisibility?.lv2]);
 
 	return (
-		<Layout hasSider>
+		<Layout hasSider className="full-height">
 			{/* Meta tags */}
 			{props.meta}
 
 			{/* Sidebar here */}
-			{useSidebar && <MenuSider />}
+			<div className="full-height fixed z-[102] overflow-visible md:relative md:overflow-y-auto md:overflow-x-hidden">
+				{useSidebar && <MenuSider />}
+			</div>
 
-			<Layout className="min-h-screen transition-all" style={{ marginLeft }}>
+			<Layout className="full-height overflow-auto transition-all">
 				{/* Site Header */}
 				{useSidebar && <SiteHeader />}
 
 				{/* Page content here */}
-				<div className="grow px-2">{props.children}</div>
+				<div className="flex flex-auto flex-col overflow-auto">{props.children}</div>
 
 				{/* Site/Page Footer */}
 				<PageFooter />

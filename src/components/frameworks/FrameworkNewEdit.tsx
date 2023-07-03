@@ -1,6 +1,6 @@
 import { useFrameworkCreateApi, useFrameworkSlugApi, useFrameworkUpdateApi } from "@/api/api-framework";
-import { useGitProviderListApi } from "@/api/api-git-provider";
 import type { IFramework } from "@/api/api-types";
+import { gitProviders } from "@/api/api-types";
 import SmartForm from "@/commons/smart-form/SmartForm";
 import type { SmartFormElementProps } from "@/commons/smart-form/SmartFormTypes";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -18,7 +18,7 @@ const FrameworkNewEdit = (props: FrameworkNewEditProps = {}) => {
 	// console.log("framework :>> ", framework);
 
 	// gitProviders
-	const { data: { list: gitProviders = [] } = {} } = useGitProviderListApi();
+	// const { data: { list: gitProviders = [] } = {} } = useGitProviderListApi();
 	// console.log("gitProviders :>> ", gitProviders);
 
 	const smartFormConfigs: SmartFormElementProps[] = [
@@ -26,10 +26,11 @@ const FrameworkNewEdit = (props: FrameworkNewEditProps = {}) => {
 		{
 			type: "select",
 			label: "Git Provider",
-			name: "git",
+			name: "gitProvider",
+			displayKey: "gitProvider",
 			style: { width: 250 },
 			options: gitProviders.map((gitProvider) => {
-				return { label: gitProvider.name || "", value: gitProvider._id };
+				return { label: gitProvider?.name, value: gitProvider?.slug };
 			}),
 		},
 		{ type: "input", label: "Repository HTTPS URL", name: "repoURL", placeholder: "https://github.com/user/repo.git" },

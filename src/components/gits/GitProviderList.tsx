@@ -1,8 +1,9 @@
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { Button, Popconfirm, Space, Table } from "antd";
+import { useSize } from "ahooks";
+import { Button, notification, Popconfirm, Space, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import { useGitProviderDeleteApi, useGitProviderListApi } from "@/api/api-git-provider";
 import type { IGitProvider, IUser } from "@/api/api-types";
@@ -80,25 +81,20 @@ const columns: ColumnsType<DataType> = [
 	},
 ];
 
-// const data: DataType[] = [];
-// for (let i = 0; i < 100; i++) {
-// 	data.push({
-// 		key: i,
-// 		name: `Framework #${i}`,
-// 		git: `Github`,
-// 		version: "main",
-// 		username: `goon`,
-// 		createdAt: dayjs().format("LLL"),
-// 	});
-// }
 const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const GitProviderList = () => {
 	const [page, setPage] = useState(1);
-	const { data } = useGitProviderListApi({ populate: "owner", pagination: { page, size: pageSize } });
+
+	const { data, status } = useGitProviderListApi({
+		filter: { verified: true },
+		populate: "owner",
+		pagination: { page, size: pageSize },
+	});
+
 	const { list: gitProviders, pagination } = data || {};
 	const { total_items } = pagination || {};
-	console.log("gitProviders :>> ", gitProviders);
+	// console.log("gitProviders :>> ", gitProviders);
 
 	const [deleteApi] = useGitProviderDeleteApi();
 
@@ -106,7 +102,7 @@ export const GitProviderList = () => {
 
 	const deleteItem = async (id: string) => {
 		const res = await deleteApi({ _id: id });
-		console.log("deleteItem :>> ", res);
+		if (res?.status) notification.success({ message: `Item deleted successfully.` });
 	};
 
 	const displayedData =
@@ -138,16 +134,24 @@ export const GitProviderList = () => {
 		if (current) setPage(current);
 	};
 
+	const ref = useRef(null);
+	const size = useSize(ref);
+
 	return (
-		<div>
-			<Table
-				columns={columns}
-				dataSource={displayedData}
-				scroll={{ x: 1200 }}
-				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize, total: total_items }}
-				onChange={onTableChange}
-			/>
-		</div>
+		<>
+			{/* Page title & desc here */}
+			<div className="h-full flex-auto overflow-hidden" ref={ref}>
+				<Table
+					sticky
+					size="small"
+					loading={status === "loading"}
+					columns={columns}
+					dataSource={displayedData}
+					scroll={{ x: 1200, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+					pagination={{ pageSize, total: total_items, position: ["bottomCenter"] }}
+					onChange={onTableChange}
+				/>
+			</div>
+		</>
 	);
 };

@@ -1,6 +1,7 @@
+/* eslint-disable prettier/prettier */
 import type { AxiosRequestConfig } from "axios";
 
-export type ApiFilter = Record<string, any> | URLSearchParams | undefined;
+export type ApiFilter = any;
 
 export type ApiOptions = AxiosRequestConfig & {
 	pagination?: IPaginationOptions;
@@ -8,6 +9,7 @@ export type ApiOptions = AxiosRequestConfig & {
 	filter?: ApiFilter;
 	sort?: string;
 	staleTime?: number;
+	enabled?: boolean;
 };
 
 export type ApiStatus = "error" | "loading" | "success" | "idle";
@@ -35,21 +37,93 @@ export interface ApiResponse<T = any> extends ApiPagination {
 	token?: AccessTokenInfo;
 }
 
+export interface HiddenBodyKeys {
+	id?: unknown;
+	_id?: unknown;
+	metadata?: unknown;
+	owner?: unknown;
+	workspace?: unknown;
+	createdAt?: unknown;
+	deletedAt?: unknown;
+	updatedAt?: unknown;
+}
+
 export const registryProviderList = ["gcloud", "digitalocean", "dockerhub"] as const;
+export type RegistryProvider = { name: string; slug: (typeof registryProviderList)[number] };
 export const registryProviders = registryProviderList.map((provider) => {
 	switch (provider) {
 		case "digitalocean":
-			return { name: "Digital Ocean Registry", slug: "digitalocean" };
+			return { name: "Digital Ocean Registry", slug: "digitalocean" } as RegistryProvider;
 		case "gcloud":
-			return { name: "Google Container Registry", slug: "gcloud" };
+			return { name: "Google Container Registry", slug: "gcloud" } as RegistryProvider;
 		case "dockerhub":
-			return { name: "Docker Registry", slug: "dockerhub" };
+			return { name: "Docker Registry", slug: "dockerhub" } as RegistryProvider;
 		default:
 			return undefined;
 	}
 });
-// eslint-disable-next-line prettier/prettier
 export type RegistryProviderType = (typeof registryProviderList)[number];
+
+// cloud providers
+export const cloudProviderList = ["gcloud", "digitalocean", "custom"] as const;
+export type CloudProviderType = (typeof cloudProviderList)[number];
+
+// database providers
+export const cloudDatabaseList = [
+	"mongodb",
+	"mysql",
+	"mariadb",
+	"postgresql",
+	// "sqlserver", "sqlite", "redis", "dynamodb"
+] as const;
+export type CloudDatabaseType = (typeof cloudDatabaseList)[number];
+
+// git providers
+export const availableGitProviders = ["bitbucket", "github"] as const;
+export const gitProviders = availableGitProviders.map((provider) => {
+	switch (provider) {
+		case "bitbucket":
+			return { name: "Bitbucket", slug: "bitbucket" };
+		case "github":
+			return { name: "Github", slug: "github" };
+		// case "gitlab":
+		// 	return { name: "Gitlab", slug: "gitlab" };
+		default:
+			return { name: "Unknown", slug: "unknown" };
+	}
+});
+export type GitProviderType = (typeof availableGitProviders)[number];
+
+// resource types
+export const availableResourceSizes = ["none", "1x", "2x", "3x", "4x", "5x", "6x", "7x", "8x", "9x", "10x"] as const;
+export type ResourceQuotaSize = (typeof availableResourceSizes)[number];
+
+// git provider domains
+export const gitProviderDomain = {
+	bitbucket: "bitbucket.org",
+	github: "github.com",
+	gitlab: "gitlab.com",
+};
+
+// build status
+export const buildStatusList = ["start", "building", "failed", "success"] as const;
+export type BuildStatus = (typeof buildStatusList)[number];
+
+/**
+ * App status:
+ * - `healthy`: App's containers are running well.
+ * - `partial_healthy`: Some of the app's containers are unhealthy.
+ * - `undeployed`: App has not been deployed yet.
+ * - `failed`: App's containers are unable to deploy due to image pull back-off or image pulling errors.
+ * - `crashed`: App's containers are facing some unexpected errors.
+ * - `unknown`: Other unknown errors.
+ */
+export const appStatusList = ["healthy", "partial_healthy", "undeployed", "failed", "crashed", "unknown"] as const;
+export type AppStatus = (typeof appStatusList)[number];
+
+// ssl
+export const sslIssuers = ["letsencrypt", "custom", "none"] as const;
+export type SSLIssuer = (typeof sslIssuers)[number];
 
 export interface IGeneral {
 	/**
@@ -68,6 +142,7 @@ export interface IGeneral {
 	updatedAt?: string;
 	createdBy?: string;
 	metadata?: any;
+	active?: boolean;
 	/**
 	 * User ID of the owner
 	 *
@@ -81,6 +156,8 @@ export interface IGeneral {
 	 */
 	workspace?: any;
 }
+
+export type IBase = IGeneral;
 
 export interface IPaginationOptions {
 	page?: number;
@@ -124,6 +201,11 @@ export interface IWorkspace extends IGeneral {
 	slug?: string;
 
 	/**
+	 * Is this a Public workspace
+	 */
+	public?: boolean;
+
+	/**
 	 * Workspace profile picture
 	 */
 	image?: string;
@@ -144,6 +226,11 @@ export interface IWorkspace extends IGeneral {
 	 * List of this workspace's API Access Token
 	 */
 	apiAccessTokens?: WorkspaceApiAccessToken[];
+
+	/**
+	 * `DX_KEY` that obtained from https://diginext.vn
+	 */
+	dx_key?: string;
 }
 
 export type IRouteScope = "all" | "workspace" | "team" | "project" | "app";
@@ -296,35 +383,236 @@ export interface IUser extends IGeneral {
 	 * Active workspace ID which the user is logging into
 	 */
 	activeWorkspace?: IWorkspace;
+
+	/**
+	 * Active role ID in current workspace
+	 */
+	activeRole?: IRole;
 }
 
 export interface IServiceAccount extends IUser {}
 
-export interface IGitProvider extends IGeneral {
+export interface BitbucketOAuthOptions {
+	/**
+	 * The CONSUMER_KEY for Bitbucket authentication:
+	 * to create new repo, commit, pull & push changes to the repositories.
+	 *
+	 * @link https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	consumer_key?: string;
+
+	/**
+	 * The CONSUMER_SECRET for Bitbucket authentication:
+	 * to create new repo, commit, pull & push changes to the repositories.
+	 *
+	 * @link https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	consumer_secret?: string;
+
+	/**
+	 * Your Bitbucket account's username
+	 */
+	username?: string;
+
+	/**
+	 * The APP_PASSWORD for Bitbucket authentication:
+	 * to create new repo, commit, pull & push changes to the repositories.
+	 *
+	 * @link https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	app_password?: string;
+
+	/**
+	 * `TRUE` if the REST API calling was successfully.
+	 */
+	verified?: boolean;
+}
+
+export interface GithubOAuthOptions {
+	/**
+	 * The app's CLIENT_ID for Github authentication:
+	 * to create new repo, commit, pull & push changes to the repositories.
+	 *
+	 * @link https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	client_id?: string;
+
+	/**
+	 * The app's CLIENT_SECRET for Github authentication:
+	 * to create new repo, commit, pull & push changes to the repositories.
+	 *
+	 * @link https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	client_secret?: string;
+
+	/**
+	 * Your Github account's username
+	 */
+	username?: string;
+
+	/**
+	 * The PERSONAL ACCESS TOKEN for Github authentication:
+	 * to create new repo, commit, pull & push changes to the repositories.
+	 *
+	 * @link https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	personal_access_token?: string;
+
+	/**
+	 * `TRUE` if the REST API calling was successfully.
+	 */
+	verified?: boolean;
+}
+
+export interface GitUser {
+	id?: string;
+	username?: string;
+	display_name?: string;
+	url?: string;
+	email?: string;
+}
+
+export interface GitOrg {
+	id: string;
+	name: string;
+	description: string;
+	url: string;
+	is_org: boolean;
+}
+
+export interface GitRepository {
+	id: string;
+	name: string;
+	full_name: string;
+	description: string;
+	private: boolean;
+	fork: boolean;
+	repo_url: string;
+	ssh_url: string;
+	owner: {
+		username: string;
+		id: string;
+		url: string;
+		type: string;
+	};
+	created_at: string;
+	updated_at: string;
+}
+
+export interface GitRepositoryDto {
+	name: string;
+	description?: string;
+	private: boolean;
+}
+
+export interface IGitProvider extends IBase {
+	/**
+	 * The name of the Git provider.
+	 *
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
 	name?: string;
 
+	/**
+	 * The host of the Git provider.
+	 *
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
 	host?: string;
 
+	/**
+	 * The Git workspace of the Git provider.
+	 *
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
 	gitWorkspace?: string;
 
+	/**
+	 * The repository of the Git provider.
+	 *
+	 * @type {{
+	 *     url?: string;
+	 *     sshPrefix?: string;
+	 *   }}
+	 * @memberof IGitProvider
+	 */
 	repo?: {
+		/**
+		 * The URL of the repository of the Git provider.
+		 *
+		 * @type {string}
+		 */
 		url?: string;
+
+		/**
+		 * The SSH prefix of the repository of the Git provider.
+		 *
+		 * @type {string}
+		 */
 		sshPrefix?: string;
 	};
 
 	/**
-	 * User ID of the owner
+	 * The type of the Git provider.
 	 *
-	 * @remarks This can be populated to {User} data
+	 * @type {GitProviderType}
+	 * @memberof IGitProvider
 	 */
-	owner?: IUser | string;
+	type?: GitProviderType;
 
 	/**
-	 * ID of the workspace
-	 *
-	 * @remarks This can be populated to {Workspace} data
+	 * - `TRUE` if the git provider which connected by "Administrator"
+	 * - `FALSE` if it was connected by workspace's members and won't be displayed on the dashboard.
 	 */
-	workspace?: IWorkspace | string;
+	isOrg?: boolean;
+
+	/**
+	 * Bitbucket OAuth Information
+	 */
+	bitbucket_oauth?: BitbucketOAuthOptions;
+
+	/**
+	 * Github OAuth Information
+	 */
+	github_oauth?: GithubOAuthOptions;
+
+	/**
+	 * Authorization header method
+	 */
+	method?: "bearer" | "basic";
+
+	/**
+	 * The API access token of the Git provider,
+	 * to create new repo, commit, pull & push changes to the repositories.
+	 *
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	access_token?: string;
+
+	/**
+	 * The API refresh token of the Git provider,
+	 * to obtain new access token if it's expired
+	 *
+	 * @type {string}
+	 * @memberof IGitProvider
+	 */
+	refresh_token?: string;
 }
 
 export interface IFramework extends IGeneral {
@@ -339,6 +627,8 @@ export interface IFramework extends IGeneral {
 	 */
 
 	git?: IGitProvider;
+
+	gitProvider?: string;
 
 	repoURL?: string;
 
@@ -519,6 +809,41 @@ export interface IAppEnvironment {
 	 * Collection array of environment variables
 	 */
 	envVars?: KubeEnvironmentVariable[];
+
+	/**
+	 * User name of the first person who deploy on this environment.
+	 */
+	createdBy?: string;
+
+	/**
+	 * User name of the last person who deploy or update this environment.
+	 */
+	lastUpdatedBy?: string;
+
+	/**
+	 * ID of the creator
+	 */
+	creator?: any;
+
+	/**
+	 * Update time
+	 */
+	updatedAt?: Date;
+
+	/**
+	 * Deployment's status
+	 */
+	status?: AppStatus;
+
+	/**
+	 * Amount of ready instances
+	 */
+	readyCount?: number;
+
+	/**
+	 * A screenshot URL from build success
+	 */
+	screenshot?: string;
 }
 
 export interface ICloudProvider extends IGeneral {
@@ -719,6 +1044,27 @@ export interface IBuild extends IGeneral {
 	appSlug?: string;
 
 	/**
+	 * CLI Version
+	 */
+	cliVersion?: string;
+	/**
+	 * Image tag is also "buildNumber"
+	 */
+	tag?: string;
+	/**
+	 * Build start time
+	 */
+	startTime?: Date;
+	/**
+	 * Build end time
+	 */
+	endTime?: Date;
+	/**
+	 * Build duration in miliseconds
+	 */
+	duration?: number;
+
+	/**
 	 * ID of the app
 	 *
 	 * @remarks This can be populated to {Project} data
@@ -799,3 +1145,94 @@ export interface IRelease extends IGeneral {
 	 */
 	workspace?: IWorkspace | string;
 }
+
+// http methods
+export const requestMethodList = ["GET", "POST", "PATCH", "DELETE"] as const;
+export type RequestMethodType = (typeof requestMethodList)[number];
+
+export const weekDays = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
+export type WeekDay = (typeof weekDays)[number];
+
+export const cronjobRepeatUnitList = ["second", "minute", "hour", "day", "month", "year"] as const;
+export type CronjobRepeatUnit = (typeof cronjobRepeatUnitList)[number];
+
+// cronjob status
+export const cronjobStatusList = ["failed", "success"] as const;
+export type CronjobStatus = (typeof cronjobStatusList)[number];
+
+export type CronjobRequest = {
+	url?: string;
+	method?: RequestMethodType;
+	params?: Record<string, string>;
+	body?: Record<string, string>;
+	headers?: Record<string, string>;
+};
+
+export type CronjobRepeat = {
+	range?: number;
+	unit?: CronjobRepeatUnit;
+};
+
+export type CronjonRepeatCondition = {
+	/**
+	 * Array of hours from 0 to 23
+	 */
+	atHours?: number[];
+	/**
+	 * Array of minutes from 0 to 59
+	 */
+	atMins?: number[];
+	/**
+	 * Array of weekdays
+	 */
+	atWeekDays?: WeekDay[];
+	/**
+	 * Array of days from 1 to 31
+	 */
+	atDays?: number[];
+	/**
+	 * Array of days from 0 to 11
+	 */
+	atMonths?: number[];
+};
+
+export type CronjobHistory = {
+	runAt: Date;
+	status: CronjobStatus;
+	responseStatus: string | number;
+	message: string;
+};
+
+export interface ICronjob extends IBase {
+	name?: string;
+	// api request
+	url?: string;
+	method?: RequestMethodType;
+	params?: Record<string, string>;
+	body?: Record<string, string>;
+	headers?: Record<string, string>;
+	// schedule
+	nextRunAt?: Date;
+	repeat?: CronjobRepeat;
+	repeatCondition?: CronjonRepeatCondition;
+	// history
+	history?: CronjobHistory[];
+}
+export type CronjobDto = Omit<ICronjob, keyof HiddenBodyKeys>;
+
+export interface ICloudDatabase extends IBase {
+	name?: string;
+	verified?: boolean;
+	type?: CloudDatabaseType;
+	provider?: string;
+	user?: string;
+	pass?: string;
+	host?: string;
+	port?: number;
+	url?: string;
+	/**
+	 * Cronjob ID
+	 */
+	autoBackup?: string | ICronjob;
+}
+export type CloudDatabaseDto = Omit<ICloudDatabase, keyof HiddenBodyKeys>;

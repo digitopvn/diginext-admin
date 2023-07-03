@@ -19,9 +19,9 @@ const GitProviderNewEdit = (props: GitProviderNewEditProps = {}) => {
 	const smartFormConfigs: SmartFormElementProps[] = [
 		{ type: "input", label: "Name", name: "name", placeholder: "Github" },
 		{ type: "input", label: "Host", name: "host", placeholder: "github.com" },
-		{ type: "input", label: "Workspace name", name: "gitWorkspace", placeholder: "https://github.com/user/repo.git" },
-		{ type: "input", label: "Workspace URL", name: "repo.url", placeholder: "git@github.com:user/repo.git" },
-		{ type: "input", label: "Workspace SSH Prefix", name: "repo.sshPrefix", placeholder: "main" },
+		{ type: "input", label: "Workspace name", name: "gitWorkspace", placeholder: "my-organization" },
+		{ type: "input", label: "Workspace URL", name: "repo.url", placeholder: "https://github.com/my-organization" },
+		{ type: "input", label: "Workspace SSH Prefix", name: "repo.sshPrefix", placeholder: "git@github.com:my-organization" },
 	];
 
 	return <SmartForm name="gitProvider" api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />;

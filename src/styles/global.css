@@ -20,3 +20,34 @@
 .anticon {
 	vertical-align: middle;
 }
+
+.ant-layout .ant-layout-sider-light .ant-layout-sider-zero-width-trigger {
+	top: 4px;
+	z-index: 101;
+}
+
+.ant-menu-inline .ant-menu-item {
+	width: 100%;
+}
+
+.ant-table-wrapper .ant-table.ant-table-small,
+.ant-table-wrapper .ant-table.ant-table-small th,
+.ant-table-wrapper .ant-table.ant-table-small td,
+.ant-table-wrapper .ant-table.ant-table-small span,
+.ant-table-wrapper .ant-table.ant-table-small li {
+	font-size: 12px;
+}
+
+a {
+	color: #1668dc;
+}
+
+/* Tailwind Plugin for correct full height on iOS */
+.full-height {
+	height: 100vh;
+}
+@supports (-webkit-touch-callout: none) {
+	.full-height {
+		height: -webkit-fill-available;
+	}
+}

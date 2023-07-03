@@ -1,6 +1,5 @@
 import { Card, Divider, List, Typography } from "antd";
 import dayjs from "dayjs";
-import React from "react";
 
 import { useGitPublicKeyApi } from "@/api/api-git-provider";
 import { useApiKeyListApi } from "@/api/api-key";
@@ -15,7 +14,6 @@ dayjs.extend(localizedFormat);
 
 export const WorkspaceSettings = () => {
 	const workspace = useWorkspace();
-	// console.log("workspace :>> ", workspace);
 
 	const { data: { list: apiKeys = [] } = { list: [] } } = useApiKeyListApi();
 	// console.log("apiKeys :>> ", apiKeys);
@@ -25,6 +23,15 @@ export const WorkspaceSettings = () => {
 	return (
 		<div className="px-4 py-6">
 			<Typography.Title>{workspace?.name} Workspace</Typography.Title>
+
+			{/* DX KEY */}
+			<Card title="DX_KEY">
+				<div key={`dx-key`}>
+					<CopyCode mode="inline" value={workspace?.dx_key || ""} />
+				</div>
+			</Card>
+
+			<Divider dashed />
 
 			{/* API ACCESS TOKEN */}
 			{apiKeys.length > 0 && (
@@ -43,7 +50,7 @@ export const WorkspaceSettings = () => {
 
 			<Divider dashed />
 
-			{/* PUBLIC KEY */}
+			{/* SSH PUBLIC KEY */}
 			<Card title="PUBLIC KEY">
 				<div key={`ssh-public-key`}>
 					<CopyCode mode="inline" value={publicKeyRes?.data.publicKey || ""} />
