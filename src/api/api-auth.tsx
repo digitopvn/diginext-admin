@@ -1,8 +1,9 @@
 import { LoadingOutlined } from "@ant-design/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button } from "antd";
 import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
-import { isEmpty, trimEnd } from "lodash";
+import { endsWith, isEmpty } from "lodash";
 import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
@@ -22,26 +23,27 @@ export const login = (params: { redirectURL?: string } = {}) => {
 };
 
 export const useAuthApi = (props: { access_token?: string } = {}) => {
-	const [routerQuery] = useRouterQuery();
 	const router = useRouter();
+	const access_token = (router.query.access_token || getCookie("x-auth-cookie")) as string;
+	// console.log("useAuthApi > access_token :>> ", access_token);
 
 	return useQuery({
-		staleTime: 5 * 60 * 1000, // 5 minutes
+		// staleTime: 5 * 60 * 1000, // 5 minutes
 		// cacheTime: 60 * 1000,
 		queryKey: ["auth"],
-		// enabled: typeof access_token !== "undefined",
+		enabled: typeof access_token !== "undefined",
 		queryFn: async () => {
-			const urlParams = new URLSearchParams(router.asPath.split("?")[1]);
-			const query = Object.fromEntries(urlParams);
-			const { access_token: queryToken } = query;
 			// try the best to get "access_token"...
-			const token = props.access_token || router.query.access_token || routerQuery.access_token || queryToken || getCookie("x-auth-cookie");
-			const headers = token ? { Authorization: `Bearer ${trimEnd(token, "%23")}` } : {};
+			const ac = access_token && endsWith(access_token, "%23") ? access_token.substring(0, access_token.length - 3) : access_token;
+			const headers = ac ? { Authorization: `Bearer ${ac}` } : {};
+			console.log("useAuthApi > queryFn > headers :>> ", headers);
+
 			try {
-				const { data } = await axios.get(
-					`${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile${token ? `?access_token=${trimEnd(token, "%23")}` : ""}`,
-					{ headers }
-				);
+				const url = `${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile${ac ? `?access_token=${ac}` : ""}`;
+				// console.log("useAuthApi > queryFn > url :>> ", url);
+				const { data } = await axios.get(url, { headers });
+				// console.log("useAuthApi > queryFn > profile :>> ", JSON.stringify(data, null, 2));
+				if (data?.token?.access_token) setCookie("x-auth-cookie", data?.token?.access_token);
 				return data;
 			} catch (e) {
 				console.error("useAuthApi >", e);
@@ -57,14 +59,9 @@ export const useAuth = (props: { redirectUrl?: string } = {}) => {
 	const router = useRouter();
 	const [query] = useRouterQuery();
 
-	const { access_token = getCookie("x-auth-cookie") } = query;
-	if (access_token) setCookie("x-auth-cookie", trimEnd(access_token, "%23"));
-
-	// const [user, setUser] = useState<IUser>();
-
-	const authActions = useAuthApi({ access_token: access_token as string });
-	const { data: response, status: apiStatus, isError, isFetched, isLoading, isSuccess, refetch } = authActions;
-	const { status: responseStatus, data } = response || {};
+	const authActions = useAuthApi();
+	const { data: response, status: apiStatus, refetch, isStale, isRefetching } = authActions;
+	const { status: responseStatus } = response || {};
 	const user = response?.data as IUser | undefined;
 	const queryClient = useQueryClient();
 
@@ -73,24 +70,38 @@ export const useAuth = (props: { redirectUrl?: string } = {}) => {
 		await refetch();
 	};
 
-	useEffect(() => {
-		if (!router.isReady) return;
+	const access_token = (router.query.access_token || getCookie("x-auth-cookie")) as string;
 
-		console.log(`----------------------------------`);
+	useEffect(() => {
+		// console.log(`[1] ----------------------------------`);
 		// console.log("apiStatus :>> ", apiStatus);
 		// console.log("responseStatus :>> ", responseStatus);
 		// console.log("user :>> ", user);
-		// console.log("access_token :>> ", access_token);
 
+		// const access_token = (router.query.access_token || getCookie("x-auth-cookie")) as string;
+		// console.log("access_token :>> ", access_token);
+		// console.log("isStale :>> ", isStale);
+		// console.log("isRefetching :>> ", isRefetching);
+		// console.log(`---------------------------------- [1]`);
+
+		if (!access_token) {
+			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
+			return;
+		}
+		if (isRefetching) return;
 		if (typeof responseStatus === "undefined") return;
 		if (apiStatus === "loading") return;
 
-		if (!access_token || !responseStatus) {
+		if (!responseStatus && !user) {
 			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
-		} else if (isEmpty(user?.activeWorkspace) || isEmpty(user?.activeRole)) {
-			router.push(`/workspace/select?access_token=${trimEnd(access_token, "%23")}`);
+			return;
 		}
-	}, [apiStatus, responseStatus, access_token]);
+
+		if (isEmpty(user?.activeWorkspace) || isEmpty(user?.activeRole)) {
+			// reload().then(() => router.push(`/workspace/select`));
+			router.push(`/workspace/select`);
+		}
+	}, [apiStatus, access_token]);
 
 	return [user, authActions] as [IUser, typeof authActions];
 };
@@ -100,6 +111,7 @@ export const AuthPage = (props: { children?: ReactNode } = {}) => {
 
 	const router = useRouter();
 
+	const access_token = router.query.access_token || getCookie("x-auth-cookie");
 	const [user, { status, isLoading, isFetched }] = useAuth();
 
 	if (isLoading)
@@ -110,7 +122,21 @@ export const AuthPage = (props: { children?: ReactNode } = {}) => {
 			</CenterContainer>
 		);
 
-	if (isFetched && isEmpty(user)) return <></>;
+	if (isFetched && !access_token && isEmpty(user))
+		return (
+			<CenterContainer>
+				<p className="ml-2">Unauthenticated.</p>
+				<Button href="/login">Login</Button>
+			</CenterContainer>
+		);
+
+	if (isFetched && access_token && isEmpty(user))
+		return (
+			<CenterContainer>
+				<LoadingOutlined />
+				<span className="ml-2">Loading...</span>
+			</CenterContainer>
+		);
 
 	if (isFetched && (isEmpty(user?.activeWorkspace) || isEmpty(user?.activeRole)))
 		return (

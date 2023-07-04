@@ -133,7 +133,7 @@ export const useApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {
 	headers["Cache-Control"] = "no-cache";
 	// console.log(apiPath, "> headers :>> ", headers);
 
-	return useQuery<ApiResponse<T>, Error>({
+	return useQuery<ApiResponse<T>, Error, ApiResponse<T>>({
 		queryKey: keys,
 		queryFn: async () => {
 			const { data } = await axios.get<ApiResponse<T>>(`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}`, { ...options, headers });

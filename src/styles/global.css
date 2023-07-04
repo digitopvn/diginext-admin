@@ -4,6 +4,11 @@
 
 @tailwind utilities;
 
+html,
+body {
+	@apply w-full relative overflow-x-hidden;
+}
+
 .content p {
 	@apply my-6;
 }
