@@ -65,11 +65,7 @@ export class Config {
 	}
 
 	static get NEXT_PUBLIC_BASE_URL() {
-		if (typeof window !== "undefined") {
-			if (window.location.origin.indexOf("localhost") > -1) return "http://localhost:3000";
-			if (window.location.origin.indexOf("192.168.50.74") > -1) return "http://192.168.50.74:3000";
-		}
-		return trimEnd(process.env.NEXT_PUBLIC_BASE_URL || "", "/") || "/";
+		return typeof window !== "undefined" ? window.location.origin : trimEnd(process.env.NEXT_PUBLIC_BASE_URL || "", "/") || "/";
 	}
 
 	static get DISABLE_INPECT_MEMORY() {

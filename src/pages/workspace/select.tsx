@@ -1,4 +1,5 @@
 import { LoadingOutlined, LogoutOutlined } from "@ant-design/icons";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button, Checkbox, Form, Input, Select, Typography } from "antd";
 import { useRouter } from "next/router";
 import type { SyntheticEvent } from "react";
@@ -34,6 +35,8 @@ interface WorkspaceInputData {
 const WorkspaceSetupPage = () => {
 	const router = useRouter();
 
+	const queryClient = useQueryClient();
+
 	const [wsName, setWsName] = useState("");
 	// const [dxKey, setDxKey] = useState("");
 	const [err, setErr] = useState("");
@@ -49,8 +52,8 @@ const WorkspaceSetupPage = () => {
 	const joinWorkspace = async (workspaceId: string) => {
 		const res = await joinWorkspaceApi({ userId: user._id, workspace: workspaceId });
 		if (res?.status) {
-			// await queryClient.invalidateQueries({ queryKey: ["auth"] });
-			refetch();
+			await queryClient.invalidateQueries({ queryKey: ["auth"] });
+			await refetch();
 
 			// redirect to workspace URL:
 			const url = new URL(window.location.href);
@@ -68,7 +71,10 @@ const WorkspaceSetupPage = () => {
 		const result = await createWorkspaceApi(wsData);
 		if (result?.status) {
 			const workspace = result?.data;
+
+			await queryClient.invalidateQueries({ queryKey: ["auth"] });
 			await refetch();
+
 			router.push(isDev() ? `${Config.NEXT_PUBLIC_BASE_URL}` : `/`);
 		} else {
 			setErr(result?.messages?.join(".") || "Internal Server Error");

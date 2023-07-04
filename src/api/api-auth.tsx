@@ -1,9 +1,8 @@
 import { LoadingOutlined } from "@ant-design/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Alert } from "antd";
 import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
-import { isEmpty } from "lodash";
+import { isEmpty, trimEnd } from "lodash";
 import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
@@ -24,8 +23,6 @@ export const login = (params: { redirectURL?: string } = {}) => {
 
 export const useAuthApi = (props: { access_token?: string } = {}) => {
 	const [routerQuery] = useRouterQuery();
-
-	const { access_token = getCookie("x-auth-cookie") || routerQuery.access_token } = props;
 	const router = useRouter();
 
 	return useQuery({
@@ -37,10 +34,14 @@ export const useAuthApi = (props: { access_token?: string } = {}) => {
 			const urlParams = new URLSearchParams(router.asPath.split("?")[1]);
 			const query = Object.fromEntries(urlParams);
 			const { access_token: queryToken } = query;
-			const token = access_token ?? getCookie("x-auth-cookie") ?? queryToken;
-			const headers = token ? { Authorization: `Bearer ${token}` } : {};
+			// try the best to get "access_token"...
+			const token = props.access_token || router.query.access_token || routerQuery.access_token || queryToken || getCookie("x-auth-cookie");
+			const headers = token ? { Authorization: `Bearer ${trimEnd(token, "%23")}` } : {};
 			try {
-				const { data } = await axios.get(`${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile`, { headers });
+				const { data } = await axios.get(
+					`${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile${token ? `?access_token=${trimEnd(token, "%23")}` : ""}`,
+					{ headers }
+				);
 				return data;
 			} catch (e) {
 				console.error("useAuthApi >", e);
@@ -57,7 +58,7 @@ export const useAuth = (props: { redirectUrl?: string } = {}) => {
 	const [query] = useRouterQuery();
 
 	const { access_token = getCookie("x-auth-cookie") } = query;
-	if (access_token) setCookie("x-auth-cookie", access_token);
+	if (access_token) setCookie("x-auth-cookie", trimEnd(access_token, "%23"));
 
 	// const [user, setUser] = useState<IUser>();
 
@@ -69,40 +70,27 @@ export const useAuth = (props: { redirectUrl?: string } = {}) => {
 
 	const reload = async () => {
 		await queryClient.invalidateQueries({ queryKey: ["auth"] });
+		await refetch();
 	};
 
 	useEffect(() => {
 		if (!router.isReady) return;
 
-		const cookieToken = getCookie("x-auth-cookie") || query.access_token;
-
-		// console.log(`----------------------------------`);
+		console.log(`----------------------------------`);
 		// console.log("apiStatus :>> ", apiStatus);
 		// console.log("responseStatus :>> ", responseStatus);
 		// console.log("user :>> ", user);
-		// console.log("cookieToken :>> ", cookieToken);
+		// console.log("access_token :>> ", access_token);
 
 		if (typeof responseStatus === "undefined") return;
 		if (apiStatus === "loading") return;
 
-		if (!cookieToken || !responseStatus) {
+		if (!access_token || !responseStatus) {
 			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
 		} else if (isEmpty(user?.activeWorkspace) || isEmpty(user?.activeRole)) {
-			router.push(`/workspace/select`);
+			router.push(`/workspace/select?access_token=${trimEnd(access_token, "%23")}`);
 		}
-
-		// setTimeout(() => {
-		// 	if (!user?.activeWorkspace) return router.push(`/workspace/select`);
-
-		// 	if (!cookieToken || !responseStatus) {
-		// 		// return router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
-		// 		if (typeof window !== "undefined") window.location.href = redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`;
-		// 		return null;
-		// 	}
-
-		// 	return reload();
-		// }, 400);
-	}, [apiStatus, responseStatus]);
+	}, [apiStatus, responseStatus, access_token]);
 
 	return [user, authActions] as [IUser, typeof authActions];
 };
@@ -114,11 +102,6 @@ export const AuthPage = (props: { children?: ReactNode } = {}) => {
 
 	const [user, { status, isLoading, isFetched }] = useAuth();
 
-	// useEffect(() => {
-	// 	if (!router.isReady) return;
-	// 	if (status === "success" && !user) router.push("/login");
-	// }, [status, router.isReady]);
-
 	if (isLoading)
 		return (
 			<CenterContainer>
@@ -127,21 +110,13 @@ export const AuthPage = (props: { children?: ReactNode } = {}) => {
 			</CenterContainer>
 		);
 
-	if (isFetched && isEmpty(user))
-		return (
-			<>
-				Login required:
-				<br />
-				{JSON.stringify(user || {}, null, 2)}
-				<br />
-				Origin: {window?.location?.origin}
-			</>
-		);
+	if (isFetched && isEmpty(user)) return <></>;
 
-	if (!user?.activeWorkspace)
+	if (isFetched && (isEmpty(user?.activeWorkspace) || isEmpty(user?.activeRole)))
 		return (
 			<CenterContainer className="text-center">
-				<Alert message="Error" description={`This workspace does not exists.`} type="error" />
+				<LoadingOutlined />
+				<span className="ml-2">Loading...</span>
 			</CenterContainer>
 		);
 
