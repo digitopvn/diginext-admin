@@ -1,20 +1,14 @@
 /* eslint-disable no-nested-ternary */
-import { CloudUploadOutlined, DeleteOutlined, FieldTimeOutlined, HistoryOutlined, PlusOutlined } from "@ant-design/icons";
+import { CloudUploadOutlined, DeleteOutlined, DownloadOutlined } from "@ant-design/icons";
 import { useSize } from "ahooks";
 import { Button, notification, Popconfirm, Space, Table, Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import { isEmpty } from "lodash";
+import Link from "next/link";
 import React, { useRef, useState } from "react";
 
-import {
-	useCloudDatabaseActionAutoBackupApi,
-	useCloudDatabaseActionBackupApi,
-	useCloudDatabaseActionRestoreApi,
-	useCloudDatabaseDeleteApi,
-	useCloudDatabaseListApi,
-} from "@/api/api-cloud-database";
-import type { ICloudDatabase } from "@/api/api-types";
+import { useCloudDatabaseActionRestoreApi, useCloudDatabaseBackupDeleteApi, useCloudDatabaseBackupListApi } from "@/api/api-cloud-database";
+import type { ICloudDatabaseBackup } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -27,7 +21,7 @@ const relativeTime = require("dayjs/plugin/relativeTime");
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
-interface DataType extends ICloudDatabase {
+interface DataType extends ICloudDatabaseBackup {
 	key?: React.Key;
 	id?: string;
 	actions?: any;
@@ -35,36 +29,46 @@ interface DataType extends ICloudDatabase {
 
 const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
-export const DatabaseList = () => {
+export const DatabaseBackupList = () => {
+	// layout & query params
 	const { responsive } = useLayoutProvider();
+	const [query, { setQuery }] = useRouterQuery();
+	const { database } = query;
 
+	// list & pagination
 	const [page, setPage] = useState(1);
-	const { data, status } = useCloudDatabaseListApi({ populate: "owner,autoBackup", pagination: { page, size: pageSize } });
+	const { data, status } = useCloudDatabaseBackupListApi({
+		filter: { dbSlug: database },
+		populate: "owner,database",
+		pagination: { page, size: pageSize },
+	});
 	const { list, pagination } = data || {};
 	const { total_items } = pagination || {};
 
-	const [deleteApi] = useCloudDatabaseDeleteApi();
-	const [backupApi] = useCloudDatabaseActionBackupApi();
+	// actions
 	const [restoreApi] = useCloudDatabaseActionRestoreApi();
-	const [autoBackupApi] = useCloudDatabaseActionAutoBackupApi();
-	const [query, { setQuery }] = useRouterQuery();
+	const [deleteApi] = useCloudDatabaseBackupDeleteApi();
 
 	const columns: ColumnsType<DataType> = [
+		{
+			title: "No.",
+			width: 7,
+			key: "no",
+			dataIndex: "no",
+			render: (value, record, index) => <>{(page - 1) * pageSize + index + 1}</>,
+			// fixed: responsive?.md ? "left" : undefined,
+		},
 		{
 			title: "Name",
 			width: 50,
 			dataIndex: "name",
 			key: "name",
 			render: (value, record) => (
-				<Button
-					type="link"
-					onClick={() => setQuery({ lv1: "edit", type: "database", database: record.slug })}
-					style={{ overflowWrap: "break-word", whiteSpace: "pre-wrap", textAlign: "left" }}
-				>
+				<Link href={record.url || "#"} target="_blank">
 					{value}
-				</Button>
+				</Link>
 			),
-			fixed: responsive?.md ? "left" : undefined,
+			// fixed: responsive?.md ? "left" : undefined,
 			filterSearch: true,
 			filters: [{ text: "goon", value: "goon" }],
 			onFilter: (value, record) => (record.name ? record.name.indexOf(value.toString()) > -1 : true),
@@ -73,37 +77,18 @@ export const DatabaseList = () => {
 			title: "Type",
 			dataIndex: "type",
 			key: "type",
-			width: 20,
+			width: 18,
 			render: (value, record) => <Tag>{value}</Tag>,
 			// filterSearch: true,
 			// filters: [{ text: "goon", value: "goon" }],
 			// onFilter: (value, record) => (record.slug ? record.slug.indexOf(value.toString()) > -1 : true),
 		},
 		{
-			title: "Verified",
-			dataIndex: "verified",
-			key: "verified",
-			width: 20,
-			render: (value, record) => (record.verified ? <Tag color="success">YES</Tag> : <Tag color="error">NO</Tag>),
-			// filterSearch: true,
-			// filters: [{ text: "goon", value: "goon" }],
-			// onFilter: (value, record) => (record.slug ? record.slug.indexOf(value.toString()) > -1 : true),
-		},
-		{
-			title: "Auto-backup",
-			dataIndex: "auto-backup",
-			key: "auto-backup",
-			width: 20,
-			render: (value, record) =>
-				!isEmpty(record.autoBackup) ? (
-					(record.autoBackup as any).active ? (
-						<Tag color="success">YES</Tag>
-					) : (
-						<Tag color="volcano">STOPPED</Tag>
-					)
-				) : (
-					<Tag color="error">NO</Tag>
-				),
+			title: "Database",
+			dataIndex: "dbSlug",
+			key: "dbSlug",
+			width: 22,
+			render: (value, record) => (record.dbSlug ? <Tag color="success">{record.dbSlug}</Tag> : <Tag color="error">-</Tag>),
 			// filterSearch: true,
 			// filters: [{ text: "goon", value: "goon" }],
 			// onFilter: (value, record) => (record.slug ? record.slug.indexOf(value.toString()) > -1 : true),
@@ -127,28 +112,10 @@ export const DatabaseList = () => {
 			title: <Typography.Text className="text-xs md:text-sm">Action</Typography.Text>,
 			key: "action",
 			fixed: "right",
-			width: responsive?.md ? 30 : 26,
+			width: responsive?.md ? 20 : 20,
 			render: (value, record) => record.actions,
 		},
 	];
-
-	const backupDatabase = async (id?: string) => {
-		if (!id) notification.error({ message: `Unable to backup.` });
-		const res = await backupApi({ _id: id });
-		if (res?.status) notification.success({ message: `Database has been backed up successfully.` });
-	};
-
-	const restoreDatabase = async (id?: string) => {
-		if (!id) notification.error({ message: `Unable to restore.` });
-		const res = await restoreApi({ _id: id });
-		if (res?.status) notification.success({ message: `Database has been restored successfully.` });
-	};
-
-	const autoBackupDatabase = async (id?: string) => {
-		if (!id) notification.error({ message: `Unable to auto backup.` });
-		const res = await autoBackupApi({ _id: id });
-		if (res?.status) notification.success({ message: `Database has been enabled auto-backup.` });
-	};
 
 	const deleteItem = async (id?: string) => {
 		if (!id) notification.error({ message: `Unable to delete this item.` });
@@ -167,14 +134,11 @@ export const DatabaseList = () => {
 				...item,
 				actions: (
 					<Space.Compact>
-						<Tooltip overlay="Run backup">
-							<Button icon={<CloudUploadOutlined />} onClick={() => backupDatabase(item?._id)} />
+						<Tooltip overlay="Download">
+							<Button icon={<DownloadOutlined />} href={item.url} target="_blank" />
 						</Tooltip>
-						<Tooltip overlay="Enable auto-backup">
-							<Button icon={<FieldTimeOutlined />} onClick={() => autoBackupDatabase(item?._id)} />
-						</Tooltip>
-						<Tooltip overlay="Backup history">
-							<Button icon={<HistoryOutlined />} onClick={() => setQuery({ lv1: "db_backups", database: item?.slug })} />
+						<Tooltip overlay="Restore">
+							<Button disabled icon={<CloudUploadOutlined />} onClick={() => restoreApi({ id: item?._id })} />
 						</Tooltip>
 						<Popconfirm
 							title="Are you sure to delete this item?"
@@ -183,7 +147,7 @@ export const DatabaseList = () => {
 							okText="Yes"
 							cancelText="No"
 						>
-							<Button icon={<DeleteOutlined />}></Button>
+							<Button icon={<DeleteOutlined />} />
 						</Popconfirm>
 					</Space.Compact>
 				),
@@ -197,19 +161,23 @@ export const DatabaseList = () => {
 		<>
 			{/* Page title & desc here */}
 			<PageTitle
-				title={`Databases (${total_items ?? "-"})`}
+				title={`Database Backups (${total_items ?? "-"})`}
 				breadcrumbs={[{ name: "Workspace" }]}
-				actions={[
-					<Button
-						key="workspace-setting-btn"
-						type="default"
-						icon={<PlusOutlined className="align-middle" />}
-						onClick={() => setQuery({ lv1: "new", type: "database" })}
-					>
-						Add
-					</Button>,
-				]}
-			/>
+				actions={
+					[
+						// <Button
+						// 	key="workspace-setting-btn"
+						// 	type="default"
+						// 	icon={<PlusOutlined className="align-middle" />}
+						// 	onClick={() => setQuery({ lv1: "new", type: "database" })}
+						// >
+						// 	Add
+						// </Button>,
+					]
+				}
+			>
+				<Tag color="success">{database}</Tag>
+			</PageTitle>
 			<div className="h-full flex-auto overflow-hidden" ref={ref}>
 				<Table
 					sticky

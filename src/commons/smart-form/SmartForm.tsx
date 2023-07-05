@@ -27,7 +27,7 @@ export type SmartFormProps<T> = {
 	api?: {
 		useSlugApi?: UseQueryResult<T, Error>;
 		useUpdateApi?: UseUpdateApi<T>;
-		useCreateApi?: UseCreateApi<T>;
+		useCreateApi?: UseCreateApi<T, T>;
 	};
 	configs?: SmartFormElementProps[];
 };

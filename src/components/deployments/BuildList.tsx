@@ -44,112 +44,6 @@ interface DataType {
 	children?: DataType[];
 }
 
-const columns: ColumnsType<IBuild & DataType> = [
-	{
-		title: "Name",
-		width: 70,
-		dataIndex: "name",
-		key: "name",
-		// fixed: "left",
-		filterSearch: true,
-		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
-		render: (value, record) => (
-			<>
-				<p>
-					<Link href={`/build/logs?build_slug=${record.slug}`}>
-						<strong>{value}</strong>
-					</Link>
-				</p>
-				<ul className="ml-4 list-disc">
-					<li>
-						Project: <Tag color="blue">{record.projectSlug}</Tag>
-					</li>
-					<li>
-						App: <Tag color="cyan">{record.appSlug}</Tag>
-					</li>
-					{record.duration ? (
-						<li>
-							Duration:{" "}
-							<Tag key="duration" color="gold" icon={<ClockCircleOutlined />}>
-								{humanrizer.humanize(record.duration || 0, { round: true })}
-							</Tag>
-						</li>
-					) : (
-						<></>
-					)}
-					<li>
-						Created{" "}
-						<strong>
-							<DateDisplay date={record.createdAt} />
-						</strong>
-					</li>
-				</ul>
-			</>
-		),
-	},
-	{
-		title: "Created by",
-		dataIndex: "owner",
-		key: "owner",
-		width: 40,
-		filterSearch: true,
-		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.owner && ((record.owner as IUser).slug || "").indexOf(value.toString()) > -1) || true,
-		render: (value) => <>{value?.name}</>,
-	},
-	// {
-	// 	title: "Created at",
-	// 	dataIndex: "createdAt",
-	// 	key: "createdAt",
-	// 	width: 50,
-	// 	render: (value) => <DateDisplay date={value} />,
-	// 	sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
-	// },
-	{
-		title: "Status",
-		dataIndex: "status",
-		// fixed: "right",
-		key: "status",
-		width: 30,
-		filters: [{ text: "live", value: "live" }],
-		render: (value) => {
-			let color = "warning";
-			let icon = <InfoCircleOutlined />;
-			switch (value) {
-				case "building":
-					color = "processing";
-					icon = <LoadingOutlined className="align-middle" />;
-					break;
-				case "failed":
-					color = "error";
-					icon = <CloseCircleOutlined className="align-middle" />;
-					break;
-				case "success":
-					color = "success";
-					icon = <CheckCircleOutlined className="align-middle" />;
-					break;
-				case "start":
-				default:
-					color = "default";
-					icon = <InfoCircleOutlined />;
-					break;
-			}
-			return (
-				<Tag color={color} icon={icon}>
-					{value}
-				</Tag>
-			);
-		},
-	},
-	{
-		title: "Action",
-		key: "action",
-		width: 30,
-		dataIndex: "action",
-	},
-];
-
 const pageSize = 100;
 
 type IBuildListProps = {
@@ -159,11 +53,110 @@ type IBuildListProps = {
 };
 
 export const BuildList = () => {
+	// query params
 	const router = useRouter();
 	const root = useApp();
-
 	const [query, { setQuery }] = useRouterQuery();
 	const { project, app, env } = query;
+
+	// configuration
+	const columns: ColumnsType<IBuild & DataType> = [
+		{
+			title: "Name",
+			width: 70,
+			dataIndex: "name",
+			key: "name",
+			// fixed: "left",
+			filterSearch: true,
+			filters: [{ text: "goon", value: "goon" }],
+			onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
+			render: (value, record) => (
+				<>
+					<p>
+						<Link href={`/build/logs?build_slug=${record.slug}`}>
+							<strong>{value}</strong>
+						</Link>
+					</p>
+					<ul className="ml-4 list-disc">
+						<li>
+							Project: <Tag color="blue">{record.projectSlug}</Tag>
+						</li>
+						<li>
+							App: <Tag color="cyan">{record.appSlug}</Tag>
+						</li>
+						{record.duration ? (
+							<li>
+								Duration:{" "}
+								<Tag key="duration" color="gold" icon={<ClockCircleOutlined />}>
+									{humanrizer.humanize(record.duration || 0, { round: true })}
+								</Tag>
+							</li>
+						) : (
+							<></>
+						)}
+						<li>
+							Created{" "}
+							<strong>
+								<DateDisplay date={record.createdAt} />
+							</strong>
+						</li>
+					</ul>
+				</>
+			),
+		},
+		{
+			title: "Created by",
+			dataIndex: "owner",
+			key: "owner",
+			width: 40,
+			filterSearch: true,
+			filters: [{ text: "goon", value: "goon" }],
+			onFilter: (value, record) => (record.owner && ((record.owner as IUser).slug || "").indexOf(value.toString()) > -1) || true,
+			render: (value) => <>{value?.name}</>,
+		},
+		{
+			title: "Status",
+			dataIndex: "status",
+			// fixed: "right",
+			key: "status",
+			width: 30,
+			filters: [{ text: "live", value: "live" }],
+			render: (value) => {
+				let color = "warning";
+				let icon = <InfoCircleOutlined />;
+				switch (value) {
+					case "building":
+						color = "processing";
+						icon = <LoadingOutlined className="align-middle" />;
+						break;
+					case "failed":
+						color = "error";
+						icon = <CloseCircleOutlined className="align-middle" />;
+						break;
+					case "success":
+						color = "success";
+						icon = <CheckCircleOutlined className="align-middle" />;
+						break;
+					case "start":
+					default:
+						color = "default";
+						icon = <InfoCircleOutlined />;
+						break;
+				}
+				return (
+					<Tag color={color} icon={icon}>
+						{value}
+					</Tag>
+				);
+			},
+		},
+		{
+			title: "Action",
+			key: "action",
+			width: 30,
+			dataIndex: "action",
+		},
+	];
 
 	const filter: any = {};
 	if (project) filter.projectSlug = project;

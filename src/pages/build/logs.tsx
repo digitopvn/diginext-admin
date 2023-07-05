@@ -1,26 +1,11 @@
 /* eslint-disable no-nested-ternary */
-import {
-	BuildOutlined,
-	CalendarOutlined,
-	CheckCircleOutlined,
-	ClockCircleOutlined,
-	ExclamationCircleOutlined,
-	LoadingOutlined,
-	UserOutlined,
-} from "@ant-design/icons";
-import { Space, Tag } from "antd";
+
 import dayjs from "dayjs";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { HumanizeDuration, HumanizeDurationLanguage } from "humanize-duration-ts";
-import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { useInterval } from "usehooks-ts";
 
-import { useBuildSlugApi } from "@/api/api-build";
-import { PageTitle } from "@/commons/PageTitle";
 import { BuildLogs } from "@/components/deployments/BuildLogs";
-import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { Main } from "@/templates/Main";
 import { Meta } from "@/templates/Meta";
 
@@ -36,84 +21,10 @@ const humanrizer = new HumanizeDuration(humanrizerLang);
 const BuildDetailPage = () => {
 	const router = useRouter();
 
-	const [buildDuration, setBuildDuration] = useState("0");
-
-	// console.log("router.asPath :>> ", router.asPath);
-	// const { slugs = [] } = router.query;
-	// const [buildSlug = ""] = slugs as string[];
-
-	const [{ build_slug }] = useRouterQuery();
-	// console.log("build_slug :>> ", build_slug);
-	const { data: build } = useBuildSlugApi(build_slug);
-
-	useInterval(
-		() => {
-			if (build?.startTime) setBuildDuration(humanrizer.humanize(dayjs(build.startTime).diff(dayjs()), { round: true }));
-			if (build?.duration) setBuildDuration(humanrizer.humanize(build?.duration || 0, { round: true }));
-		},
-		build?.duration ? null : 1000
-	);
-
-	useEffect(() => {
-		if (build?.duration) setBuildDuration(humanrizer.humanize(build?.duration || 0, { round: true }));
-	}, [build?.duration]);
-
-	if (!router.isReady || !build_slug) return <></>;
-
 	return (
 		<Main meta={<Meta title="Build Detail" description="View the details of your build logs." />}>
-			{/* Page title & desc here */}
-			<PageTitle
-				title={`Build Logs: ${build_slug}`}
-				breadcrumbs={[
-					{ name: "Builds", url: "/build" },
-					{ name: `Project "${build?.projectSlug}"` },
-					{ name: `App "${build?.appSlug}"` },
-					build?.env ? { name: `Env "${build?.env}"` } : {},
-				]}
-				actions={[
-					<Tag key="cli-version" color="gold" icon={<ClockCircleOutlined />}>
-						CLI: {build?.cliVersion || "unknown"}
-					</Tag>,
-					<Tag key="duration" color="gold" icon={<ClockCircleOutlined />}>
-						Duration: {buildDuration}
-					</Tag>,
-					<Tag
-						key="status"
-						color="green"
-						icon={
-							build?.status === "success" ? (
-								<CheckCircleOutlined />
-							) : build?.status === "building" ? (
-								<LoadingOutlined />
-							) : build?.status === "failed" ? (
-								<ExclamationCircleOutlined />
-							) : (
-								<></>
-							)
-						}
-					>
-						{build?.status}
-					</Tag>,
-				]}
-			>
-				<Space wrap className="mt-2">
-					<Tag key="created-date" color="geekblue" icon={<CalendarOutlined />}>
-						{dayjs(build?.createdAt).format("LLL")}
-					</Tag>
-					<Tag key="created-by" color="magenta" icon={<UserOutlined />}>
-						{build?.createdBy}
-					</Tag>
-					<Link href={`https://${build?.image}:${build?.tag}`} target="_blank">
-						<Tag key="image-tag" color="volcano" icon={<BuildOutlined />}>
-							click to view image url
-						</Tag>
-					</Link>
-				</Space>
-			</PageTitle>
-
 			{/* Page Content */}
-			<div className="p-5">
+			<div className="flex-auto overflow-hidden">
 				<BuildLogs />
 			</div>
 		</Main>

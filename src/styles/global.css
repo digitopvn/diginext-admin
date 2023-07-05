@@ -17,6 +17,17 @@ body {
 	@apply my-6;
 }
 
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}
+
 /* Reset button of Antd because Tailwind conflict */
 .ant-btn-primary {
 	background: #1677ff;

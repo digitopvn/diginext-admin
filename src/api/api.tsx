@@ -1,3 +1,4 @@
+import type { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { App } from "antd";
 // import { notification } from "antd";
@@ -178,9 +179,9 @@ export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options
 	});
 };
 
-export type UseCreateApi<T> = [(data: T) => Promise<ApiResponse<T>> | undefined, "error" | "idle" | "loading" | "success"];
+export type UseCreateApi<R, T> = [UseMutateAsyncFunction<ApiResponse<R>, Error, T, unknown>, "error" | "idle" | "loading" | "success"];
 
-export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}): UseCreateApi<T> => {
+export const useCreateApi = <R = any, E = Error, T = any>(keys: any[], apiPath: string, options: ApiOptions = {}): UseCreateApi<R, T> => {
 	// const [noti] = notification.useNotification();
 	const app = useApp();
 	const { notification } = app;
@@ -192,7 +193,7 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptio
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
-	const mutation = useMutation<ApiResponse<T>, Error, T>({
+	const mutation = useMutation<ApiResponse<R>, Error, T>({
 		mutationFn: async (newData) => {
 			const { populate, sort, pagination, filter = (newData as any)._id ? { _id: (newData as any)._id } : undefined } = options;
 			if ((newData as any)._id) {
@@ -203,8 +204,8 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptio
 			const populateParams = populate ? `populate=${populate}` : "";
 			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}${populateParams}`;
 
-			const { data, status } = await axios.post<ApiResponse<T>>(apiURL, newData, { ...options, headers });
-			if (status === 429) throw new Error("Too many requests.");
+			const { data, status: httpStatus } = await axios.post<ApiResponse<R>>(apiURL, newData, { ...options, headers });
+			if (httpStatus === 429) throw new Error("Too many requests.");
 
 			if (!data.status) {
 				if (!isEmpty(data.messages)) {

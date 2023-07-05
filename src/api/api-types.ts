@@ -109,8 +109,13 @@ export const gitProviderDomain = {
 export const buildStatusList = ["start", "building", "failed", "success"] as const;
 export type BuildStatus = (typeof buildStatusList)[number];
 
+// backup status
+export const backupStatusList = ["start", "in_progress", "failed", "success", "cancelled"] as const;
+export type BackupStatus = (typeof backupStatusList)[number];
+
 /**
  * App status:
+ * - `deploying`: App is being deployed.
  * - `healthy`: App's containers are running well.
  * - `partial_healthy`: Some of the app's containers are unhealthy.
  * - `undeployed`: App has not been deployed yet.
@@ -118,7 +123,7 @@ export type BuildStatus = (typeof buildStatusList)[number];
  * - `crashed`: App's containers are facing some unexpected errors.
  * - `unknown`: Other unknown errors.
  */
-export const appStatusList = ["healthy", "partial_healthy", "undeployed", "failed", "crashed", "unknown"] as const;
+export const appStatusList = ["deploying", "healthy", "partial_healthy", "undeployed", "failed", "crashed", "unknown"] as const;
 export type AppStatus = (typeof appStatusList)[number];
 
 // ssl
@@ -1236,3 +1241,20 @@ export interface ICloudDatabase extends IBase {
 	autoBackup?: string | ICronjob;
 }
 export type CloudDatabaseDto = Omit<ICloudDatabase, keyof HiddenBodyKeys>;
+
+export interface ICloudDatabaseBackup extends IBase {
+	name?: string;
+	status?: BackupStatus;
+	/**
+	 * Backup file path
+	 */
+	path?: string;
+	/**
+	 * Backup file URL
+	 */
+	url?: string;
+	type?: CloudDatabaseType;
+	dbSlug?: string;
+	database?: string | ICloudDatabase;
+}
+export type CloudDatabaseBackupDto = Omit<ICloudDatabaseBackup, keyof HiddenBodyKeys>;

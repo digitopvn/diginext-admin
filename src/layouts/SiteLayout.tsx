@@ -6,6 +6,7 @@ import { MenuSider } from "@/commons/MenuSider";
 import NewEditPage from "@/commons/NewEditPage";
 import { PageFooter } from "@/commons/PageFooter";
 import { SiteHeader } from "@/commons/SiteHeader";
+import { DatabaseBackupList } from "@/components/databases/DatabaseBackupList";
 import { AppLogs } from "@/components/deployments/AppLogs";
 import { BuildList } from "@/components/deployments/BuildList";
 import { BuildLogs } from "@/components/deployments/BuildLogs";
@@ -38,7 +39,14 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 	} = theme.useToken();
 
 	const openBuildList = (level = 1) => {
-		if (showDrawer) showDrawer({ title: "Builds", content: <BuildList /> }, { level });
+		if (showDrawer)
+			showDrawer(
+				{
+					title: "Builds",
+					content: <BuildList />,
+				},
+				{ level }
+			);
 	};
 
 	const openReleaseList = (level = 1) => {
@@ -46,7 +54,18 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 	};
 
 	const openBuildLogs = (level = 1) => {
-		if (showDrawer) showDrawer({ title: "Build Logs", content: <BuildLogs /> }, { level });
+		if (showDrawer)
+			showDrawer(
+				{
+					title: "Build Logs",
+					content: (
+						// <div className="p-4 pt-6">
+						<BuildLogs />
+						// </div>
+					),
+				},
+				{ level }
+			);
 	};
 
 	const openEnvVarsPage = (level = 1) => {
@@ -65,6 +84,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 		if (showDrawer) showDrawer({ title: `Deploy Environment: ${env.toUpperCase()}`, content: <DeployEnvironment /> }, { level });
 	};
 
+	const openDbBackupList = (level = 1) => {
+		if (showDrawer) showDrawer({ title: `Cloud Database Backups`, content: <DatabaseBackupList /> }, { level });
+	};
+
 	const openEditPage = (level = 1) => {
 		if (showDrawer) showDrawer({ title: "Edit", content: <NewEditPage /> }, { level });
 	};
@@ -78,6 +101,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 		switch (lv1) {
 			case "build":
 				openBuildList();
+				break;
+
+			case "build_logs":
+				openBuildLogs(1);
 				break;
 
 			case "release":
@@ -102,6 +129,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 
 			case "app_logs":
 				openAppDeployEnvLogsPage();
+				break;
+
+			case "db_backups":
+				openDbBackupList();
 				break;
 
 			default:
@@ -134,6 +165,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 
 			case "deployment_yaml":
 				openDeploymentYamlPage(2);
+				break;
+
+			case "db_backups":
+				openDbBackupList(2);
 				break;
 
 			default:
