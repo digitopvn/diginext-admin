@@ -21,6 +21,10 @@ export interface SummaryStats {
 	month: Stats;
 }
 
+export const useStatsVersionApi = () => {
+	return useApi<{ version: string }>(["stats", "version"], `/api/v1/stats/version`);
+};
+
 export const useStatsApi = () => {
 	return useApi<SummaryStats>(["stats", "summary"], `/api/v1/stats/summary`);
 };

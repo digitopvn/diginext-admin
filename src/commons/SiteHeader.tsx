@@ -1,4 +1,4 @@
-import { DownOutlined, MenuFoldOutlined, MenuUnfoldOutlined, QuestionCircleOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
+import { DownOutlined, MenuFoldOutlined, MenuUnfoldOutlined, QuestionCircleOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Button, Layout, Popover, Space, theme } from "antd";
 import React, { useEffect } from "react";
 import { useDarkMode } from "usehooks-ts";
@@ -41,8 +41,10 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 
 				{/* User & notification */}
 				<Space size={4}>
-					<Button type="text" icon={<SearchOutlined />} />
-					<Button type="text" icon={<QuestionCircleOutlined />} />
+					{/* <Button type="text" icon={<SearchOutlined />} /> */}
+
+					<Button type="text" icon={<QuestionCircleOutlined />} href="https://zii.vn/dx-docs" target="_blank" />
+
 					{/* eslint-disable-next-line tailwindcss/no-custom-classname */}
 					<Button
 						type="text"

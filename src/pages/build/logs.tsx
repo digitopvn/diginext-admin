@@ -1,8 +1,6 @@
 /* eslint-disable no-nested-ternary */
 
 import dayjs from "dayjs";
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { HumanizeDuration, HumanizeDurationLanguage } from "humanize-duration-ts";
 import { useRouter } from "next/router";
 
 import { BuildLogs } from "@/components/deployments/BuildLogs";
@@ -14,9 +12,6 @@ const relativeTime = require("dayjs/plugin/relativeTime");
 
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
-
-const humanrizerLang = new HumanizeDurationLanguage();
-const humanrizer = new HumanizeDuration(humanrizerLang);
 
 const BuildDetailPage = () => {
 	const router = useRouter();

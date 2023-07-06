@@ -72,10 +72,8 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	const scroll = useScroll(frameRef);
 	const contentRef = useRef<any>(null);
 	const contentSize = useSize(contentRef);
-	// console.log("contentSize :>> ", contentSize);
-	// console.log("scroll :>> ", scroll);
-	const preventScrollBottom = (scroll?.top || 0) > (contentSize?.height || 0) - (window?.innerHeight || 0);
-	// console.log("preventScrollBottom :>> ", preventScrollBottom);
+
+	const preventScrollBottom = typeof window === "undefined" ? false : (scroll?.top || 0) > (contentSize?.height || 0) - (window?.innerHeight || 0);
 
 	const {
 		token: { colorText },

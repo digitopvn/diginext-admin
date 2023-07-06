@@ -11,9 +11,9 @@ export const EnvName = {
 };
 
 export const AppConfig = {
-	site_name: "Diginext Admin",
-	title: "Diginext Admin",
-	description: "Welcome to an Admin Panel of Diginext.",
+	site_name: "Diginext",
+	title: "Diginext",
+	description: "Welcome to the Dashboard of Diginext.",
 	locale: "en",
 	tableConfig: {
 		defaultPageSize: 50,
