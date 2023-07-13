@@ -169,7 +169,7 @@ export const UserList = () => {
 				loading={status === "loading"}
 				columns={columns}
 				dataSource={displayedList}
-				scroll={{ x: 1000, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+				scroll={{ x: 1000, y: typeof size?.height !== "undefined" ? size.height - 140 : undefined }}
 				pagination={{ pageSize, total: total_items, position: ["bottomCenter"] }}
 				onChange={onTableChange}
 			/>

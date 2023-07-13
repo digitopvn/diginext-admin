@@ -1,5 +1,5 @@
 import { useCreateApi, useDeleteApi, useItemApi, useItemSlugApi, useListApi, useUpdateApi } from "./api";
-import type { ApiOptions, IApp, IAppEnvironment, KubeEnvironmentVariable } from "./api-types";
+import type { ApiOptions, IApp, IDeployEnvironment, KubeEnvironmentVariable } from "./api-types";
 
 export const useAppListApi = (options?: ApiOptions) => {
 	return useListApi<IApp>(["apps", "list"], `/api/v1/app`, options);
@@ -40,19 +40,19 @@ export const useAppAddDomainApi = (options?: ApiOptions) => {
 // APP DEPLOY ENVIRONMENT
 
 export const useAppDeployEnvironmentSlugApi = (slug: string, options?: ApiOptions) => {
-	return useItemSlugApi<IAppEnvironment>(["deploy_environment", slug], `/api/v1/app/deploy_environment`, slug, options);
+	return useItemSlugApi<IDeployEnvironment>(["deploy_environment", slug], `/api/v1/app/deploy_environment`, slug, options);
 };
 
 export const useAppDeployEnvironmentCreateApi = () => {
-	return useCreateApi<IAppEnvironment>(["deploy_environment"], `/api/v1/app/deploy_environment`);
+	return useCreateApi<IDeployEnvironment>(["deploy_environment"], `/api/v1/app/deploy_environment`);
 };
 
 export const useAppDeployEnvironmentUpdateApi = (options?: ApiOptions) => {
-	return useUpdateApi<IAppEnvironment>(["deploy_environment", "update"], `/api/v1/app/deploy_environment`, options);
+	return useUpdateApi<IDeployEnvironment>(["deploy_environment", "update"], `/api/v1/app/deploy_environment`, options);
 };
 
 export const useAppDeployEnvironmentDeleteApi = () => {
-	return useDeleteApi<IAppEnvironment>(["deploy_environment", "delete"], `/api/v1/app/deploy_environment`);
+	return useDeleteApi<IDeployEnvironment>(["deploy_environment", "delete"], `/api/v1/app/deploy_environment`);
 };
 
 // LOGS

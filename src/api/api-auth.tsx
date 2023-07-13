@@ -36,7 +36,7 @@ export const useAuthApi = (props: { access_token?: string } = {}) => {
 			// try the best to get "access_token"...
 			const ac = access_token && endsWith(access_token, "%23") ? access_token.substring(0, access_token.length - 3) : access_token;
 			const headers = ac ? { Authorization: `Bearer ${ac}` } : {};
-			console.log("useAuthApi > queryFn > headers :>> ", headers);
+			// console.log("useAuthApi > queryFn > headers :>> ", headers);
 
 			try {
 				const url = `${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile${ac ? `?access_token=${ac}` : ""}`;

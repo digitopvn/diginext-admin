@@ -22,7 +22,10 @@ export interface SummaryStats {
 }
 
 export const useStatsVersionApi = () => {
-	return useApi<{ version: string }>(["stats", "version"], `/api/v1/stats/version`);
+	return useApi<{ version: string }>(["stats", "version"], `/api/v1/stats/version`, {
+		// cache for 30 mins
+		staleTime: 30 * 60 * 1000,
+	});
 };
 
 export const useStatsApi = () => {

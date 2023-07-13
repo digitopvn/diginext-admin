@@ -1,5 +1,5 @@
 import { useApi, useCreateApi, useDeleteApi, useItemApi, useItemSlugApi, useListApi, useUpdateApi } from "./api";
-import type { ApiOptions, GitOrg, GitRepository, GitUser, IGitProvider } from "./api-types";
+import type { ApiOptions, GitOrg, GitRepoBranch, GitRepository, GitUser, IGitProvider } from "./api-types";
 
 export const useGitProviderListApi = (options?: ApiOptions) => {
 	return useListApi<IGitProvider>(["gits", "list"], `/api/v1/git`, options);
@@ -47,4 +47,11 @@ export const useGitOrgRepoListApi = (options?: ApiOptions) => {
 
 export const useGitOrgRepoCreateApi = () => {
 	return useCreateApi<GitRepository>(["git-orgs-repos"], `/api/v1/git/orgs/repos`);
+};
+
+export const useGitRepoBranchListApi = (repo: string, options?: ApiOptions) => {
+	return useListApi<GitRepoBranch>(["git-repo-branches", repo], `/api/v1/git/orgs/repos/branches`, {
+		...options,
+		filter: { ...options?.filter, repo },
+	});
 };

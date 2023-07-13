@@ -8,6 +8,7 @@ import {
 	InfoCircleOutlined,
 	MoreOutlined,
 	PlusCircleFilled,
+	PlusOutlined,
 	QrcodeOutlined,
 	RocketOutlined,
 } from "@ant-design/icons";
@@ -23,6 +24,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useAppDeleteApi, useAppEnvVarsDeleteApi } from "@/api/api-app";
 import { useProjectDeleteApi, useProjectListWithAppsApi } from "@/api/api-project";
 import { DateDisplay } from "@/commons/DateDisplay";
+import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
 import { AppConfig } from "@/utils/AppConfig";
@@ -75,11 +77,16 @@ export const ProjectList = () => {
 			render: (value, record) =>
 				// eslint-disable-next-line no-nested-ternary
 				record.type === "project" ? (
-					<Link href={`/apps?project=${record.slug}`}>
-						<strong>{record.slug}</strong>
-					</Link>
+					<>
+						<Link href={`/apps?project=${record.slug}`}>
+							<strong>{record.name}</strong>
+						</Link>{" "}
+						<Tag>{record.slug}</Tag>
+					</>
 				) : record.type === "app" ? (
-					<>{record.slug}</>
+					<>
+						<span className="text-purple-300">{record.name}</span> <Tag>{record.slug}</Tag>
+					</>
 				) : (
 					value
 				),
@@ -329,6 +336,18 @@ export const ProjectList = () => {
 											menu={{
 												items: [
 													{
+														label: "Deploy now",
+														key: "deploy-now",
+														icon: <RocketOutlined />,
+														onClick: () => {
+															let path = `/deploy?app=${app.slug}&env=${envName}`;
+															if (deployEnvironment.registry) path += `&registry=${deployEnvironment.registry}`;
+															if (deployEnvironment.cluster) path += `&cluster=${deployEnvironment.cluster}`;
+															if (deployEnvironment.port) path += `&port=${deployEnvironment.port}`;
+															router.push(path);
+														},
+													},
+													{
 														label: "List of builds",
 														key: "list-of-builds",
 														icon: <BuildOutlined />,
@@ -382,6 +401,15 @@ export const ProjectList = () => {
 										<Dropdown
 											menu={{
 												items: [
+													{
+														label: "Deploy now",
+														key: "deploy-now",
+														icon: <RocketOutlined />,
+														onClick: () =>
+															router.push(
+																`/deploy?app=${app.slug}&env=${envName}&registry=${deployEnvironment.registry}&cluster=${deployEnvironment.cluster}`
+															),
+													},
 													{
 														label: "List of builds",
 														key: "list-of-builds",
@@ -470,28 +498,42 @@ export const ProjectList = () => {
 	const size = useSize(ref);
 
 	return (
-		<div className="h-full flex-auto overflow-hidden" ref={ref}>
-			<Table
-				size="small"
-				loading={status === "loading"}
-				columns={columns}
-				dataSource={displayedProjects}
-				// scroll={{ x: window?.innerWidth >= 728 ? 1500 : 600 }}
-				scroll={{ x: responsive?.md ? 1600 : 1200, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
-				sticky={{ offsetHeader: 0 }}
-				pagination={{
-					showSizeChanger: true,
-					current: page,
-					// defaultCurrent: page,
-					defaultPageSize: pageSize,
-					total: total_items,
-					// total: total_pages,
-					// , pageSize
-					position: ["bottomCenter"],
-				}}
-				onChange={onTableChange}
+		<>
+			{/* Page title & desc here */}
+			<PageTitle
+				title="Projects"
+				breadcrumbs={[{ name: "Workspace" }]}
+				actions={[
+					<Button key="import-btn" icon={<PlusOutlined className="align-middle" />}>
+						Import
+					</Button>,
+				]}
 			/>
-			{contextHolder}
-		</div>
+
+			{/* Page Content */}
+			<div className="h-full flex-auto overflow-hidden" ref={ref}>
+				<Table
+					size="small"
+					loading={status === "loading"}
+					columns={columns}
+					dataSource={displayedProjects}
+					// scroll={{ x: window?.innerWidth >= 728 ? 1500 : 600 }}
+					scroll={{ x: responsive?.md ? 1600 : 1200, y: typeof size?.height !== "undefined" ? size.height - 140 : undefined }}
+					sticky={{ offsetHeader: 0 }}
+					pagination={{
+						showSizeChanger: true,
+						current: page,
+						// defaultCurrent: page,
+						defaultPageSize: pageSize,
+						total: total_items,
+						// total: total_pages,
+						// , pageSize
+						position: ["bottomCenter"],
+					}}
+					onChange={onTableChange}
+				/>
+				{contextHolder}
+			</div>
+		</>
 	);
 };

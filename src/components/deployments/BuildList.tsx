@@ -21,6 +21,7 @@ import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
 
 import { useBuildListApi, useBuildStopApi } from "@/api/api-build";
+import { useDeployFromAppApi, useDeployFromGitApi } from "@/api/api-deploy";
 import { useCreateReleaseFromBuildApi } from "@/api/api-release";
 import type { IBuild, IRelease, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
@@ -163,9 +164,12 @@ export const BuildList = () => {
 	if (app) filter.appSlug = app;
 	// if (env) filter.env = env;
 
-	// const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 	const [page, setPage] = useState(1);
 
+	// APIs
+	// const {} = useBuildSlugApi()
+	const [buildAndDeployFromAppApi, buildAndDeployFromAppStatus] = useDeployFromAppApi();
+	const [buildAndDeployFromGitApi, buildAndDeployFromGitStatus] = useDeployFromGitApi();
 	const [stopBuildApi, stopBuildStatus] = useBuildStopApi();
 
 	const { data, status } = useBuildListApi({ sort: "-createdAt", populate: "owner", pagination: { page, size: pageSize }, filter });
@@ -220,6 +224,19 @@ export const BuildList = () => {
 		}
 	};
 
+	/**
+	 * Re-run the build process.
+	 * @param build - Build's slug
+	 * @param deployEnv - Deploy environment: dev, prod,...
+	 */
+	const buildAndDeployAgain = async (build: string, deployEnv: string) => {
+		// ...
+	};
+
+	/**
+	 * Stop the current build.
+	 * @param slug - Build's slug
+	 */
 	const stopBuild = async (slug?: string) => {
 		const result = await stopBuildApi({ slug });
 		console.log("[BuildList] stopBuild :>> ", result);
@@ -282,7 +299,7 @@ export const BuildList = () => {
 					loading={status === "loading"}
 					columns={columns}
 					dataSource={displayedBuilds}
-					scroll={{ x: 550, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+					scroll={{ x: 550, y: typeof size?.height !== "undefined" ? size.height - 140 : undefined }}
 					sticky={{ offsetHeader: 0 }}
 					pagination={{ current: page, pageSize, total: total_items, position: ["bottomCenter"] }}
 					onChange={onTableChange}

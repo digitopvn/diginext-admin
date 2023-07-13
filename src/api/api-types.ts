@@ -522,6 +522,11 @@ export interface GitRepositoryDto {
 	private: boolean;
 }
 
+export interface GitRepoBranch {
+	name: string;
+	url: string;
+}
+
 export interface IGitProvider extends IBase {
 	/**
 	 * The name of the Git provider.
@@ -731,7 +736,7 @@ export interface DiginextEnvironmentVariable {
 	type?: "string" | "secret";
 }
 
-export interface IAppEnvironment {
+export interface IDeployEnvironment {
 	/**
 	 * Container registry slug
 	 */
@@ -988,18 +993,43 @@ export interface ICluster extends IGeneral {
 	workspace?: IWorkspace | string;
 }
 
+export interface AppGitInfo {
+	/**
+	 * `REQUIRES`
+	 * ---
+	 * A SSH URI of the source code repository
+	 * @example git@bitbucket.org:digitopvn/example-repo.git
+	 */
+	repoSSH: string;
+	/**
+	 * OPTIONAL
+	 * ---
+	 * A SSH URI of the source code repository
+	 * @example https://bitbucket.org/digitopvn/example-repo
+	 */
+	repoURL?: string;
+	/**
+	 * OPTIONAL
+	 * ---
+	 * Git provider's type: `github`, `bitbucket`, `gitlab`
+	 */
+	provider?: GitProviderType;
+}
+
 export interface IApp extends IGeneral {
 	/**
 	 * @deprecated
 	 */
-	environment?: { [key: string]: IAppEnvironment };
-	deployEnvironment?: { [key: string]: IAppEnvironment };
+	environment?: { [key: string]: IDeployEnvironment };
+	deployEnvironment?: { [key: string]: IDeployEnvironment };
 
-	git?: string;
+	git?: AppGitInfo;
+	gitProvider?: string | IGitProvider;
 	latestBuild?: string;
 	name?: string;
 
 	project?: IProject | string;
+	projectSlug?: string;
 
 	/**
 	 * User ID of the owner

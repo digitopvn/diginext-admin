@@ -64,6 +64,12 @@ body {
 a {
 	color: #bf6bf7;
 }
+a:hover {
+	color: #8647af;
+}
+.ant-btn-primary:hover {
+	background: #8647af !important;
+}
 
 /* Tailwind Plugin for correct full height on iOS */
 .full-height {

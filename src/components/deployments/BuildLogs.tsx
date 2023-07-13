@@ -8,10 +8,12 @@ import {
 	CloseCircleOutlined,
 	ExclamationCircleOutlined,
 	LoadingOutlined,
+	RedoOutlined,
+	StopOutlined,
 	UserOutlined,
 } from "@ant-design/icons";
 import { useInterval, useScroll, useSize } from "ahooks";
-import { Button, Space, Tag, theme } from "antd";
+import { Button, notification, Space, Tag, theme } from "antd";
 import dayjs from "dayjs";
 import parser from "html-react-parser";
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -22,7 +24,8 @@ import React, { useEffect, useRef, useState } from "react";
 import sanitizeHtml from "sanitize-html";
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { useBuildSlugApi } from "@/api/api-build";
+import { useBuildSlugApi, useBuildStopApi } from "@/api/api-build";
+import { useDeployFromAppApi } from "@/api/api-deploy";
 import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { Config } from "@/utils/AppConfig";
@@ -48,18 +51,25 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	const [query] = useRouterQuery();
 	const { build_slug } = query;
 
-	// api
-	const { data: build } = useBuildSlugApi(build_slug);
+	// APIs
+	const { data: build = {}, refetch: refetchBuildApi } = useBuildSlugApi(build_slug);
 	const logData = build?.logs || "";
 	const displayedData = stripAnsiCodes(logData);
 	// console.log("displayedData :>> ", displayedData);
+
+	// action APIs
+	const [buildAndDeployFromAppApi, buildAndDeployFromAppStatus] = useDeployFromAppApi();
+	const [stopBuildApi, stopBuildStatus] = useBuildStopApi();
+
+	// build info
+	const { status: buildStatus } = build;
 
 	const lines: any[] = displayedData.split("\n").map((line: any, i: number) => line.toString());
 
 	// socket
 	const SOCKET_ROOM = build_slug;
 	const SOCKET_URL = typeof window !== "undefined" ? window.location.origin : Config.NEXT_PUBLIC_API_BASE_URL;
-	console.log("SOCKET_URL :>> ", SOCKET_URL);
+	// console.log("SOCKET_URL :>> ", SOCKET_URL);
 
 	const [messages, setMessages] = useState<string[]>(["Connecting..."]);
 	const [status, setStatus] = useState<"failed" | "in_progress" | "success">("in_progress"); // failed, in_progress, success
@@ -81,6 +91,12 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 
 	const scrollToBottom = () => {
 		if (!preventScrollBottom) bottomEl?.current?.scrollIntoView({ behavior: "smooth" });
+	};
+
+	const rerunBuildAndDeploy = () => {
+		// if (!build.branch || !build.appSlug || env) return;
+		// buildAndDeployFromAppApi({ appSlug: build.appSlug, gitBranch: build.branch, deployParams: { env } });
+		notification.info({ message: `This feature is under development.` });
 	};
 
 	// effects
@@ -119,18 +135,18 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 		// no need to connect to socket if the room is not available:
 		if (!SOCKET_ROOM) return () => false;
 
-		console.log(`[socket] connecting to "${SOCKET_ROOM}" room...`);
+		// console.log(`[socket] connecting to "${SOCKET_ROOM}" room...`);
 		const socket = io(SOCKET_URL, { transports: ["websocket"] });
 
 		socket.on("connect", () => {
-			console.log("[socket] connected:", socket.connected, `(ROOM: ${SOCKET_ROOM})`);
+			// console.log("[socket] connected:", socket.connected, `(ROOM: ${SOCKET_ROOM})`);
 
 			// Join to the room:
 			socket.emit("join", { room: SOCKET_ROOM });
 
 			// Listen on the server:
 			socket.on("message", ({ action, message }: { action: string; message: string }) => {
-				console.log("[socket] message:", { action, message });
+				// console.log("[socket] message:", { action, message });
 
 				// print out the message
 				if (message) {
@@ -140,12 +156,14 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 					if (message?.toLowerCase().indexOf(failedKeyword) > -1 || message?.toLowerCase().indexOf("[error]") > -1) {
 						setStatus("failed");
 						setIsFinished(true);
+						refetchBuildApi(); // <-- reload build api to get build's info
 					}
 				}
 
 				if (action === "failed") {
 					setStatus("failed");
 					setIsFinished(true);
+					refetchBuildApi(); // <-- reload build api to get build's info
 				}
 
 				// if build success keyword detected -> mark as BUILD SUCCEED
@@ -153,6 +171,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 					socket.disconnect();
 					setIsFinished(true);
 					setStatus("success");
+					refetchBuildApi(); // <-- reload build api to get build's info
 				}
 			});
 		});
@@ -166,6 +185,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 			if (socket.connected) {
 				console.log("[socket] disconnecting...");
 				socket.disconnect();
+				refetchBuildApi(); // <-- reload build api to get build's info
 			}
 			setMessages([]);
 		};
@@ -290,6 +310,17 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 
 				{/* Go to bottom */}
 				<div className="flex gap-2">
+					{/* RE-RUN BUILD & DEPLOY PROCESS */}
+					{buildStatus === "building" && (
+						<Button icon={<StopOutlined />} onClick={() => stopBuildApi({ slug: build_slug })}>
+							STOP
+						</Button>
+					)}
+					{buildStatus !== "building" && (
+						<Button icon={<RedoOutlined />} onClick={() => rerunBuildAndDeploy()}>
+							RE-RUN
+						</Button>
+					)}
 					<Button onClick={() => setWrap(!wrap)}>{wrap ? "UNWRAP" : "WRAP"}</Button>
 					<Button icon={<ArrowDownOutlined />} onClick={() => scrollToBottom()} />
 				</div>

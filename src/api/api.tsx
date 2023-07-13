@@ -62,7 +62,7 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 			// console.log("data :>> ", data);
 			return {
 				list:
-					data.data.map((d: any) => {
+					data?.data?.map((d: any) => {
 						queryClient.setQueryData([keys[0], d._id], d);
 						queryClient.setQueryData([keys[0], d.slug], d);
 						queryClient.setQueryData([keys[0], { slug: d.slug }], d);
@@ -76,7 +76,7 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 	});
 };
 
-export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, options: ApiOptions = {}) => {
+export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string | undefined, options: ApiOptions = {}) => {
 	// const [noti] = notification.useNotification();
 	const app = useApp();
 	const { notification } = app;
@@ -136,6 +136,8 @@ export const useApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {
 
 	return useQuery<ApiResponse<T>, Error, ApiResponse<T>>({
 		queryKey: keys,
+		staleTime: options?.staleTime,
+		enabled: options?.enabled,
 		queryFn: async () => {
 			const { data } = await axios.get<ApiResponse<T>>(`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}`, { ...options, headers });
 			if (!data.status && !isEmpty(data.messages)) {

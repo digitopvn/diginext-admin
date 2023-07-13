@@ -9,7 +9,7 @@ export const useContainerRegistryApi = (id: string, options?: ApiOptions) => {
 	return useItemApi<IContainerRegistry>(["registries", id], `/api/v1/registry`, id, options);
 };
 
-export const useContainerRegistrySlugApi = (slug: string, options?: ApiOptions) => {
+export const useContainerRegistrySlugApi = (slug: string | undefined, options?: ApiOptions) => {
 	return useItemSlugApi<IContainerRegistry>(["registries", slug], `/api/v1/registry`, slug, options);
 };
 
