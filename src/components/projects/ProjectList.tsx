@@ -504,7 +504,7 @@ export const ProjectList = () => {
 				title="Projects"
 				breadcrumbs={[{ name: "Workspace" }]}
 				actions={[
-					<Button key="import-btn" icon={<PlusOutlined className="align-middle" />}>
+					<Button key="import-btn" icon={<PlusOutlined className="align-middle" />} href="/import">
 						Import
 					</Button>,
 				]}

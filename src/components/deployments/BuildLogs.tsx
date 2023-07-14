@@ -20,11 +20,12 @@ import parser from "html-react-parser";
 import { HumanizeDuration, HumanizeDurationLanguage } from "humanize-duration-ts";
 import { isEmpty } from "lodash";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 import sanitizeHtml from "sanitize-html";
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { useBuildSlugApi, useBuildStopApi } from "@/api/api-build";
+import { useBuildRerunApi, useBuildSlugApi, useBuildStopApi } from "@/api/api-build";
 import { useDeployFromAppApi } from "@/api/api-deploy";
 import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -48,8 +49,9 @@ const stripAnsiCodes = (str: any) =>
 	sanitizeHtml(`${str}`.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, ""));
 
 export const BuildLogs = ({ slug }: { slug?: string }) => {
+	const router = useRouter();
 	const [query] = useRouterQuery();
-	const { build_slug } = query;
+	const { build_slug, env } = query;
 
 	// APIs
 	const { data: build = {}, refetch: refetchBuildApi } = useBuildSlugApi(build_slug);
@@ -58,6 +60,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	// console.log("displayedData :>> ", displayedData);
 
 	// action APIs
+	const [rerunBuildApi, rerunBuildStatus] = useBuildRerunApi();
 	const [buildAndDeployFromAppApi, buildAndDeployFromAppStatus] = useDeployFromAppApi();
 	const [stopBuildApi, stopBuildStatus] = useBuildStopApi();
 
@@ -94,8 +97,50 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	};
 
 	const rerunBuildAndDeploy = () => {
-		// if (!build.branch || !build.appSlug || env) return;
-		// buildAndDeployFromAppApi({ appSlug: build.appSlug, gitBranch: build.branch, deployParams: { env } });
+		if (!build.branch || !build.appSlug || typeof env === "undefined") {
+			notification.error({ message: `Unable to re-run the build & deploy process: invalid build.` });
+			return;
+		}
+
+		// call API
+		buildAndDeployFromAppApi({
+			appSlug: build.appSlug,
+			gitBranch: build.branch,
+			deployParams: { env: env.toString(), deployInBackground: true },
+		})
+			.then((res) => {
+				if (res.status) {
+					notification.success({ message: `Build & deploy process have been re-ran, redirecting...` });
+					router.push(res.data.logURL);
+				} else {
+					notification.error({ message: res.messages.join(", ") });
+				}
+			})
+			.catch((e) => notification.error({ message: `Unable to re-run the build & deploy process: ${e}` }));
+	};
+
+	const rerunBuild = () => {
+		if (!build) {
+			notification.error({ message: `Build not found.` });
+			return;
+		}
+		if (!build.branch || !build.appSlug) {
+			notification.error({ message: `Unable to re-run the build: invalid build.` });
+			return;
+		}
+
+		// call API
+		rerunBuildApi({})
+			.then((res) => {
+				if (res.status) {
+					notification.success({ message: `Build has been re-ran, redirecting...` });
+					router.push(res.data.logURL);
+				} else {
+					notification.error({ message: res.messages.join(", ") });
+				}
+			})
+			.catch((e) => notification.error({ message: `Unable to re-run the build: ${e}` }));
+
 		notification.info({ message: `This feature is under development.` });
 	};
 
@@ -316,9 +361,14 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 							STOP
 						</Button>
 					)}
-					{buildStatus !== "building" && (
+					{buildStatus !== "building" && typeof env !== "undefined" && (
 						<Button icon={<RedoOutlined />} onClick={() => rerunBuildAndDeploy()}>
 							RE-RUN
+						</Button>
+					)}
+					{buildStatus !== "building" && typeof env !== "undefined" && (
+						<Button icon={<RedoOutlined />} onClick={() => rerunBuild()}>
+							RE-BUILD
 						</Button>
 					)}
 					<Button onClick={() => setWrap(!wrap)}>{wrap ? "UNWRAP" : "WRAP"}</Button>

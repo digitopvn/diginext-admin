@@ -24,6 +24,8 @@ export interface GitRepoData {
  * @param {string} repoSSH - Example: `git@bitbucket.org:organization-name/git-repo-slug.git`
  */
 export function parseGitRepoDataFromRepoSSH(repoSSH: string): GitRepoData {
+	if (!repoSSH) return {};
+
 	let namespace: string | undefined;
 	let repoSlug: string | undefined;
 	let gitDomain: string | undefined;
@@ -63,6 +65,8 @@ export function parseGitRepoDataFromRepoSSH(repoSSH: string): GitRepoData {
  * @param {string} repoURL - Example: `https://bitbucket.org/organization-name/git-repo-slug`
  */
 export function parseGitRepoDataFromRepoURL(repoURL: string): GitRepoData {
+	if (!repoURL) return {};
+
 	let gitProvider: GitProviderType | undefined;
 
 	let _repoURL = trimEnd(repoURL, "/");

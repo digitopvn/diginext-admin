@@ -1,6 +1,37 @@
 import { useCreateApi, useDeleteApi, useItemApi, useItemSlugApi, useListApi, useUpdateApi } from "./api";
 import type { ApiOptions, IApp, IDeployEnvironment, KubeEnvironmentVariable } from "./api-types";
 
+interface ImportGitParams {
+	/**
+	 * App's name
+	 */
+	name?: string;
+	/**
+	 * Git repo SSH url
+	 * @example git@github.com:digitopvn/diginext.git
+	 */
+	sshUrl: string;
+	/**
+	 * Git provider ID to host the new repo of this app
+	 */
+	gitProviderID: string;
+	/**
+	 * Select git branch to pull
+	 */
+	gitBranch?: string;
+	/**
+	 * Project ID of this app
+	 */
+	projectID?: string;
+	/**
+	 * `DANGER`
+	 * ---
+	 * Delete app and git repo if they were existed.
+	 * @default false
+	 */
+	force?: boolean;
+}
+
 export const useAppListApi = (options?: ApiOptions) => {
 	return useListApi<IApp>(["apps", "list"], `/api/v1/app`, options);
 };
@@ -17,6 +48,10 @@ export const useAppCreateApi = () => {
 	return useCreateApi<IApp>(["apps"], `/api/v1/app`);
 };
 
+export const useAppImportGitApi = (options?: ApiOptions) => {
+	return useCreateApi<IApp, Error, ImportGitParams>(["apps"], `/api/v1/app/import-git`, options);
+};
+
 export const useAppUpdateApi = (options?: ApiOptions) => {
 	return useUpdateApi<IApp>(["apps", "update"], `/api/v1/app`, options);
 };
@@ -24,6 +59,8 @@ export const useAppUpdateApi = (options?: ApiOptions) => {
 export const useAppDeleteApi = () => {
 	return useDeleteApi<IApp>(["apps", "delete"], `/api/v1/app`);
 };
+
+// environment variables
 
 export const useAppEnvVarsCreateApi = (options?: ApiOptions) => {
 	return useCreateApi<KubeEnvironmentVariable[] | any>(["env_vars"], `/api/v1/app/environment/variables`, options);

@@ -139,7 +139,10 @@ export const useApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {
 		staleTime: options?.staleTime,
 		enabled: options?.enabled,
 		queryFn: async () => {
-			const { data } = await axios.get<ApiResponse<T>>(`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}`, { ...options, headers });
+			const { data } = await axios.get<ApiResponse<T>>(`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}`, {
+				...options,
+				headers,
+			});
 			if (!data.status && !isEmpty(data.messages)) {
 				data.messages.forEach((message) => {
 					if (message) notification.error({ message: "Failed.", description: message });
