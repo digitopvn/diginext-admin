@@ -7,6 +7,7 @@ import { SiteLayout } from "@/layouts/SiteLayout";
 import Compose from "@/providers/Compose";
 import DrawerProvider from "@/providers/DrawerProvider";
 import LayoutProvider from "@/providers/LayoutProvider";
+import ModalProvider from "@/providers/ModalProvider";
 
 type IMainProps = {
 	meta?: ReactNode;
@@ -26,7 +27,7 @@ const Main = (props: IMainProps) => {
 			}}
 		>
 			<App>
-				<Compose components={[LayoutProvider, DrawerProvider]}>
+				<Compose components={[LayoutProvider, DrawerProvider, ModalProvider]}>
 					<SiteLayout meta={props.meta} useSidebar={useSidebar}>
 						{props.children}
 					</SiteLayout>

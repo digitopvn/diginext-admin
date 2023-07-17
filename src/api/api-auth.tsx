@@ -53,9 +53,7 @@ export const useAuthApi = (props: { access_token?: string } = {}) => {
 	});
 };
 
-export const useAuth = (props: { redirectUrl?: string } = {}) => {
-	const { redirectUrl } = props;
-
+export const useAuth = () => {
 	const router = useRouter();
 	const [query] = useRouterQuery();
 
@@ -83,6 +81,8 @@ export const useAuth = (props: { redirectUrl?: string } = {}) => {
 		// console.log("isStale :>> ", isStale);
 		// console.log("isRefetching :>> ", isRefetching);
 		// console.log(`---------------------------------- [1]`);
+
+		const redirectUrl = window?.location.href;
 
 		if (!access_token) {
 			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);

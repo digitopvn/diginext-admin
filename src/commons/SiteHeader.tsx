@@ -1,4 +1,4 @@
-import { DownOutlined, MenuFoldOutlined, MenuUnfoldOutlined, QuestionCircleOutlined, UserOutlined } from "@ant-design/icons";
+import { DownOutlined, GithubOutlined, MenuFoldOutlined, MenuUnfoldOutlined, QuestionCircleOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Button, Layout, Popover, Space, theme } from "antd";
 import React, { useEffect } from "react";
 import { useDarkMode } from "usehooks-ts";
@@ -45,6 +45,8 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 
 					<Button type="text" icon={<QuestionCircleOutlined />} href="https://zii.vn/dx-docs" target="_blank" />
 
+					<Button type="text" icon={<GithubOutlined />} href="https://github.com/digitopvn/diginext/" target="_blank" />
+
 					{/* eslint-disable-next-line tailwindcss/no-custom-classname */}
 					<Button
 						type="text"
@@ -52,6 +54,7 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 						onClick={toggle}
 						icon={isDarkMode ? <i className="ri-sun-line inline-block" /> : <i className="ri-moon-line inline-block" />}
 					/>
+
 					<Popover
 						placement="bottomRight"
 						trigger="click"

@@ -2,7 +2,7 @@ import { CheckCircleOutlined, CloseCircleOutlined, EyeOutlined, InfoCircleOutlin
 import { App, Button, Space, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import { isEmpty } from "lodash";
+import { isArray, isEmpty } from "lodash";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 
@@ -167,7 +167,7 @@ export const ReleaseList = () => {
 
 		try {
 			const res = await rolloutApi({ id });
-			const release = res?.data;
+			const release = isArray(res?.data) ? res?.data[0] : res?.data;
 
 			if (res?.status)
 				root.notification.success({
@@ -207,7 +207,7 @@ export const ReleaseList = () => {
 
 		try {
 			const releaseRes = await previewApi({ id });
-			const release = releaseRes?.data;
+			const release = isArray(releaseRes?.data) ? releaseRes?.data[0] : releaseRes?.data;
 
 			if (releaseRes?.status)
 				root.notification.success({

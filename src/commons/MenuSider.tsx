@@ -39,12 +39,12 @@ const items: MenuProps["items"] = [
 	{
 		key: `menu/project`,
 		icon: <ProjectOutlined />,
-		label: "Projects",
+		label: "Projects & apps",
 	},
 	{
 		key: `menu/build`,
 		icon: <BuildOutlined />,
-		label: "Builds",
+		label: "Builds & deploys",
 	},
 	// {
 	// 	key: `menu/release`,

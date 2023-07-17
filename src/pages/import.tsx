@@ -3,7 +3,7 @@ import Link from "next/link";
 import { AuthPage } from "@/api/api-auth";
 import CenterContainer from "@/commons/CenterContainer";
 import DiginextLogo from "@/commons/DiginextLogo";
-import ImportGitModal from "@/components/deployments/ImportGitModal";
+import ImportGitModal from "@/components/projects/ImportGitModal";
 import { Main } from "@/templates/Main";
 import { Meta } from "@/templates/Meta";
 

@@ -1,19 +1,24 @@
 import {
+	AlertOutlined,
 	AppstoreAddOutlined,
 	BuildOutlined,
+	ClearOutlined,
 	DeleteOutlined,
 	EditOutlined,
+	EyeInvisibleOutlined,
 	EyeOutlined,
 	GlobalOutlined,
+	ImportOutlined,
 	InfoCircleOutlined,
 	MoreOutlined,
 	PlusCircleFilled,
 	PlusOutlined,
+	PoweroffOutlined,
 	QrcodeOutlined,
 	RocketOutlined,
 } from "@ant-design/icons";
 import { useSize } from "ahooks";
-import { Button, Dropdown, Modal, notification, Popconfirm, Space, Table, Tag, Tooltip, Typography } from "antd";
+import { Button, Dropdown, notification, Popconfirm, Space, Table, Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
@@ -21,15 +26,24 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 
-import { useAppDeleteApi, useAppEnvVarsDeleteApi } from "@/api/api-app";
+import {
+	useAppDeleteApi,
+	useAppDeployEnvironmentAwakeApi,
+	useAppDeployEnvironmentDownApi,
+	useAppDeployEnvironmentSleepApi,
+	useAppEnvVarsDeleteApi,
+} from "@/api/api-app";
+import { useBuildStartApi, useBuildStopApi } from "@/api/api-build";
 import { useProjectDeleteApi, useProjectListWithAppsApi } from "@/api/api-project";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
+import { useModalProvider } from "@/providers/ModalProvider";
 import { AppConfig } from "@/utils/AppConfig";
 
 import AddDomainForm from "./AddDomainForm";
+import NewAppModal from "./NewAppModal";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -62,6 +76,7 @@ export const ProjectList = () => {
 	const [query, { setQuery }] = useRouterQuery();
 
 	const { responsive } = useLayoutProvider();
+	const { modal } = useModalProvider();
 
 	// table config
 	const columns: ColumnsType<DataType> = [
@@ -199,11 +214,18 @@ export const ProjectList = () => {
 	const [deleteAppApi, deleteAppApiStatus] = useAppDeleteApi();
 	const [deleteAppEnvApi, deleteAppEnvApiStatus] = useAppEnvVarsDeleteApi();
 
+	const [startBuildApi, startBuildApiStatus] = useBuildStartApi();
+	const [stopBuildApi, stopBuildApiStatus] = useBuildStopApi();
+
+	const [sleepDeployEnvApi, sleepDeployEnvApiStatus] = useAppDeployEnvironmentSleepApi();
+	const [awakeDeployEnvApi, awakeDeployEnvApiStatus] = useAppDeployEnvironmentAwakeApi();
+	const [takeDownDeployEnvApi, takeDownDeployEnvApiStatus] = useAppDeployEnvironmentDownApi();
+
 	// modals
-	const [modal, contextHolder] = Modal.useModal();
+	// const [modal, contextHolder] = Modal.useModal();
 	const openAddDomains = (app: string, env: string) => {
 		console.log("env :>> ", env);
-		const instance = modal.info({
+		const instance = modal?.info({
 			title: "Add new domains",
 			icon: <PlusCircleFilled />,
 			content: (
@@ -211,11 +233,28 @@ export const ProjectList = () => {
 					app={app}
 					env={env}
 					next={() => {
-						instance.destroy();
+						instance?.destroy();
 						notification.success({ message: "Congrats!", description: `New domain was added successfully!` });
 					}}
 				/>
 			),
+			footer: null,
+			closable: true,
+			maskClosable: true,
+			onOk() {},
+		});
+	};
+
+	const openNewApp = () => {
+		const instance = modal?.info({
+			// title: "Add new domains",
+			className: "!p-0",
+			// centered: true,
+			style: { padding: 0 },
+			bodyStyle: { padding: 0 },
+			icon: null,
+			// width: 500,
+			content: <NewAppModal onClose={() => instance?.destroy()} />,
 			footer: null,
 			closable: true,
 			maskClosable: true,
@@ -261,6 +300,7 @@ export const ProjectList = () => {
 	const displayedProjects = projects?.map((p: any) => {
 		return {
 			...p,
+			// PROJECTS
 			type: "project",
 			actions: (
 				<Space.Compact>
@@ -284,6 +324,8 @@ export const ProjectList = () => {
 			key: p._id,
 			id: p._id,
 			status: "N/A",
+
+			// DEPLOY ENVIRONMENTS
 			children: p.apps
 				? p.apps.map((app: any) => {
 						const envList = Object.keys(app.deployEnvironment ?? {});
@@ -347,6 +389,12 @@ export const ProjectList = () => {
 															router.push(path);
 														},
 													},
+													// {
+													// 	label: "Build now",
+													// 	key: "build-now",
+													// 	icon: <AimOutlined />,
+													// 	onClick: () => startBuildApi({}),
+													// },
 													{
 														label: "List of builds",
 														key: "list-of-builds",
@@ -370,6 +418,24 @@ export const ProjectList = () => {
 														key: "add-domains",
 														icon: <AppstoreAddOutlined />,
 														onClick: () => openAddDomains(record.appSlug, envName),
+													},
+													{
+														label: "Sleep",
+														key: "sleep",
+														icon: <EyeInvisibleOutlined />,
+														onClick: () => sleepDeployEnvApi({ slug: record.appSlug, env: envName }),
+													},
+													{
+														label: "Awake",
+														key: "awake",
+														icon: <AlertOutlined />,
+														onClick: () => awakeDeployEnvApi({ slug: record.appSlug, env: envName }),
+													},
+													{
+														label: "Take down",
+														key: "take-down",
+														icon: <PoweroffOutlined />,
+														onClick: () => takeDownDeployEnvApi({ slug: record.appSlug, env: envName }),
 													},
 												],
 											}}
@@ -410,6 +476,12 @@ export const ProjectList = () => {
 																`/deploy?app=${app.slug}&env=${envName}&registry=${deployEnvironment.registry}&cluster=${deployEnvironment.cluster}`
 															),
 													},
+													// {
+													// 	label: "Build now",
+													// 	key: "build-now",
+													// 	icon: <AimOutlined />,
+													// 	onClick: () => startBuildApi({}),
+													// },
 													{
 														label: "List of builds",
 														key: "list-of-builds",
@@ -427,6 +499,24 @@ export const ProjectList = () => {
 														key: "add-domains",
 														icon: <AppstoreAddOutlined />,
 														onClick: () => openAddDomains(record.appSlug, envName),
+													},
+													{
+														label: "Sleep",
+														key: "sleep",
+														icon: <EyeInvisibleOutlined />,
+														onClick: () => sleepDeployEnvApi({ slug: record.appSlug, env: envName }),
+													},
+													{
+														label: "Awake",
+														key: "awake",
+														icon: <AlertOutlined />,
+														onClick: () => awakeDeployEnvApi({ slug: record.appSlug, env: envName }),
+													},
+													{
+														label: "Take down",
+														key: "take-down",
+														icon: <PoweroffOutlined />,
+														onClick: () => takeDownDeployEnvApi({ slug: record.appSlug, env: envName }),
 													},
 												],
 											}}
@@ -454,6 +544,7 @@ export const ProjectList = () => {
 							return record;
 						});
 
+						// APPLICATIONS
 						return {
 							...(app as any),
 							key: app._id,
@@ -467,6 +558,9 @@ export const ProjectList = () => {
 										<Button icon={<EditOutlined />} />
 									</Tooltip>
 									{/* <Button icon={<PauseCircleOutlined />} /> */}
+									<Tooltip title="Archive">
+										<Button icon={<ClearOutlined />} />
+									</Tooltip>
 									<Popconfirm
 										title="Are you sure to delete this app?"
 										description={
@@ -501,11 +595,19 @@ export const ProjectList = () => {
 		<>
 			{/* Page title & desc here */}
 			<PageTitle
-				title="Projects"
+				title="Projects & apps"
 				breadcrumbs={[{ name: "Workspace" }]}
 				actions={[
-					<Button key="import-btn" icon={<PlusOutlined className="align-middle" />} href="/import">
+					<Button key="import-btn" icon={<ImportOutlined className="align-middle" />} href="/import">
 						Import
+					</Button>,
+					<Button
+						key="create-app-btn"
+						icon={<PlusOutlined className="align-middle" />}
+						onClick={() => openNewApp()}
+						// href="/new-app"
+					>
+						Create app
 					</Button>,
 				]}
 			/>
@@ -532,7 +634,6 @@ export const ProjectList = () => {
 					}}
 					onChange={onTableChange}
 				/>
-				{contextHolder}
 			</div>
 		</>
 	);

@@ -96,6 +96,21 @@ export type GitProviderType = (typeof availableGitProviders)[number];
 
 // resource types
 export const availableResourceSizes = ["none", "1x", "2x", "3x", "4x", "5x", "6x", "7x", "8x", "9x", "10x"] as const;
+/**
+ * Container quota resources
+ * @example
+ * "none" - {}
+ * "1x" - { requests: { cpu: "20m", memory: "128Mi" }, limits: { cpu: "20m", memory: 128Mi" } }
+ * "2x" - { requests: { cpu: "40m", memory: "256Mi" }, limits: { cpu: "40m", memory: "256Mi" } }
+ * "3x" - { requests: { cpu: "80m", memory: "512Mi" }, limits: { cpu: "80m", memory: "512Mi" } }
+ * "4x" - { requests: { cpu: "160m", memory: "1024Mi" }, limits: { cpu: "160m", memory: "1024Mi" } }
+ * "5x" - { requests: { cpu: "320m", memory: "2048Mi" }, limits: { cpu: "320m", memory: "2048Mi" } }
+ * "6x" - { requests: { cpu: "640m", memory: "4058Mi" }, limits: { cpu: "640m", memory: "4058Mi" } }
+ * "7x" - { requests: { cpu: "1280m", memory: "2048Mi" }, limits: { cpu: "1280m", memory: "2048Mi" } }
+ * "8x" - { requests: { cpu: "2560m", memory: "8116Mi" }, limits: { cpu: "2560m", memory: "8116Mi" } }
+ * "9x" - { requests: { cpu: "5120m", memory: "16232Mi" }, limits: { cpu: "5120m", memory: "16232Mi" } }
+ * "10x" - { requests: { cpu: "10024m", memory: "32464Mi" }, limits: { cpu: "10024m", memory: "32464Mi" } }
+ */
 export type ResourceQuotaSize = (typeof availableResourceSizes)[number];
 
 // git provider domains
@@ -1018,32 +1033,119 @@ export interface AppGitInfo {
 
 export interface IApp extends IGeneral {
 	/**
-	 * @deprecated
+	 * The name of the app.
+	 *
+	 * @type {string}
+	 * @memberof IApp
 	 */
-	environment?: { [key: string]: IDeployEnvironment };
-	deployEnvironment?: { [key: string]: IDeployEnvironment };
-
-	git?: AppGitInfo;
-	gitProvider?: string | IGitProvider;
-	latestBuild?: string;
 	name?: string;
 
-	project?: IProject | string;
+	/**
+	 * OPTIONAL: The image URI of this app on the Container Registry (without `TAG`).
+	 *
+	 * Combined from: `<registry-image-base-url>/<project-slug>/<app-name-slug>`
+	 *
+	 * **Don't** specify `tag` at the end! (e.g., `latest`, `beta`,...)
+	 *
+	 * @type {string}
+	 * @memberof IApp
+	 * @default <registry-image-base-url>/<project-slug>/<app-name-slug>
+	 * @example "asia.gcr.io/my-workspace/my-project/my-app"
+	 */
+	image?: string;
+
+	/**
+	 * The slug of the app.
+	 *
+	 * @type {string}
+	 * @memberof IApp
+	 */
+	slug?: string;
+
+	/**
+	 * The user who created the app.
+	 *
+	 * @type {string}
+	 * @memberof IApp
+	 */
+	createdBy?: string;
+
+	/**
+	 * The user who last updated the app.
+	 *
+	 * @type {string}
+	 * @memberof IApp
+	 */
+	lastUpdatedBy?: string;
+
+	/**
+	 * The Git information of the app.
+	 *
+	 * @type {AppGitInfo}
+	 * @memberof IApp
+	 */
+	git?: AppGitInfo;
+
+	/**
+	 * The framework information of the app.
+	 *
+	 * @memberof IApp
+	 */
+	framework?: {
+		name?: string;
+		slug?: string;
+		version?: string;
+		repoURL?: string;
+		repoSSH?: string;
+	};
+
+	/**
+	 * The environment information of the app.
+	 *
+	 * @type {{ [key: string]: IDeployEnvironment | string }}
+	 * @memberof IApp
+	 * @deprecated
+	 */
+	environment?: { [key: string]: IDeployEnvironment | string };
+
+	/**
+	 * The deploy environment information of the app.
+	 *
+	 * @type {{ [key: string]: IDeployEnvironment }}
+	 * @memberof IApp
+	 */
+	deployEnvironment?: { [key: string]: IDeployEnvironment };
+
+	/**
+	 * The latest build of the app.
+	 *
+	 * @type {string}
+	 * @memberof IApp
+	 */
+	latestBuild?: string;
+
+	/**
+	 * Project of this app
+	 */
+	project?: string | IProject;
+
+	/**
+	 * The project slug of the app.
+	 *
+	 * @type {string}
+	 * @memberof IApp
+	 */
 	projectSlug?: string;
 
 	/**
-	 * User ID of the owner
-	 *
-	 * @remarks This can be populated to {User} data
+	 * Git Provider of this app
 	 */
-	owner?: IUser | string;
+	gitProvider?: string | IGitProvider | string;
 
 	/**
-	 * ID of the workspace
-	 *
-	 * @remarks This can be populated to {Workspace} data
+	 * Date when the application was archived (take down all deploy environments)
 	 */
-	workspace?: IWorkspace | string;
+	archivedAt?: Date;
 }
 
 export interface IProject extends IGeneral {

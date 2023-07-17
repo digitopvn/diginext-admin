@@ -1,6 +1,6 @@
 import { LoadingOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useQueryClient } from "@tanstack/react-query";
-import { Button, Checkbox, Form, Input, Select, Typography } from "antd";
+import { Button, Checkbox, Form, Input, notification, Select, Typography } from "antd";
 import { useRouter } from "next/router";
 import type { SyntheticEvent } from "react";
 import { useState } from "react";
@@ -12,7 +12,6 @@ import CenterContainer from "@/commons/CenterContainer";
 import DiginextLogo from "@/commons/DiginextLogo";
 import { Main } from "@/templates/Main";
 import { Meta } from "@/templates/Meta";
-import { Config, isDev } from "@/utils/AppConfig";
 
 const { Title } = Typography;
 
@@ -37,8 +36,8 @@ const WorkspaceSetupPage = () => {
 
 	const queryClient = useQueryClient();
 
-	const [wsName, setWsName] = useState("");
 	// const [dxKey, setDxKey] = useState("");
+	const [wsName, setWsName] = useState("");
 	const [err, setErr] = useState("");
 
 	const onChange = (e: SyntheticEvent) => setWsName((e.currentTarget as any).value);
@@ -50,6 +49,10 @@ const WorkspaceSetupPage = () => {
 	const { workspaces = [] } = user || {};
 
 	const joinWorkspace = async (workspaceId: string) => {
+		if (!user._id) {
+			notification.error({ message: `Unauthenticated.` });
+			return;
+		}
 		const res = await joinWorkspaceApi({ userId: user._id, workspace: workspaceId });
 		if (res?.status) {
 			await queryClient.invalidateQueries({ queryKey: ["auth"] });
@@ -75,7 +78,11 @@ const WorkspaceSetupPage = () => {
 			await queryClient.invalidateQueries({ queryKey: ["auth"] });
 			await refetch();
 
-			router.push(isDev() ? `${Config.NEXT_PUBLIC_BASE_URL}` : `/`);
+			// router.push(isDev() ? `${Config.NEXT_PUBLIC_BASE_URL}` : `/`);
+			// redirect to workspace URL:
+			const url = new URL(window.location.href);
+			const redirectUrl = url.searchParams.get("redirect_url") || window.location.origin;
+			router.push(redirectUrl);
 		} else {
 			setErr(result?.messages?.join(".") || "Internal Server Error");
 		}

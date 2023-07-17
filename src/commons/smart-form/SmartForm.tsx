@@ -27,7 +27,7 @@ export type SmartFormProps<T> = {
 	api?: {
 		useSlugApi?: UseQueryResult<T, Error>;
 		useUpdateApi?: UseUpdateApi<T>;
-		useCreateApi?: UseCreateApi<T, T>;
+		useCreateApi?: UseCreateApi<T>;
 	};
 	configs?: SmartFormElementProps[];
 };
@@ -67,7 +67,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 		console.log(isNew ? "[NEW]" : "[UPDATE]", "Submit:", values);
 		const postData = { ...values };
 
-		let result: ApiResponse<T> | undefined;
+		let result: ApiResponse<T | T[]> | undefined;
 		if (isNew) {
 			if (!createApi) return;
 
@@ -223,14 +223,10 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 							case "list_string":
 								// console.log("field.name :>> ", field.name);
 								// console.log("field.value :>> ", field.value);
+								// eslint-disable-next-line no-case-declarations
+								const strArr = field.value ?? (item ? _.get(item, field.name) : []) ?? [];
 								return (
-									<SmartStringList
-										key={`${name}-${field.name}`}
-										{...field}
-										value={field.value ?? (item ? _.get(item, field.name) : [])}
-										status={fieldsStatus}
-										isNew={isNew}
-									/>
+									<SmartStringList key={`${name}-${field.name}`} {...field} value={strArr} status={fieldsStatus} isNew={isNew} />
 								);
 
 							default:

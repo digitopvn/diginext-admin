@@ -1,6 +1,6 @@
 import { BankOutlined, CheckCircleOutlined, LoadingOutlined, QuestionCircleOutlined, UserOutlined } from "@ant-design/icons";
 import { Alert, Card, Divider, notification, Select, Steps, Typography } from "antd";
-import { isEmpty } from "lodash";
+import { isArray, isEmpty } from "lodash";
 import { useState } from "react";
 
 import { useGitOrgListApi, useGitProviderUpdateApi } from "@/api/api-git-provider";
@@ -80,7 +80,7 @@ export const BitbucketConnectModal = () => {
 											// console.log("res :>> ", res);
 											if (isEmpty(res.data)) return;
 
-											const gitProvider = res.data[0] || res.data;
+											const gitProvider = isArray(res.data) ? res.data[0] : res.data;
 											console.log("gitProvider :>> ", gitProvider);
 											if (!gitProvider) {
 												notification.error({ message: `Oops...`, description: `Can't update git provider.` });
@@ -210,7 +210,7 @@ export const GithubConnectModal = () => {
 											// console.log("res :>> ", res);
 											if (isEmpty(res.data)) return;
 
-											const gitProvider = res.data[0] || res.data;
+											const gitProvider = isArray(res.data) ? res.data[0] : res.data;
 											console.log("gitProvider :>> ", gitProvider);
 											if (!gitProvider) {
 												notification.error({ message: `Oops...`, description: `Can't update git provider.` });

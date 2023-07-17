@@ -8,6 +8,7 @@ import { useContainerRegistryListApi } from "@/api/api-registry";
 import { availableResourceSizes, sslIssuers } from "@/api/api-types";
 import SmartForm from "@/commons/smart-form/SmartForm";
 import type { SmartFormElementProps } from "@/commons/smart-form/SmartFormTypes";
+import { getContainerResourceBySize } from "@/plugins/container-utils";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useDrawerProvider } from "@/providers/DrawerProvider";
 
@@ -45,9 +46,10 @@ const DeployEnvironment = () => {
 			placeholder: "Container size",
 			displayKey: "size", // the magic is here 😅...
 			options: availableResourceSizes.map((size) => {
-				return { label: size || "", value: size };
+				const resource = getContainerResourceBySize(size || "none");
+				return { label: `${size} ${resource.limits ? `(cpu: ${resource.limits?.cpu}, mem: ${resource.limits?.memory})` : ""}`, value: size };
 			}),
-			wrapperStyle: { float: responsive?.md ? "left" : "none", marginRight: responsive?.md ? 15 : 0 },
+			wrapperStyle: { float: responsive?.md ? "left" : "none", marginRight: responsive?.md ? 15 : 0, width: responsive?.md ? 260 : "100%" },
 		},
 		{
 			type: "number",

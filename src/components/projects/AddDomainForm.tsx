@@ -22,7 +22,15 @@ const AddDomainForm = (props: { app: string; env: string; next?: () => void }) =
 	};
 
 	return (
-		<Form name="add-domains" style={{ maxWidth: 600 }} layout="vertical" onFinish={onFinish} onFinishFailed={onFinishFailed} autoComplete="off">
+		<Form
+			name="add-domains"
+			style={{ maxWidth: 600 }}
+			layout="vertical"
+			onFinish={onFinish}
+			onFinishFailed={onFinishFailed}
+			autoComplete="off"
+			preserve={false}
+		>
 			<Form.Item label="Domain" name="domain" rules={[{ required: true, message: "Please input your domain." }]}>
 				<Input prefix={<KeyOutlined />} placeholder="Your domain" />
 			</Form.Item>

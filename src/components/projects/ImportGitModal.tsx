@@ -91,6 +91,7 @@ const ImportGitModal = (props: ImportGitProps) => {
 					onFinish={onFinish}
 					onFinishFailed={onFinishFailed}
 					autoComplete="off"
+					preserve={false}
 				>
 					<Form.Item name="sshUrl" rules={[{ required: true, message: "Please enter the repo SSH url." }]} initialValue={curSshURL}>
 						<Input

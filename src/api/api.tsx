@@ -184,9 +184,9 @@ export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options
 	});
 };
 
-export type UseCreateApi<R, T> = [UseMutateAsyncFunction<ApiResponse<R>, Error, T, unknown>, "error" | "idle" | "loading" | "success"];
+export type UseCreateApi<R, T = R> = [UseMutateAsyncFunction<ApiResponse<R>, Error, T, unknown>, "error" | "idle" | "loading" | "success"];
 
-export const useCreateApi = <R = any, E = Error, T = any>(keys: any[], apiPath: string, options: ApiOptions = {}): UseCreateApi<R, T> => {
+export const useCreateApi = <R = any, E = Error, T = R>(keys: any[], apiPath: string, options: ApiOptions = {}): UseCreateApi<R, T> => {
 	// const [noti] = notification.useNotification();
 	const app = useApp();
 	const { notification } = app;
@@ -209,6 +209,7 @@ export const useCreateApi = <R = any, E = Error, T = any>(keys: any[], apiPath: 
 			const populateParams = populate ? `populate=${populate}` : "";
 			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}${populateParams}`;
 
+			console.log("options :>> ", options);
 			const { data, status: httpStatus } = await axios.post<ApiResponse<R>>(apiURL, newData, { ...options, headers });
 			if (httpStatus === 429) throw new Error("Too many requests.");
 
@@ -261,9 +262,9 @@ const updateById = async (apiPath: string, id: string, updateData: any, options:
 	return data;
 };
 
-export type UseUpdateApi<T> = [(data: T) => Promise<ApiResponse<T>> | undefined, "error" | "idle" | "loading" | "success"];
+export type UseUpdateApi<R, T = R> = [(data: T) => Promise<ApiResponse<R | R[]>> | undefined, "error" | "idle" | "loading" | "success"];
 
-export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, options: ApiOptions = {}): UseUpdateApi<T | R> => {
+export const useUpdateApi = <R = any, T = R>(keys: any[], apiPath: string, options: ApiOptions = {}): UseUpdateApi<R, T> => {
 	// const [noti] = notification.useNotification();
 	const app = useApp();
 	const { notification } = app;
@@ -284,11 +285,11 @@ export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, opt
 	const paginationParams = new URLSearchParams(pagination as any).toString();
 	const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}${sortParams}${populateParams}${paginationParams}`;
 
-	const mutation = useMutation<ApiResponse<T>, Error, T | R, { id?: string; previousData?: any }>({
+	const mutation = useMutation<ApiResponse<R | R[]>, Error, T, { id?: string; previousData?: any }>({
 		// [1] START
 		mutationFn: async (updateData) => {
 			// console.log("UPDATE > start > filter :>> ", filter);
-			const { data } = await axios.patch<ApiResponse<T>>(apiURL, updateData, { ...options, headers });
+			const { data } = await axios.patch<ApiResponse<R>>(apiURL, updateData, { ...options, headers });
 
 			// show error message ONLY if status is failure
 			if (!data.status) {
@@ -317,9 +318,9 @@ export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, opt
 	return [mutation.mutateAsync, mutation.status];
 };
 
-export type UseDeleteApi<T> = [(data: T) => Promise<ApiResponse<T>> | undefined, "error" | "idle" | "loading" | "success"];
+export type UseDeleteApi<T, R> = [(data: T) => Promise<ApiResponse<R>> | undefined, "error" | "idle" | "loading" | "success"];
 
-export const useDeleteApi = <T = any,>(keys: any[], apiPath: string, options: ApiOptions = {}): UseDeleteApi<T> => {
+export const useDeleteApi = <R = any, T = any>(keys: any[], apiPath: string, options: ApiOptions = {}): UseDeleteApi<T, R> => {
 	// const [noti] = notification.useNotification();
 	const app = useApp();
 	const { notification } = app;
@@ -332,11 +333,11 @@ export const useDeleteApi = <T = any,>(keys: any[], apiPath: string, options: Ap
 
 	// const { filter } = options;
 
-	const mutation = useMutation<ApiResponse<T>, Error, T>({
+	const mutation = useMutation<ApiResponse<R>, Error, T>({
 		mutationFn: async (filter) => {
 			const filterParams = filter ? `${new URLSearchParams(filter).toString()}` : "";
 			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}`;
-			const { data } = await axios.delete<ApiResponse<T>>(apiURL, { ...options, headers });
+			const { data } = await axios.delete<ApiResponse<R>>(apiURL, { ...options, headers });
 
 			if (!data.status) {
 				if (!isEmpty(data.messages)) {

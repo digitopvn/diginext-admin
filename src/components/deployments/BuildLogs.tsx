@@ -120,17 +120,18 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	};
 
 	const rerunBuild = () => {
+		// console.log("build :>> ", build);
 		if (!build) {
 			notification.error({ message: `Build not found.` });
 			return;
 		}
 		if (!build.branch || !build.appSlug) {
-			notification.error({ message: `Unable to re-run the build: invalid build.` });
+			notification.error({ message: `Unable to re-run the build: invalid build (missing git branch).` });
 			return;
 		}
 
 		// call API
-		rerunBuildApi({})
+		rerunBuildApi({ buildWatch: false })
 			.then((res) => {
 				if (res.status) {
 					notification.success({ message: `Build has been re-ran, redirecting...` });
@@ -366,7 +367,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 							RE-RUN
 						</Button>
 					)}
-					{buildStatus !== "building" && typeof env !== "undefined" && (
+					{buildStatus !== "building" && (
 						<Button icon={<RedoOutlined />} onClick={() => rerunBuild()}>
 							RE-BUILD
 						</Button>
