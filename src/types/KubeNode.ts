@@ -89,7 +89,7 @@ export interface KubeNode {
 	spec: Partial<Spec>;
 	status: Partial<Status>;
 	// extras
-	clusterShortName?: string;
+	clusterSlug?: string;
 	/**
 	 * Cluster ID
 	 */

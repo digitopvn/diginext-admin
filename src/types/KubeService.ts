@@ -20,7 +20,7 @@ export interface KubeService {
 		};
 	};
 	// extras
-	clusterShortName?: string;
+	clusterSlug?: string;
 	/**
 	 * Cluster ID
 	 */

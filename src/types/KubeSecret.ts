@@ -12,7 +12,7 @@ export interface KubeSecret {
 		[key: string]: string;
 	};
 	// extras
-	clusterShortName?: string;
+	clusterSlug?: string;
 	/**
 	 * Cluster ID
 	 */

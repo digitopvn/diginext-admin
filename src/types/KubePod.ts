@@ -161,7 +161,7 @@ export interface KubePod {
 		startTime?: string;
 	};
 	// extras
-	clusterShortName?: string;
+	clusterSlug?: string;
 	/**
 	 * Cluster ID
 	 */

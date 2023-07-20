@@ -3,6 +3,7 @@ import {
 	AppstoreAddOutlined,
 	BuildOutlined,
 	ClearOutlined,
+	CloudUploadOutlined,
 	DeleteOutlined,
 	EditOutlined,
 	EyeInvisibleOutlined,
@@ -27,14 +28,17 @@ import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 
 import {
+	useAppArchiveApi,
 	useAppDeleteApi,
 	useAppDeployEnvironmentAwakeApi,
 	useAppDeployEnvironmentDownApi,
 	useAppDeployEnvironmentSleepApi,
 	useAppEnvVarsDeleteApi,
+	useAppUnarchiveApi,
 } from "@/api/api-app";
 import { useBuildStartApi, useBuildStopApi } from "@/api/api-build";
 import { useProjectDeleteApi, useProjectListWithAppsApi } from "@/api/api-project";
+import type { IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -61,6 +65,7 @@ interface DataType {
 	owner?: string;
 	updatedAt?: string;
 	createdAt?: string;
+	archivedAt?: string;
 	status?: string;
 	type?: string;
 	actions?: string;
@@ -136,13 +141,13 @@ export const ProjectList = () => {
 		},
 		{
 			title: "Last updated by",
-			dataIndex: "owner",
-			key: "owner",
+			dataIndex: "lastUpdatedBy",
+			key: "lastUpdatedBy",
 			width: 35,
 			filterSearch: true,
-			filters: [{ text: "goon", value: "goon" }],
-			onFilter: (value, record) => (record.owner && record.owner.indexOf(value.toString()) > -1) || true,
-			render: (value) => <>{value?.name}</>,
+			// filters: [{ text: "goon", value: "goon" }],
+			// onFilter: (value, record) => (record.owner && record.owner.indexOf(value.toString()) > -1) || true,
+			render: (value, record) => <>{value || (record.owner as IUser)?.name}</>,
 		},
 		{
 			title: "Last updated",
@@ -167,6 +172,7 @@ export const ProjectList = () => {
 			key: "status",
 			width: responsive?.md ? 20 : 15,
 			filters: [
+				{ text: "archived", value: "archived" },
 				{ text: "healthy", value: "healthy" },
 				{ text: "undeployed", value: "undeployed" },
 				{ text: "partial_healthy", value: "partial_healthy" },
@@ -176,21 +182,28 @@ export const ProjectList = () => {
 			],
 			filterSearch: true,
 			onFilter: (value, record) => {
+				if (value === "archived") return typeof record.archivedAt !== "undefined";
 				if (record.type === "project" || record.type === "app") return true;
 				console.log("record.status === value :>> ", record.status, value);
 				if (record.status) return record.status === value;
 				return false;
 			},
-			render: (value) => (
-				// <Tag color="success" icon={<CheckCircleOutlined className="align-middle" />}>
-				<Tag
-					// eslint-disable-next-line no-nested-ternary
-					color={value === "healthy" ? "success" : value === "undeployed" ? "pink" : "default"}
-					icon={<InfoCircleOutlined className="align-middle" />}
-				>
-					{value}
-				</Tag>
-			),
+			render: (value, record) => {
+				let status = value;
+				if (record.type === "app") {
+					// check for "undeployed" status?
+				}
+				if (record?.archivedAt) status = "archived";
+				return (
+					<Tag
+						// eslint-disable-next-line no-nested-ternary
+						color={value === "healthy" ? "success" : value === "undeployed" ? "pink" : "default"}
+						icon={<InfoCircleOutlined className="align-middle" />}
+					>
+						{status}
+					</Tag>
+				);
+			},
 		},
 		{
 			title: <Typography.Text className="text-xs md:text-sm">Action</Typography.Text>,
@@ -206,13 +219,15 @@ export const ProjectList = () => {
 	const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 
 	// fetch projects
-	const { data, status } = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
+	const { data, status, refetch: refetchProjecAndApps } = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: projects, pagination } = data || {};
 	const { total_pages, total_items } = pagination || {};
 
 	const [deleteProjectApi, deleteProjectApiStatus] = useProjectDeleteApi();
 	const [deleteAppApi, deleteAppApiStatus] = useAppDeleteApi();
 	const [deleteAppEnvApi, deleteAppEnvApiStatus] = useAppEnvVarsDeleteApi();
+	const [archiveAppApi, archiveAppApiStatus] = useAppArchiveApi();
+	const [unarchiveAppApi, unarchiveAppApiStatus] = useAppUnarchiveApi();
 
 	const [startBuildApi, startBuildApiStatus] = useBuildStartApi();
 	const [stopBuildApi, stopBuildApiStatus] = useBuildStopApi();
@@ -282,6 +297,7 @@ export const ProjectList = () => {
 
 	const deleteApp = async (id: string) => {
 		const result = await deleteAppApi({ _id: id });
+		refetchProjecAndApps();
 		console.log("[deleteApp] result :>> ", result);
 	};
 
@@ -549,7 +565,7 @@ export const ProjectList = () => {
 							...(app as any),
 							key: app._id,
 							id: app._id,
-							status: "N/A",
+							// status: "N/A",
 							type: "app",
 							children: environments,
 							actions: (
@@ -558,8 +574,15 @@ export const ProjectList = () => {
 										<Button icon={<EditOutlined />} />
 									</Tooltip>
 									{/* <Button icon={<PauseCircleOutlined />} /> */}
-									<Tooltip title="Archive">
-										<Button icon={<ClearOutlined />} />
+									<Tooltip title={typeof app.archiveAt !== "undefined" ? "Unarchive" : "Archive"}>
+										<Button
+											icon={typeof app.archiveAt !== "undefined" ? <CloudUploadOutlined /> : <ClearOutlined />}
+											onClick={() =>
+												typeof app.archiveAt !== "undefined"
+													? unarchiveAppApi({ _id: app._id })?.then(() => refetchProjecAndApps())
+													: archiveAppApi({ _id: app._id })?.then(() => refetchProjecAndApps())
+											}
+										/>
 									</Tooltip>
 									<Popconfirm
 										title="Are you sure to delete this app?"
@@ -620,7 +643,7 @@ export const ProjectList = () => {
 					columns={columns}
 					dataSource={displayedProjects}
 					// scroll={{ x: window?.innerWidth >= 728 ? 1500 : 600 }}
-					scroll={{ x: responsive?.md ? 1600 : 1200, y: typeof size?.height !== "undefined" ? size.height - 140 : undefined }}
+					scroll={{ x: responsive?.md ? 1600 : 1200, y: typeof size?.height !== "undefined" ? size.height - 120 : undefined }}
 					sticky={{ offsetHeader: 0 }}
 					pagination={{
 						showSizeChanger: true,

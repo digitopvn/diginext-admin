@@ -21,7 +21,7 @@ export interface KubeRegistrySecret {
 		[".dockerconfigjson"]?: string;
 	};
 	// extras
-	clusterShortName?: string;
+	clusterSlug?: string;
 	/**
 	 * Cluster ID
 	 */

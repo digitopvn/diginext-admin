@@ -190,15 +190,15 @@ export const DeploymentList = () => {
 		},
 		{
 			title: "Cluster",
-			dataIndex: "clusterShortName",
-			key: "clusterShortName",
+			dataIndex: "clusterSlug",
+			key: "clusterSlug",
 			width: 30,
 			render: (value) => <Link href="#">{value}</Link>,
 			filterSearch: true,
 			filters: clusters.map((cluster) => {
-				return { text: cluster.shortName || "", value: cluster.shortName || "" };
+				return { text: cluster.slug || "", value: cluster.slug || "" };
 			}),
-			onFilter: (value, record) => (record.clusterShortName ? record.clusterShortName.indexOf(value.toString()) > -1 : true),
+			onFilter: (value, record) => (record.clusterSlug ? record.clusterSlug.indexOf(value.toString()) > -1 : true),
 		},
 		{
 			title: "Created at",

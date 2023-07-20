@@ -9,7 +9,7 @@ import {
 } from "@ant-design/icons";
 import { useSize } from "ahooks";
 import { Button, Space, Table, Tag } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import React, { useRef } from "react";
@@ -18,6 +18,7 @@ import { useAppListApi } from "@/api/api-app";
 import type { IApp, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
+import { useRouterQuery } from "@/plugins/useRouterQuery";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -38,7 +39,8 @@ const pageSize = 200;
 
 export const AppList = () => {
 	const router = useRouter();
-	const { project: projectSlug } = router.query;
+	const [query, { setQuery }] = useRouterQuery();
+	const { project: projectSlug } = query;
 
 	// Config
 	const columns: ColumnsType<DataType> = [
@@ -187,6 +189,11 @@ export const AppList = () => {
 	const ref = useRef(null);
 	const size = useSize(ref);
 
+	const onTableChange = (_pagination: TablePaginationConfig) => {
+		const { current } = _pagination;
+		setQuery({ page: current ?? 1 });
+	};
+
 	return (
 		<>
 			{/* Page title & desc here */}
@@ -205,7 +212,7 @@ export const AppList = () => {
 					expandable={{
 						defaultExpandAllRows: true,
 					}}
-					// onChange={(_pagination, filters, sorter, extra) => onTableChange(_pagination, extra)}
+					onChange={onTableChange}
 				/>
 			</div>
 		</>
