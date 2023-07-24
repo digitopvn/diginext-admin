@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import { DeleteOutlined } from "@ant-design/icons";
 import { useSize } from "ahooks";
-import { Button, notification, Popconfirm, Space, Table, Tag, Typography } from "antd";
+import { Button, Popconfirm, Space, Table, Tag, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import type { TableCurrentDataSource } from "antd/es/table/interface";
 import dayjs from "dayjs";
@@ -10,11 +10,9 @@ import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 
 import { useClusterListApi } from "@/api/api-cluster";
-import { useMonitorPodApi } from "@/api/api-monitor-pod";
-import { useUserDeleteApi } from "@/api/api-user";
+import { useMonitorPodApi, useMonitorPodDeleteApi } from "@/api/api-monitor-pod";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
-import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
 import type { KubePod } from "@/types/KubePod";
 
@@ -39,21 +37,15 @@ export const PodList = () => {
 	const { data: clusterRes, status: clusterApiStatus } = useClusterListApi();
 	const { list: clusters = [] } = clusterRes || {};
 
-	const clusterShortName: string = "";
+	const clusterSlug: string = "";
 
 	const [amountFiltered, setAmountFiltered] = useState(0);
 	const [page, setPage] = useState(1);
-	const { data, status } = useMonitorPodApi({ filter: { clusterShortName } });
+	const { data, status } = useMonitorPodApi({ filter: { cluster: clusterSlug } });
 	const { list, pagination } = data || {};
 	const { total_items } = pagination || {};
 
-	const [deleteApi] = useUserDeleteApi();
-	const [query, { setQuery }] = useRouterQuery();
-
-	const deleteItem = async (id: string) => {
-		const res = await deleteApi({ _id: id });
-		if (res?.status) notification.success({ message: `Item deleted successfully.` });
-	};
+	const [deletePodApi, deletePodApiStatus] = useMonitorPodDeleteApi();
 
 	const onTableChange = (_pagination: TablePaginationConfig, extra: TableCurrentDataSource<DataType>) => {
 		const { current } = _pagination;
@@ -73,7 +65,7 @@ export const PodList = () => {
 						<Popconfirm
 							title="Are you sure to delete this item?"
 							description={<span className="text-red-500">Caution: this is permanent and cannot be rolled back.</span>}
-							// onConfirm={() => deleteItem(item._id as string)}
+							onConfirm={() => deletePodApi({ cluster: item.cluster, namespace: item.metadata.namespace, name: item.metadata.name })}
 							okText="Yes"
 							cancelText="No"
 						>

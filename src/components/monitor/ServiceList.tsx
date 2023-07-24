@@ -1,6 +1,6 @@
 import { DeleteOutlined } from "@ant-design/icons";
 import { useSize } from "ahooks";
-import { Button, notification, Popconfirm, Space, Table, Typography } from "antd";
+import { Button, Popconfirm, Space, Table, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import type { TableCurrentDataSource } from "antd/es/table/interface";
 import dayjs from "dayjs";
@@ -8,11 +8,9 @@ import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 
 import { useClusterListApi } from "@/api/api-cluster";
-import { useMonitorServiceApi } from "@/api/api-monitor-service";
-import { useUserDeleteApi } from "@/api/api-user";
+import { useMonitorServiceApi, useMonitorServiceDeleteApi } from "@/api/api-monitor-service";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
-import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
 import type { KubeService } from "@/types/KubeService";
 
@@ -37,21 +35,15 @@ export const ServiceList = () => {
 	const { data: clusterRes, status: clusterApiStatus } = useClusterListApi();
 	const { list: clusters = [] } = clusterRes || {};
 
-	const clusterShortName: string = "";
+	const [clusterSlug, setClusterSlug] = useState("");
 
 	const [amountFiltered, setAmountFiltered] = useState(0);
 	const [page, setPage] = useState(1);
-	const { data, status } = useMonitorServiceApi({ filter: { clusterShortName } });
+	const { data, status } = useMonitorServiceApi({ filter: { cluster: clusterSlug } });
 	const { list, pagination } = data || {};
 	const { total_items } = pagination || {};
 
-	const [deleteApi] = useUserDeleteApi();
-	const [query, { setQuery }] = useRouterQuery();
-
-	const deleteItem = async (id: string) => {
-		const res = await deleteApi({ _id: id });
-		if (res?.status) notification.success({ message: `Item deleted successfully.` });
-	};
+	const [deleteServiceApi, deleteServiceApiStatus] = useMonitorServiceDeleteApi();
 
 	const onTableChange = (_pagination: TablePaginationConfig, extra: TableCurrentDataSource<DataType>) => {
 		const { current } = _pagination;
@@ -72,7 +64,9 @@ export const ServiceList = () => {
 						<Popconfirm
 							title="Are you sure to delete this item?"
 							description={<span className="text-red-500">Caution: this is permanent and cannot be rolled back.</span>}
-							// onConfirm={() => deleteItem(item._id as string)}
+							onConfirm={() =>
+								deleteServiceApi({ cluster: item.clusterSlug, namespace: item.metadata?.namespace, name: item.metadata?.name })
+							}
 							okText="Yes"
 							cancelText="No"
 						>

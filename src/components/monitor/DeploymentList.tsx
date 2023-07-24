@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
-import { MoreOutlined } from "@ant-design/icons";
+import { DeleteOutlined } from "@ant-design/icons";
 import { useSize } from "ahooks";
-import { Button, notification, Table, Tag, Tooltip, Typography } from "antd";
+import { Button, Popconfirm, Space, Table, Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import type { TableCurrentDataSource } from "antd/es/table/interface";
 import dayjs from "dayjs";
@@ -10,11 +10,9 @@ import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 
 import { useClusterListApi } from "@/api/api-cluster";
-import { useMonitorDeploymentApi } from "@/api/api-monitor-deployment";
-import { useUserDeleteApi } from "@/api/api-user";
+import { useMonitorDeploymentApi, useMonitorDeploymentDeleteApi } from "@/api/api-monitor-deployment";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
-import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
 import type { KubeDeployment } from "@/types/KubeDeployment";
 
@@ -39,21 +37,15 @@ export const DeploymentList = () => {
 	const { data: clusterRes, status: clusterApiStatus } = useClusterListApi();
 	const { list: clusters = [] } = clusterRes || {};
 
-	const clusterShortName: string = "";
+	const clusterSlug: string = "";
 
 	const [amountFiltered, setAmountFiltered] = useState(0);
 	const [page, setPage] = useState(1);
-	const { data, status } = useMonitorDeploymentApi({ filter: { clusterShortName } });
+	const { data, status } = useMonitorDeploymentApi({ filter: { cluster: clusterSlug } });
 	const { list, pagination } = data || {};
 	const { total_items = list?.length ?? 0 } = pagination || {};
 
-	const [deleteApi] = useUserDeleteApi();
-	const [query, { setQuery }] = useRouterQuery();
-
-	const deleteItem = async (id: string) => {
-		const res = await deleteApi({ _id: id });
-		if (res?.status) notification.success({ message: `Item deleted successfully.` });
-	};
+	const [deleteDeploymentApi, deleteDeploymentApiStatus] = useMonitorDeploymentDeleteApi();
 
 	const onTableChange = (_pagination: TablePaginationConfig, extra: TableCurrentDataSource<DataType>) => {
 		const { current } = _pagination;
@@ -68,7 +60,22 @@ export const DeploymentList = () => {
 			return {
 				...item,
 				key: `ns-${i}`,
-				actions: [<Button size="small" key="more-btn" icon={<MoreOutlined />} />],
+				actions: (
+					<Space.Compact>
+						{/* <Button icon={<EditOutlined />} onClick={() => setQuery({ lv1: "edit", type: "user", user: item.metadata?.name })}></Button> */}
+						<Popconfirm
+							title="Are you sure to delete this item?"
+							description={<span className="text-red-500">Caution: this is permanent and cannot be rolled back.</span>}
+							onConfirm={() =>
+								deleteDeploymentApi({ cluster: item.cluster, namespace: item.metadata?.namespace, name: item.metadata?.name })
+							}
+							okText="Yes"
+							cancelText="No"
+						>
+							<Button icon={<DeleteOutlined />}></Button>
+						</Popconfirm>
+					</Space.Compact>
+				),
 			};
 		}) || [];
 

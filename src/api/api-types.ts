@@ -10,6 +10,36 @@ export type ApiOptions = AxiosRequestConfig & {
 	sort?: string;
 	staleTime?: number;
 	enabled?: boolean;
+	isDebugging?: boolean;
+};
+
+export type ApiMonitorFilter = {
+	/**
+	 * Cluster's ID or SLUG
+	 */
+	cluster?: string;
+	/**
+	 * Resource's name
+	 */
+	name?: string;
+	/**
+	 * Namespace's name
+	 */
+	namespace?: string;
+	/**
+	 * Filter by labels
+	 */
+	labels?: Record<string, string>;
+};
+
+export type ApiMonitorOptions = AxiosRequestConfig & {
+	// pagination?: IPaginationOptions;
+	filter?: ApiMonitorFilter;
+	sort?: string;
+	output?: "json" | "yaml";
+	staleTime?: number;
+	enabled?: boolean;
+	isDebugging?: boolean;
 };
 
 export type ApiStatus = "error" | "loading" | "success" | "idle";

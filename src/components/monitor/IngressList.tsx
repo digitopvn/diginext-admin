@@ -1,6 +1,6 @@
 import { DeleteOutlined } from "@ant-design/icons";
 import { useSize } from "ahooks";
-import { Button, notification, Popconfirm, Space, Table, Typography } from "antd";
+import { Button, Popconfirm, Space, Table, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import type { TableCurrentDataSource } from "antd/es/table/interface";
 import dayjs from "dayjs";
@@ -8,11 +8,9 @@ import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 
 import { useClusterListApi } from "@/api/api-cluster";
-import { useMonitorIngressApi } from "@/api/api-monitor-ingress";
-import { useUserDeleteApi } from "@/api/api-user";
+import { useMonitorIngressApi, useMonitorIngressDeleteApi } from "@/api/api-monitor-ingress";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
-import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
 import type { KubeIngress } from "@/types/KubeIngress";
 
@@ -37,21 +35,15 @@ export const IngressList = () => {
 	const { data: clusterRes, status: clusterApiStatus } = useClusterListApi();
 	const { list: clusters = [] } = clusterRes || {};
 
-	const clusterShortName: string = "";
+	const clusterSlug: string = "";
 
 	const [amountFiltered, setAmountFiltered] = useState(0);
 	const [page, setPage] = useState(1);
-	const { data, status } = useMonitorIngressApi({ filter: { clusterShortName } });
+	const { data, status } = useMonitorIngressApi({ filter: { cluster: clusterSlug } });
 	const { list, pagination } = data || {};
 	const { total_items } = pagination || {};
 
-	const [deleteApi] = useUserDeleteApi();
-	const [query, { setQuery }] = useRouterQuery();
-
-	const deleteItem = async (id: string) => {
-		const res = await deleteApi({ _id: id });
-		if (res?.status) notification.success({ message: `Item deleted successfully.` });
-	};
+	const [deleteIngressApi, deleteIngressApiStatus] = useMonitorIngressDeleteApi();
 
 	const onTableChange = (_pagination: TablePaginationConfig, extra: TableCurrentDataSource<DataType>) => {
 		const { current } = _pagination;
@@ -71,7 +63,9 @@ export const IngressList = () => {
 						<Popconfirm
 							title="Are you sure to delete this item?"
 							description={<span className="text-red-500">Caution: this is permanent and cannot be rolled back.</span>}
-							// onConfirm={() => deleteItem(item._id as string)}
+							onConfirm={() =>
+								deleteIngressApi({ cluster: item.cluster, namespace: item.metadata?.namespace, name: item.metadata?.name })
+							}
 							okText="Yes"
 							cancelText="No"
 						>

@@ -134,11 +134,11 @@ export const NodeList = () => {
 		},
 	];
 
-	const clusterShortName: string = "";
+	const clusterSlug: string = "";
 
 	const [amountFiltered, setAmountFiltered] = useState(0);
 	const [page, setPage] = useState(1);
-	const { data, status } = useMonitorNodeApi({ filter: { clusterShortName } });
+	const { data, status } = useMonitorNodeApi({ filter: { cluster: clusterSlug } });
 	const { list, pagination } = data || {};
 	const { total_items } = pagination || {};
 
