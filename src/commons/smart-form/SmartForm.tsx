@@ -123,7 +123,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 	};
 
 	return (
-		<div className="overflow-x-hidden p-6 pb-16">
+		<div className={`overflow-x-hidden p-6 pb-16 ${className}`}>
 			{/* LOADING */}
 			{status === "loading" && isNew === false && <Skeleton active />}
 			{createStatus === "loading" && isNew === true && <Skeleton active />}

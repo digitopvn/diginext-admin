@@ -26,6 +26,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 		height = "350px",
 		disabled = false,
 		visible = true,
+		wrapperStyle,
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -70,6 +71,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 
 	return (
 		<Form.Item
+			noStyle
 			label={
 				<Space size="small">
 					{label}
@@ -78,24 +80,24 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 			}
 			name={name}
 			rules={[{ required, message: requiredMessage }]}
-			style={{ display: visible ? "block" : "none" }}
+			style={{ display: visible ? "block" : "none", ...wrapperStyle }}
 		>
 			{/* <Input suffix={icon} onChange={onChange} /> */}
-			<Space direction="vertical" className="w-full">
-				<CodeMirror
-					height={height}
-					theme={isDarkMode ? "dark" : "light"}
-					extensions={[...lang.map((_lang) => langs[_lang]()), basicSetup({})]}
-					onChange={onChange}
-					value={_value}
-					editable={!disabled}
-				/>
+			{/* <Space direction="vertical" className="w-full"> */}
+			<CodeMirror
+				// height={height}
+				theme={isDarkMode ? "dark" : "light"}
+				extensions={[...lang.map((_lang) => langs[_lang]()), basicSetup({})]}
+				onChange={onChange}
+				value={_value}
+				editable={!disabled}
+			/>
 
-				{postLabel}
+			{postLabel}
 
-				{/* Display manual save controller if auto save is off */}
-				{!disabled && !autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
-			</Space>
+			{/* Display manual save controller if auto save is off */}
+			{!disabled && !autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
+			{/* </Space> */}
 		</Form.Item>
 	);
 };

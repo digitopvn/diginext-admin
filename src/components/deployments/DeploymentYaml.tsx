@@ -25,10 +25,17 @@ const DeploymentYaml = () => {
 			label: "Deployment YAML",
 			lang: ["yaml"],
 			disabled: true,
+			wrapperStyle: { display: "flex", width: "100%" },
 		},
 	];
 
-	return <SmartForm name="deployment_yaml" api={{ useSlugApi, useUpdateApi }} configs={smartFormConfigs} className="h-auto" />;
+	return (
+		<div className="h-full w-full">
+			<div className="flex h-full w-full">
+				<SmartForm name="deployment_yaml" api={{ useSlugApi, useUpdateApi }} configs={smartFormConfigs} className="flex !overflow-x-auto" />
+			</div>
+		</div>
+	);
 };
 
 export default DeploymentYaml;
