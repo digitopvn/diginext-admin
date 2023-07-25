@@ -38,7 +38,7 @@ import {
 } from "@/api/api-app";
 import { useBuildStartApi, useBuildStopApi } from "@/api/api-build";
 import { useProjectDeleteApi, useProjectListWithAppsApi } from "@/api/api-project";
-import type { IUser } from "@/api/api-types";
+import type { IApp, IDeployEnvironment, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -105,7 +105,14 @@ export const ProjectList = () => {
 					</>
 				) : record.type === "app" ? (
 					<>
-						<span className="text-purple-300">{record.name}</span> <Tag>{record.slug}</Tag>
+						<span
+							className="cursor-pointer text-purple-300 transition-colors hover:text-purple-500 hover:transition-colors"
+							onClick={() => setQuery({ lv1: "edit", type: "app", app: record.slug })}
+						>
+							{record.name}
+						</span>{" "}
+						<Tag>{record.slug}</Tag>
+						<Tag color="cyan">{(record as IApp).git?.provider}</Tag>
 					</>
 				) : (
 					value
@@ -347,16 +354,20 @@ export const ProjectList = () => {
 						const envList = Object.keys(app.deployEnvironment ?? {});
 						const environments: DataType[] = envList.map((envName) => {
 							// console.log("envStr :>> ", envStr);
-							const deployEnvironment = (app.deployEnvironment || {})[envName] || {};
+							const deployEnvironment = ((app.deployEnvironment || {})[envName] || {}) as IDeployEnvironment;
 
 							const record: any = {
 								name: (
-									<Button
-										type="link"
-										onClick={() => setQuery({ lv1: "deploy_environment", project: p.slug, app: app.slug, env: envName })}
-									>
-										{envName.toUpperCase()}
-									</Button>
+									<>
+										<Button
+											type="link"
+											onClick={() => setQuery({ lv1: "deploy_environment", project: p.slug, app: app.slug, env: envName })}
+										>
+											{envName.toUpperCase()}
+										</Button>
+										{/* <Tag>{deployEnvironment.registry}</Tag> */}
+										<Tag color="green">Namespace: {deployEnvironment.namespace}</Tag>
+									</>
 								),
 								key: `${p.slug}-${app.slug}-${envName}`,
 								id: envName,
@@ -571,7 +582,7 @@ export const ProjectList = () => {
 							actions: (
 								<Space.Compact>
 									<Tooltip title="Edit app">
-										<Button icon={<EditOutlined />} />
+										<Button icon={<EditOutlined />} onClick={() => setQuery({ lv1: "edit", type: "app", app: app.slug })} />
 									</Tooltip>
 									{/* <Button icon={<PauseCircleOutlined />} /> */}
 									<Tooltip title={typeof app.archiveAt !== "undefined" ? "Unarchive" : "Archive"}>

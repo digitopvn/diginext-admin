@@ -23,7 +23,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 		autoSave = false,
 		isNew,
 		lang = [],
-		height = "350px",
+		height,
 		disabled = false,
 		visible = true,
 		wrapperStyle,
@@ -82,10 +82,14 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 			rules={[{ required, message: requiredMessage }]}
 			style={{ display: visible ? "block" : "none", ...wrapperStyle }}
 		>
+			<Space size="small" className="mb-2">
+				{label}
+				{icon}
+			</Space>
 			{/* <Input suffix={icon} onChange={onChange} /> */}
 			{/* <Space direction="vertical" className="w-full"> */}
 			<CodeMirror
-				// height={height}
+				height={height}
 				theme={isDarkMode ? "dark" : "light"}
 				extensions={[...lang.map((_lang) => langs[_lang]()), basicSetup({})]}
 				onChange={onChange}
@@ -98,6 +102,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 			{/* Display manual save controller if auto save is off */}
 			{!disabled && !autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
 			{/* </Space> */}
+			<div className="h-4" />
 		</Form.Item>
 	);
 };

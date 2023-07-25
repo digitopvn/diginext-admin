@@ -22,7 +22,7 @@ const DeploymentYaml = () => {
 		{
 			type: "code-editor",
 			name: "deploymentYaml",
-			label: "Deployment YAML",
+			// label: "Deployment YAML",
 			lang: ["yaml"],
 			disabled: true,
 			wrapperStyle: { display: "flex", width: "100%" },

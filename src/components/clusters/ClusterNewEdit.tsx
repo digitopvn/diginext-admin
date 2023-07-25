@@ -50,8 +50,22 @@ const ClusterNewEdit = (props: ClusterNewEditProps = {}) => {
 			visible: providerShortName === "gcloud",
 		},
 		{ type: "input", label: "Zone (Google)", name: "zone", placeholder: "asia-southeast1-a", visible: providerShortName === "gcloud" },
-		{ type: "code-editor", lang: ["json"], label: "Service Account (JSON)", name: "serviceAccount", visible: providerShortName === "gcloud" },
-		{ type: "code-editor", lang: ["yaml"], label: "KubeConfig (YAML)", name: "kubeConfig", visible: providerShortName === "custom" },
+		{
+			type: "code-editor",
+			lang: ["json"],
+			label: "Service Account (JSON)",
+			name: "serviceAccount",
+			visible: providerShortName === "gcloud",
+			height: "350px",
+		},
+		{
+			type: "code-editor",
+			lang: ["yaml"],
+			label: "KubeConfig (YAML)",
+			name: "kubeConfig",
+			visible: providerShortName === "custom",
+			height: "350px",
+		},
 		{ type: "textarea", label: "API Access Token", name: "apiAccessToken", visible: providerShortName === "digitalocean" },
 	];
 

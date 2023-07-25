@@ -2,6 +2,7 @@ import ClusterNewEdit from "@/components/clusters/ClusterNewEdit";
 import DatabaseNewEdit from "@/components/databases/DatabaseNewEdit";
 import FrameworkNewEdit from "@/components/frameworks/FrameworkNewEdit";
 import GitProviderNewEdit from "@/components/gits/GitProviderNewEdit";
+import AppNewEdit from "@/components/projects/AppNewEdit";
 import ContainerRegistryNewEdit from "@/components/registries/ContainerRegistryNewEdit";
 import RoleNewEdit from "@/components/workspaces/RoleNewEdit";
 import UserNewEdit from "@/components/workspaces/UserNewEdit";
@@ -12,6 +13,10 @@ const NewEditPage = () => {
 
 	let children;
 	switch (type) {
+		case "app":
+			children = <AppNewEdit />;
+			break;
+
 		case "cluster":
 			children = <ClusterNewEdit />;
 			break;
