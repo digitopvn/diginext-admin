@@ -121,6 +121,27 @@ export const useAppEnvVarsCreateApi = (options?: ApiOptions) => {
 	return useCreateApi<KubeEnvironmentVariable[] | any>(["env_vars"], `/api/v1/app/environment/variables`, options);
 };
 
+export const useAppEnvVarsUpdateApi = (options?: ApiOptions) => {
+	return useUpdateApi<
+		IApp,
+		{
+			/**
+			 * App slug
+			 */
+			slug: string;
+			/**
+			 * Deploy environment name
+			 * @example "dev" | "prod"
+			 */
+			env: string;
+			/**
+			 * Array of variables to be created on deploy environment in JSON format
+			 */
+			envVars: KubeEnvironmentVariable[];
+		}
+	>(["env_vars", "update"], `/api/v1/app/environment/variables`, options);
+};
+
 export const useAppEnvVarsDeleteApi = (options?: ApiOptions) => {
 	return useDeleteApi<KubeEnvironmentVariable[] | any>(["env_vars", "delete"], `/api/v1/app/environment/variables`, options);
 };

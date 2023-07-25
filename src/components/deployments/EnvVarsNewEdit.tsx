@@ -1,13 +1,13 @@
 import { CloseOutlined } from "@ant-design/icons";
-import { Alert, Button, Empty, Form, Input, Skeleton, Space, Typography } from "antd";
-import { isArray, isEmpty } from "lodash";
+import { Alert, Button, Empty, Form, Input, notification, Skeleton, Space, Typography } from "antd";
+import { isNumberString } from "class-validator";
+import { isArray, isEmpty, uniqueId } from "lodash";
 import { useEffect, useState } from "react";
 
-import { useAppEnvVarsCreateApi, useAppSlugApi } from "@/api/api-app";
+import { useAppEnvVarsUpdateApi, useAppSlugApi } from "@/api/api-app";
 import type { KubeEnvironmentVariable } from "@/api/api-types";
 import ManualSaveController from "@/commons/smart-form/ManualSaveController";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
-import { useDrawerProvider } from "@/providers/DrawerProvider";
 
 const formatEnvVarName = (name: string) => {
 	let formatName = name.replace(/\s+/g, "_");
@@ -16,73 +16,95 @@ const formatEnvVarName = (name: string) => {
 	return formatName.toUpperCase();
 };
 
+interface DisplayEnvVar extends KubeEnvironmentVariable {
+	id: string;
+}
+
 const EnvVarsNewEdit = () => {
 	const [{ env, project: projectSlug, app: appSlug }] = useRouterQuery();
 
-	const { closeDrawer } = useDrawerProvider();
-
-	// frameworks
-	// const useUpdateApi = useFrameworkUpdateApi({ filter: { id: app?._id } });
-	const [createApi, createStatus] = useAppEnvVarsCreateApi();
+	// const [createApi, createStatus] = useAppEnvVarsCreateApi();
+	const [updateApi, updateApiStatus] = useAppEnvVarsUpdateApi();
 	const { data: app = {}, status } = useAppSlugApi(appSlug, { populate: "project,owner,workspace" });
 
-	console.log("EnvVarsNewEdit > app :>> ", app);
 	const envVars = !isEmpty(app) ? (app.deployEnvironment || {})[env]?.envVars || [] : [];
-	// console.log("envVars :>> ", envVars);
 
-	const [_envVars, _setEnvVars] = useState(envVars);
+	const [_envVars, _setEnvVars] = useState<DisplayEnvVar[]>([]);
 	const [form] = Form.useForm();
 
 	// This function to use for clearing forms
-	const setEnvVars = (values: KubeEnvironmentVariable[] = []) => _setEnvVars([...values]);
+	const setEnvVars = (values: DisplayEnvVar[] = []) => _setEnvVars([...values]);
 
 	useEffect(() => {
-		let initialEnvVars = envVars;
-		if (!isArray(envVars) && typeof envVars[0] !== "undefined") {
-			initialEnvVars = [];
+		const initialEnvVars: DisplayEnvVar[] = [];
+		if (isArray(envVars)) {
+			initialEnvVars.push(...envVars.map((envVar, i) => ({ id: uniqueId(), ...envVar })));
+		} else if (!isArray(envVars) && typeof envVars[0] !== "undefined") {
+			// sometime the "envVars" is an {Object}...
 			Object.entries(envVars).forEach(([, val]) => {
-				initialEnvVars.push(val as KubeEnvironmentVariable);
+				if ((val as any).name && (val as any).value) {
+					const envVar: DisplayEnvVar = { id: uniqueId(), name: (val as any).name, value: (val as any).value };
+					initialEnvVars.push(envVar);
+				}
 			});
 		}
-		console.log("envVars :>> ", envVars);
-		console.log("initialEnvVars :>> ", initialEnvVars);
+
+		// console.log("envVars :>> ", envVars);
+		// console.log("initialEnvVars :>> ", initialEnvVars);
+
 		setEnvVars(initialEnvVars);
 	}, [JSON.stringify(envVars)]);
 
-	const deleteEnvVarAtIndex = (index: number) => _setEnvVars((_arr) => _arr.filter((item, i) => index !== i));
+	// useEffect(() => console.log("_envVars :>> ", _envVars), [_envVars]);
 
-	const addEnvVar = (value: KubeEnvironmentVariable = { name: "", value: "" }) => _setEnvVars((_arr) => [..._arr, value]);
+	const isVarNameExisted = (name: string) => {
+		const count = _envVars.filter((_var) => _var.name === name).length;
+		return count > 1;
+	};
 
-	const updateVarNameAtIndex = (index: number, name: string = "") => {
+	const deleteEnvVarByID = (id: string) => _setEnvVars((_arr) => _arr.filter((item, i) => id !== item.id));
+
+	const addEnvVarField = (value: DisplayEnvVar = { id: uniqueId(), name: "", value: "" }) => _setEnvVars((_arr) => [..._arr, value]);
+
+	const updateVarNameByID = (id: string, name: string = "") => {
 		_setEnvVars((_arr) =>
 			_arr.map((v, i) => {
-				if (i === index) return { name, value: v.value || "" };
+				if (v.id === id) return { id, name, value: v.value || "" };
 				return v;
 			})
 		);
 	};
 
-	const updateVarValueAtIndex = (index: number, value: string = "") => {
+	const updateVarValueByID = (id: string, value: string = "") => {
 		_setEnvVars((_arr) =>
 			_arr.map((v, i) => {
-				if (i === index) return { name: v.name || "", value };
+				if (v.id === id) return { id, name: v.name || "", value };
 				return v;
 			})
 		);
 	};
 
+	/**
+	 * Submit the form
+	 */
 	const onFinish = async (values: any) => {
-		const postData = { envVars: JSON.stringify(_envVars), slug: appSlug, env };
-
 		let result;
-		// console.log("postData :>> ", postData);
+		// console.log("_envVars :>> ", _envVars);
 
-		if (createApi) result = await createApi(postData);
-		console.log("[CREATE_ENV_VARS] result :>> ", result);
+		// validate
+		try {
+			_envVars.forEach((envVar) => {
+				if (isEmpty(envVar.name)) throw new Error(`Variable's name should not be empty`);
+				if (isNumberString(envVar.name)) throw new Error(`Variable's name (${envVar.name}) should not be a number`);
+				if (isVarNameExisted(envVar.name)) throw new Error(`Variable's name (${envVar.name}) should be unique.`);
+			});
 
-		if (result?.status) setEnvVars(result?.data);
-
-		// closeDrawer();
+			// if (createApi) result = await createApi(postData);
+			if (updateApi && app.slug) result = await updateApi({ slug: app.slug, env, envVars: _envVars });
+			// console.log("[UPDATE_ENV_VARS] result :>> ", result);
+		} catch (e: any) {
+			notification.error({ message: e.toString() });
+		}
 	};
 
 	const onFinishFailed = (errorInfo: any) => {
@@ -113,58 +135,32 @@ const EnvVarsNewEdit = () => {
 						{isEmpty(_envVars) && <Empty />}
 
 						{(_envVars || []).map((envVar, index) => (
-							<Space.Compact block key={`env-var-${index}`}>
-								<Form.Item
-									className="mb-0 w-1/2"
-									name={[`envVars[${index}]`, "name"]}
-									rules={[
-										{ required: true, message: `Variable name is required` },
-										{
-											validator: (__, value) =>
-												value.indexOf(" ") === -1
-													? Promise.resolve()
-													: Promise.reject(new Error("Variable name should not contain spacing.")),
-										},
-										{
-											validator: (__, value) =>
-												// eslint-disable-next-line no-useless-escape
-												/[`!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/g.test(value) === false
-													? Promise.resolve()
-													: Promise.reject(new Error("Variable name should not contain special character.")),
-										},
-									]}
-									initialValue={envVar.name}
-								>
-									<Input
-										className="!flex-auto"
-										placeholder={"NAME"}
-										value={envVar.name}
-										onChange={(e) => updateVarNameAtIndex(index, e.currentTarget.value)}
-									/>
-								</Form.Item>
-								<Form.Item
-									className="mb-0 w-1/2"
-									name={[`envVars[${index}]`, "value"]}
-									// rules={[{ required: true, message: `Variable value is required` }]}
-									initialValue={envVar.value || ""}
-								>
-									<Input
-										className="!flex-auto"
-										placeholder={"VALUE"}
-										value={envVar.value}
-										onChange={(e) => updateVarValueAtIndex(index, e.currentTarget.value)}
-									/>
-								</Form.Item>
-								<Button tabIndex={-1} icon={<CloseOutlined />} onClick={() => deleteEnvVarAtIndex(index)} />
+							<Space.Compact block key={`env-var-${envVar.id}`}>
+								<Input
+									key={`env-var-name-input-${envVar.id}`}
+									className="!flex-auto"
+									placeholder="NAME"
+									status={isEmpty(envVar.name) || isNumberString(envVar.name) || isVarNameExisted(envVar.name) ? "error" : ""}
+									value={envVar.name}
+									onChange={(e) => (e.currentTarget.value ? updateVarNameByID(envVar.id, e.currentTarget.value) : null)}
+								/>
+								<Input
+									key={`env-var-value-input-${envVar.id}`}
+									className="!flex-auto"
+									placeholder="VALUE"
+									value={envVar.value}
+									onChange={(e) => updateVarValueByID(envVar.id, e.currentTarget.value)}
+								/>
+								<Button tabIndex={-1} icon={<CloseOutlined />} onClick={() => deleteEnvVarByID(envVar.id)} />
 							</Space.Compact>
 						))}
 					</Space>
 
 					<div className="py-6">
-						<Button onClick={() => addEnvVar()}>+ Add variable</Button>
+						<Button onClick={() => addEnvVarField()}>+ Add variable</Button>
 					</div>
 
-					<ManualSaveController name="envVars" apiStatus={createStatus} initialValue={envVars} setValue={setEnvVars} />
+					<ManualSaveController name="envVars" apiStatus={updateApiStatus} initialValue={envVars} setValue={setEnvVars} />
 				</Form>
 			)}
 		</>
