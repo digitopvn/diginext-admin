@@ -74,7 +74,9 @@ export const BuildList = () => {
 			render: (value, record) => (
 				<>
 					<p>
-						<Link href={`/build/logs?build_slug=${record.slug}`}>
+						<Link
+							href={!record.env ? `/build/logs?build_slug=${record.slug}` : `/build/logs?build_slug=${record.slug}&env=${record.env}`}
+						>
 							<strong>{value}</strong>
 						</Link>
 					</p>
@@ -176,8 +178,9 @@ export const BuildList = () => {
 	const { list: builds, pagination } = data || {};
 	const { total_items } = pagination || {};
 
-	const openBuildLogs = (slug?: string) => {
+	const openBuildLogs = (slug?: string, envStr?: string) => {
 		const _query: any = { build_slug: slug };
+		if (envStr) _query.env = envStr;
 
 		if (!query.lv1) _query.lv1 = "build_logs";
 		else _query.lv2 = "build_logs";
@@ -262,7 +265,7 @@ export const BuildList = () => {
 						</Tooltip>
 					)}
 					<Tooltip title="View logs">
-						<Button icon={<CodeOutlined />} onClick={() => openBuildLogs(build.slug)} />
+						<Button icon={<CodeOutlined />} onClick={() => openBuildLogs(build.slug, build.env)} />
 					</Tooltip>
 					<Tooltip title="Open image URL">
 						<Button icon={<EyeOutlined />} href={`https://${build.image}`} target="_blank" />

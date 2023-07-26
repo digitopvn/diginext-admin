@@ -61,6 +61,10 @@ body {
 	font-size: 12px;
 }
 
+.ant-form-item .ant-form-item-control-input {
+	align-items: flex-start;
+}
+
 a {
 	color: #bf6bf7;
 }

@@ -71,7 +71,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 
 	return (
 		<Form.Item
-			noStyle
+			// noStyle
 			label={
 				<Space size="small">
 					{label}
@@ -82,12 +82,6 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 			rules={[{ required, message: requiredMessage }]}
 			style={{ display: visible ? "block" : "none", ...wrapperStyle }}
 		>
-			<Space size="small" className="mb-2">
-				{label}
-				{icon}
-			</Space>
-			{/* <Input suffix={icon} onChange={onChange} /> */}
-			{/* <Space direction="vertical" className="w-full"> */}
 			<CodeMirror
 				height={height}
 				theme={isDarkMode ? "dark" : "light"}
