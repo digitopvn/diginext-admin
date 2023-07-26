@@ -13,6 +13,7 @@ import { useClusterListApi } from "@/api/api-cluster";
 import { useMonitorPodApi, useMonitorPodDeleteApi } from "@/api/api-monitor-pod";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
+import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
 import type { KubePod } from "@/types/KubePod";
 
@@ -28,20 +29,35 @@ interface DataType extends KubePod {
 	actions?: any;
 }
 
+export interface MonitoringProps {
+	/**
+	 * @default false
+	 */
+	hideHeader?: boolean;
+	/**
+	 * @default false
+	 */
+	hidePagination?: boolean;
+	/**
+	 * @default false
+	 */
+	autoHeight?: boolean;
+}
+
 const pageSize = 200;
 
-export const PodList = () => {
+export const PodList = (props?: MonitoringProps) => {
 	const { responsive } = useLayoutProvider();
+	const [query, { setQuery }] = useRouterQuery();
+	const { namespace: namespaceName, cluster: clusterSlug } = query;
 
 	// clusters
 	const { data: clusterRes, status: clusterApiStatus } = useClusterListApi();
 	const { list: clusters = [] } = clusterRes || {};
 
-	const clusterSlug: string = "";
-
 	const [amountFiltered, setAmountFiltered] = useState(0);
 	const [page, setPage] = useState(1);
-	const { data, status } = useMonitorPodApi({ filter: { cluster: clusterSlug } });
+	const { data, status } = useMonitorPodApi({ filter: { cluster: clusterSlug, namespace: namespaceName } });
 	const { list, pagination } = data || {};
 	const { total_items } = pagination || {};
 
@@ -117,7 +133,7 @@ export const PodList = () => {
 			onFilter: (value, record) => (record.metadata?.name ? record.metadata?.name.indexOf(value.toString()) > -1 : true),
 		},
 		{
-			title: "Phase",
+			title: "Status",
 			dataIndex: "phase",
 			key: "phase",
 			width: 18,
@@ -167,7 +183,17 @@ export const PodList = () => {
 			dataIndex: "namespace",
 			key: "namespace",
 			width: 25,
-			render: (value, record) => <Link href="#">{record.metadata?.namespace}</Link>,
+			render: (value, record) => (
+				<Link
+					href="#"
+					onClick={(e) => {
+						e.preventDefault();
+						setQuery({ ...query, namespace: record.metadata?.namespace });
+					}}
+				>
+					{record.metadata?.namespace}
+				</Link>
+			),
 			filterSearch: true,
 			filters: namespaceFilterList,
 			onFilter: (value, record) => (record.metadata?.namespace ? record.metadata?.namespace.indexOf(value.toString()) > -1 : true),
@@ -189,7 +215,13 @@ export const PodList = () => {
 			key: "clusterSlug",
 			width: 25,
 			render: (value) => (
-				<Button type="link" style={{ padding: 0 }}>
+				<Button
+					type="link"
+					style={{ padding: 0 }}
+					onClick={(e) => {
+						setQuery({ ...query, cluster: value });
+					}}
+				>
 					{value}
 				</Button>
 			),
@@ -219,21 +251,28 @@ export const PodList = () => {
 	const ref = useRef(null);
 	const size = useSize(ref);
 
+	/**
+	 * @type {HTMLAttributes}
+	 */
+	const classNames = props?.autoHeight ? "flex-auto h-auto" : "h-full flex-auto overflow-hidden";
+	const scrollY = !props?.autoHeight ? (typeof size?.height !== "undefined" ? size.height - 140 : undefined) : undefined;
+
 	return (
 		<>
 			{/* Page title & desc here */}
-			<PageTitle title={`Pods (${amountFiltered})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
-			<div className="h-full flex-auto overflow-hidden" ref={ref}>
+			{props?.hideHeader ? <></> : <PageTitle title={`Pods (${amountFiltered})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />}
+			<div className={classNames} ref={ref}>
 				<Table
 					sticky
 					size="small"
 					loading={status === "loading"}
 					columns={columns}
 					dataSource={displayedList}
-					scroll={{ x: 1000, y: typeof size?.height !== "undefined" ? size.height - 140 : undefined }}
+					scroll={{ x: 1000, y: scrollY }}
 					pagination={{
 						pageSize,
 						position: ["bottomCenter"],
+						hideOnSinglePage: true,
 					}}
 					onChange={(_pagination, filters, sorter, extra) => onTableChange(_pagination, extra)}
 				/>

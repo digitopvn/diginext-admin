@@ -4,12 +4,14 @@ import { Button, Popconfirm, Space, Table, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import type { TableCurrentDataSource } from "antd/es/table/interface";
 import dayjs from "dayjs";
+import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 
 import { useClusterListApi } from "@/api/api-cluster";
 import { useMonitorNamespaceApi, useMonitorNamespaceDeleteApi } from "@/api/api-monitor-namespace";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
+import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
 import type { KubeNamespace } from "@/types/KubeNamespace";
 
@@ -29,12 +31,12 @@ const pageSize = 200;
 
 export const NamespaceList = () => {
 	const { responsive } = useLayoutProvider();
+	const [query, { setQuery }] = useRouterQuery();
+	const { cluster: clusterSlug } = query;
 
 	// clusters
 	const { data: clusterRes, status: clusterApiStatus } = useClusterListApi();
 	const { list: clusters = [] } = clusterRes || {};
-
-	const clusterSlug: string = "";
 
 	const [amountFiltered, setAmountFiltered] = useState(0);
 	const [page, setPage] = useState(1);
@@ -59,7 +61,11 @@ export const NamespaceList = () => {
 			key: "name",
 			fixed: responsive?.md ? "left" : undefined,
 			filterSearch: true,
-			render: (value, record) => record.metadata?.name,
+			render: (value, record) => (
+				<Link href={`/monitor/namespace/resources?cluster=${record.clusterSlug}&namespace=${record.metadata?.name}`}>
+					{record.metadata?.name}
+				</Link>
+			),
 			filters: list?.map((item) => {
 				return { text: item.metadata?.name || "", value: item.metadata?.name || "" };
 			}),
@@ -71,7 +77,13 @@ export const NamespaceList = () => {
 			key: "clusterSlug",
 			width: 30,
 			render: (value) => (
-				<Button type="link" style={{ padding: 0 }}>
+				<Button
+					type="link"
+					style={{ padding: 0 }}
+					onClick={(e) => {
+						setQuery({ ...query, cluster: value });
+					}}
+				>
 					{value}
 				</Button>
 			),

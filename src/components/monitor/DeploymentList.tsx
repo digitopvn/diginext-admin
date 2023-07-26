@@ -13,8 +13,11 @@ import { useClusterListApi } from "@/api/api-cluster";
 import { useMonitorDeploymentApi, useMonitorDeploymentDeleteApi } from "@/api/api-monitor-deployment";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
+import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
 import type { KubeDeployment } from "@/types/KubeDeployment";
+
+import type { MonitoringProps } from "./PodList";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -30,18 +33,18 @@ interface DataType extends KubeDeployment {
 
 const pageSize = 200;
 
-export const DeploymentList = () => {
+export const DeploymentList = (props?: MonitoringProps) => {
 	const { responsive } = useLayoutProvider();
+	const [query, { setQuery }] = useRouterQuery();
+	const { namespace: namespaceName, cluster: clusterSlug } = query;
 
 	// clusters
 	const { data: clusterRes, status: clusterApiStatus } = useClusterListApi();
 	const { list: clusters = [] } = clusterRes || {};
 
-	const clusterSlug: string = "";
-
 	const [amountFiltered, setAmountFiltered] = useState(0);
 	const [page, setPage] = useState(1);
-	const { data, status } = useMonitorDeploymentApi({ filter: { cluster: clusterSlug } });
+	const { data, status } = useMonitorDeploymentApi({ filter: query });
 	const { list, pagination } = data || {};
 	const { total_items = list?.length ?? 0 } = pagination || {};
 
@@ -142,6 +145,13 @@ export const DeploymentList = () => {
 				if (value === "partial") return ready > 0 && ready < total;
 				return ready === total;
 			},
+			sorter: (a, b) => {
+				const readyA =
+					a.status?.availableReplicas ?? a.status?.readyReplicas ?? (a.status?.replicas ?? 0) - (a.status?.unavailableReplicas ?? 0);
+				const readyB =
+					b.status?.availableReplicas ?? b.status?.readyReplicas ?? (b.status?.replicas ?? 0) - (b.status?.unavailableReplicas ?? 0);
+				return readyA - readyB;
+			},
 		},
 		{
 			title: "CPU",
@@ -190,7 +200,17 @@ export const DeploymentList = () => {
 			dataIndex: "namespace",
 			key: "namespace",
 			width: 30,
-			render: (value, record) => <Link href="#">{record.metadata?.namespace}</Link>,
+			render: (value, record) => (
+				<Link
+					href="#"
+					onClick={(e) => {
+						e.preventDefault();
+						setQuery({ ...query, namespace: record.metadata?.namespace });
+					}}
+				>
+					{record.metadata?.namespace}
+				</Link>
+			),
 			filterSearch: true,
 			filters: namespaceFilterList,
 			onFilter: (value, record) => (record.metadata?.namespace ? record.metadata?.namespace.indexOf(value.toString()) > -1 : true),
@@ -200,7 +220,17 @@ export const DeploymentList = () => {
 			dataIndex: "clusterSlug",
 			key: "clusterSlug",
 			width: 30,
-			render: (value) => <Link href="#">{value}</Link>,
+			render: (value) => (
+				<Link
+					href="#"
+					onClick={(e) => {
+						e.preventDefault();
+						setQuery({ ...query, cluster: value });
+					}}
+				>
+					{value}
+				</Link>
+			),
 			filterSearch: true,
 			filters: clusters.map((cluster) => {
 				return { text: cluster.slug || "", value: cluster.slug || "" };
@@ -226,22 +256,25 @@ export const DeploymentList = () => {
 
 	const ref = useRef(null);
 	const size = useSize(ref);
-	// console.log("size :>> ", size);
+	const classNames = props?.autoHeight ? "flex-auto h-auto" : "h-full flex-auto overflow-hidden";
+	const scrollY = !props?.autoHeight ? (typeof size?.height !== "undefined" ? size.height - 140 : undefined) : undefined;
+
 	return (
 		<>
 			{/* Page title & desc here */}
-			<PageTitle title={`Deployments (${amountFiltered})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
-			<div className="flex-auto overflow-auto" ref={ref}>
+			{props?.hideHeader ? <></> : <PageTitle title={`Deployments (${amountFiltered})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />}
+			<div className={classNames} ref={ref}>
 				<Table
 					sticky
 					loading={status === "loading"}
 					size="small"
 					columns={columns}
 					dataSource={displayedList}
-					scroll={{ x: 1000, y: typeof size?.height !== "undefined" ? size.height - 140 : undefined }}
+					scroll={{ x: 1000, y: scrollY }}
 					pagination={{
 						pageSize,
 						position: ["bottomCenter"],
+						hideOnSinglePage: true,
 					}}
 					onChange={(_pagination, filters, sorter, extra) => onTableChange(_pagination, extra)}
 				/>
