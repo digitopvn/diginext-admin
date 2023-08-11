@@ -9,7 +9,6 @@ import type { ReactNode } from "react";
 import { useEffect } from "react";
 
 import CenterContainer from "@/commons/CenterContainer";
-import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { Config } from "@/utils/AppConfig";
 
 import type { IUser } from "./api-types";
@@ -24,8 +23,10 @@ export const login = (params: { redirectURL?: string } = {}) => {
 
 export const useAuthApi = (props: { access_token?: string } = {}) => {
 	const router = useRouter();
-	const access_token = (router.query.access_token || getCookie("x-auth-cookie")) as string;
+	let access_token = (router.query.access_token?.toString() || getCookie("x-auth-cookie")) as string;
+	let refresh_token = router.query.refresh_token?.toString();
 	// console.log("useAuthApi > access_token :>> ", access_token);
+	// console.log("refresh_token :>> ", refresh_token);
 
 	return useQuery({
 		// staleTime: 5 * 60 * 1000, // 5 minutes
@@ -33,15 +34,21 @@ export const useAuthApi = (props: { access_token?: string } = {}) => {
 		queryKey: ["auth"],
 		enabled: typeof access_token !== "undefined",
 		queryFn: async () => {
+			const query = Object.fromEntries(new URLSearchParams(router.asPath.indexOf("?") > -1 ? router.asPath.split("?")[1] : {}));
+
 			// try the best to get "access_token"...
-			const ac = access_token && endsWith(access_token, "%23") ? access_token.substring(0, access_token.length - 3) : access_token;
-			const headers = ac ? { Authorization: `Bearer ${ac}` } : {};
+			access_token = access_token && endsWith(access_token, "%23") ? access_token.substring(0, access_token.length - 3) : access_token;
+			const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 			// console.log("useAuthApi > queryFn > headers :>> ", headers);
 
+			// console.log("query :>> ", query);
+			refresh_token = query.refresh_token?.toString();
+			// console.log("refresh_token :>> ", refresh_token);
+
 			try {
-				const url = `${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile${ac ? `?access_token=${ac}` : ""}`;
+				const url = `${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile`;
 				// console.log("useAuthApi > queryFn > url :>> ", url);
-				const { data } = await axios.get(url, { headers });
+				const { data } = await axios.get(url, { headers, params: { access_token, refresh_token } });
 				// console.log("useAuthApi > queryFn > profile :>> ", JSON.stringify(data, null, 2));
 				if (data?.token?.access_token) setCookie("x-auth-cookie", data?.token?.access_token);
 				return data;
@@ -55,7 +62,6 @@ export const useAuthApi = (props: { access_token?: string } = {}) => {
 
 export const useAuth = () => {
 	const router = useRouter();
-	const [query] = useRouterQuery();
 
 	const authActions = useAuthApi();
 	const { data: response, status: apiStatus, refetch, isStale, isRefetching } = authActions;
@@ -69,6 +75,7 @@ export const useAuth = () => {
 	};
 
 	const access_token = (router.query.access_token || getCookie("x-auth-cookie")) as string;
+	const refresh_token = router.query.refresh_token?.toString();
 
 	useEffect(() => {
 		// console.log(`[1] ----------------------------------`);
@@ -88,6 +95,7 @@ export const useAuth = () => {
 			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
 			return;
 		}
+		if (!refresh_token) return;
 		if (isRefetching) return;
 		if (typeof responseStatus === "undefined") return;
 		if (apiStatus === "loading") return;
@@ -98,10 +106,10 @@ export const useAuth = () => {
 		}
 
 		if (isEmpty(user?.activeWorkspace) || isEmpty(user?.activeRole)) {
-			// reload().then(() => router.push(`/workspace/select`));
-			router.push(`/workspace/select`);
+			console.log({ access_token, refresh_token });
+			router.push(`/workspace/select`, { query: { access_token, refresh_token } });
 		}
-	}, [apiStatus, access_token]);
+	}, [apiStatus, access_token, refresh_token]);
 
 	return [user, authActions] as [IUser, typeof authActions];
 };

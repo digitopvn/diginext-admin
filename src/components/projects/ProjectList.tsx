@@ -83,6 +83,18 @@ export const ProjectList = () => {
 	const { responsive } = useLayoutProvider();
 	const { modal } = useModalProvider();
 
+	// pagination
+	const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
+
+	// fetch projects
+	const {
+		data,
+		status: apiStatus,
+		refetch: refetchProjecAndApps,
+	} = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
+	const { list: projects, pagination } = data || {};
+	const { total_pages, total_items } = pagination || {};
+
 	// table config
 	const columns: ColumnsType<DataType> = [
 		{
@@ -91,9 +103,11 @@ export const ProjectList = () => {
 			dataIndex: "name",
 			key: "name",
 			fixed: responsive?.md ? "left" : undefined,
-			// filterSearch: true,
-			// filters: [{ text: "goon", value: "goon" }],
-			// onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
+			filterSearch: true,
+			filters: projects?.map((item) => {
+				return { text: item?.slug || "", value: item?.slug || "" };
+			}),
+			onFilter: (value, record) => (record?.slug ? record?.slug.indexOf(value.toString()) > -1 : true),
 			render: (value, record) =>
 				// eslint-disable-next-line no-nested-ternary
 				record.type === "project" ? (
@@ -221,14 +235,6 @@ export const ProjectList = () => {
 			render: (value, record) => record.actions,
 		},
 	];
-
-	// pagination
-	const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
-
-	// fetch projects
-	const { data, status, refetch: refetchProjecAndApps } = useProjectListWithAppsApi({ populate: "owner", pagination: { page, size: pageSize } });
-	const { list: projects, pagination } = data || {};
-	const { total_pages, total_items } = pagination || {};
 
 	const [deleteProjectApi, deleteProjectApiStatus] = useProjectDeleteApi();
 	const [deleteAppApi, deleteAppApiStatus] = useAppDeleteApi();
@@ -650,7 +656,7 @@ export const ProjectList = () => {
 			<div className="h-full flex-auto overflow-hidden" ref={ref}>
 				<Table
 					size="small"
-					loading={status === "loading"}
+					loading={apiStatus === "loading"}
 					columns={columns}
 					dataSource={displayedProjects}
 					// scroll={{ x: window?.innerWidth >= 728 ? 1500 : 600 }}
