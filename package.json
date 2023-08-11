@@ -48,6 +48,7 @@
 		"antd": "^5.2.2",
 		"axios": "^1.2.2",
 		"class-validator": "^0.14.0",
+		"cmdk": "^0.2.0",
 		"cookies-next": "^2.1.1",
 		"dayjs": "^1.11.7",
 		"diginext-utils": "^2.0.32",
@@ -63,6 +64,7 @@
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"sanitize-html": "^2.9.0",
+		"sass": "^1.65.1",
 		"socket.io-client": "^4.5.4",
 		"usehooks-ts": "^2.9.1",
 		"validator": "^13.9.0"

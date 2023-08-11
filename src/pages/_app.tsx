@@ -1,4 +1,4 @@
-import "../styles/global.css";
+import "../styles/global.scss";
 import "antd/dist/reset.css";
 
 // React Query

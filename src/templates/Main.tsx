@@ -1,5 +1,5 @@
 import { App, ConfigProvider, theme } from "antd";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { useDarkMode } from "usehooks-ts";
 
 import GtagScript from "@/commons/measure/GtagScript";
@@ -18,6 +18,14 @@ type IMainProps = {
 const Main = (props: IMainProps) => {
 	const { isDarkMode } = useDarkMode();
 	const { useSidebar = true } = props;
+
+	useEffect(() => {
+		const htmlElement = document.documentElement;
+		htmlElement.style.colorScheme = isDarkMode ? "dark" : "";
+		if (isDarkMode) {
+			if (!htmlElement.classList.contains("dark")) htmlElement.classList.add("dark");
+		} else if (htmlElement.classList.contains("dark")) htmlElement.classList.remove("dark");
+	}, [isDarkMode]);
 
 	return (
 		<ConfigProvider

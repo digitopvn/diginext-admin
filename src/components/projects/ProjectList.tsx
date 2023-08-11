@@ -5,6 +5,7 @@ import {
 	ClearOutlined,
 	CloudUploadOutlined,
 	DeleteOutlined,
+	DeploymentUnitOutlined,
 	EditOutlined,
 	EyeInvisibleOutlined,
 	EyeOutlined,
@@ -41,6 +42,7 @@ import { useProjectDeleteApi, useProjectListWithAppsApi } from "@/api/api-projec
 import type { IApp, IDeployEnvironment, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
+import SearchBox from "@/commons/SearchBox";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
 import { useModalProvider } from "@/providers/ModalProvider";
@@ -633,6 +635,34 @@ export const ProjectList = () => {
 
 	return (
 		<>
+			{/* Search */}
+			<SearchBox
+				commands={projects?.map((p) => ({
+					label: `${p.name} (${p.slug})`,
+					value: p,
+					children: p.apps?.map((a) => ({
+						value: a,
+						label: (
+							<>
+								<Tag>{p.slug}</Tag>≫<Tag>{a.slug}</Tag>
+							</>
+						),
+						children: Object.keys(a.deployEnvironment || {}).map((env) => {
+							return {
+								label: (
+									<>
+										<DeploymentUnitOutlined />
+										{`Deploy environment ≫ ${env.toUpperCase()}`}
+									</>
+								),
+								value: (a.deployEnvironment || {})[env],
+								onSelect: (val) => setQuery({ lv1: "deploy_environment", project: p.slug, app: a.slug, env }),
+							};
+						}),
+					})),
+				}))}
+			/>
+
 			{/* Page title & desc here */}
 			<PageTitle
 				title="Projects & apps"
