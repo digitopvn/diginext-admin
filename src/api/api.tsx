@@ -22,6 +22,7 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const refresh_token = router.query.refresh_token ?? getCookie("refresh_token");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
@@ -45,7 +46,7 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 		queryFn: async () => {
 			const { data } = await axios.get<ApiResponse<T[]>>(
 				`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${sortParams}&${populateParams}&${paginationParams}`,
-				{ ...options, headers }
+				{ ...options, headers, params: { refresh_token } }
 			);
 
 			if (!data.status && !isEmpty(data.messages)) {
@@ -83,6 +84,7 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string | 
 
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const refresh_token = router.query.refresh_token ?? getCookie("refresh_token");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
@@ -98,7 +100,7 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string | 
 		staleTime: options?.staleTime,
 		queryFn: async () => {
 			const url = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${populateParams}`;
-			const { data } = await axios.get<ApiResponse<T[]>>(url, { ...options, headers });
+			const { data } = await axios.get<ApiResponse<T[]>>(url, { ...options, headers, params: { refresh_token } });
 
 			if (!data.status && !isEmpty(data.messages)) {
 				data.messages.forEach((message) => {
@@ -130,6 +132,7 @@ export const useApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {
 
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const refresh_token = router.query.refresh_token ?? getCookie("refresh_token");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 	// console.log(apiPath, "> headers :>> ", headers);
@@ -142,6 +145,7 @@ export const useApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {
 			const { data } = await axios.get<ApiResponse<T>>(`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}`, {
 				...options,
 				headers,
+				params: { refresh_token },
 			});
 			if (!data.status && !isEmpty(data.messages)) {
 				data.messages.forEach((message) => {
@@ -165,13 +169,14 @@ export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options
 
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const refresh_token = router.query.refresh_token ?? getCookie("refresh_token");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
 	return useQuery<ApiResponse<T>, Error>({
 		queryKey: keys,
 		queryFn: async () => {
-			const data = await getById<T>(apiPath, id, { ...options, headers });
+			const data = await getById<T>(apiPath, id, { ...options, headers, params: { refresh_token } });
 			if (!data.status && !isEmpty(data.messages)) {
 				data.messages.forEach((message) => {
 					if (message) notification.error({ message: "Failed.", description: message });
@@ -194,6 +199,7 @@ export const useCreateApi = <R = any, E = Error, T = R>(keys: any[], apiPath: st
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const refresh_token = router.query.refresh_token ?? getCookie("refresh_token");
 	// console.log("useCreateApi > access_token :>> ", access_token);
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
@@ -210,7 +216,11 @@ export const useCreateApi = <R = any, E = Error, T = R>(keys: any[], apiPath: st
 			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}${populateParams}`;
 
 			console.log("options :>> ", options);
-			const { data, status: httpStatus } = await axios.post<ApiResponse<R>>(apiURL, newData, { ...options, headers });
+			const { data, status: httpStatus } = await axios.post<ApiResponse<R>>(apiURL, newData, {
+				...options,
+				headers,
+				params: { refresh_token },
+			});
 			if (httpStatus === 429) throw new Error("Too many requests.");
 
 			if (!data.status) {
@@ -272,6 +282,7 @@ export const useUpdateApi = <R = any, T = R>(keys: any[], apiPath: string, optio
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const refresh_token = router.query.refresh_token ?? getCookie("refresh_token");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
@@ -289,7 +300,7 @@ export const useUpdateApi = <R = any, T = R>(keys: any[], apiPath: string, optio
 		// [1] START
 		mutationFn: async (updateData) => {
 			// console.log("UPDATE > start > filter :>> ", filter);
-			const { data } = await axios.patch<ApiResponse<R>>(apiURL, updateData, { ...options, headers });
+			const { data } = await axios.patch<ApiResponse<R>>(apiURL, updateData, { ...options, headers, params: { refresh_token } });
 
 			// show error message ONLY if status is failure
 			if (!data.status) {
@@ -328,6 +339,7 @@ export const useDeleteApi = <R = any, T = any>(keys: any[], apiPath: string, opt
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const refresh_token = router.query.refresh_token ?? getCookie("refresh_token");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
@@ -337,7 +349,7 @@ export const useDeleteApi = <R = any, T = any>(keys: any[], apiPath: string, opt
 		mutationFn: async (filter) => {
 			const filterParams = filter ? `${new URLSearchParams(filter).toString()}` : "";
 			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}`;
-			const { data } = await axios.delete<ApiResponse<R>>(apiURL, { ...options, headers });
+			const { data } = await axios.delete<ApiResponse<R>>(apiURL, { ...options, headers, params: { refresh_token } });
 
 			if (!data.status) {
 				if (!isEmpty(data.messages)) {

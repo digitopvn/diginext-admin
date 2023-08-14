@@ -23,8 +23,8 @@ export const login = (params: { redirectURL?: string } = {}) => {
 
 export const useAuthApi = (props: { access_token?: string } = {}) => {
 	const router = useRouter();
-	let access_token = (router.query.access_token?.toString() || getCookie("x-auth-cookie")) as string;
-	let refresh_token = router.query.refresh_token?.toString();
+	let access_token = (router.query.access_token?.toString() || getCookie("x-auth-cookie")) as string | undefined;
+	let refresh_token = (router.query.refresh_token?.toString() || getCookie("refresh_token")) as string | undefined;
 	// console.log("useAuthApi > access_token :>> ", access_token);
 	// console.log("refresh_token :>> ", refresh_token);
 
@@ -48,10 +48,11 @@ export const useAuthApi = (props: { access_token?: string } = {}) => {
 			try {
 				const url = `${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile`;
 				// console.log("useAuthApi > queryFn > url :>> ", url);
-				const { data } = await axios.get(url, { headers, params: { access_token, refresh_token } });
-				// console.log("useAuthApi > queryFn > profile :>> ", JSON.stringify(data, null, 2));
-				if (data?.token?.access_token) setCookie("x-auth-cookie", data?.token?.access_token);
-				return data;
+				const { data: response } = await axios.get(url, { headers, params: { access_token, refresh_token } });
+				console.log("useAuthApi > queryFn > profile :>> ", JSON.stringify(response, null, 2));
+				if (response?.data?.token?.access_token) setCookie("x-auth-cookie", response?.data?.token?.access_token);
+				if (response?.data?.token?.refresh_token) setCookie("refresh_token", response?.data?.token?.refresh_token);
+				return response;
 			} catch (e) {
 				console.error("useAuthApi >", e);
 				return undefined;
@@ -75,7 +76,7 @@ export const useAuth = () => {
 	};
 
 	const access_token = (router.query.access_token || getCookie("x-auth-cookie")) as string;
-	const refresh_token = router.query.refresh_token?.toString();
+	const refresh_token = (router.query.refresh_token || getCookie("refresh_token")) as string;
 
 	useEffect(() => {
 		// console.log(`[1] ----------------------------------`);

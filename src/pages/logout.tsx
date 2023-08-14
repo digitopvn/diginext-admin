@@ -21,6 +21,7 @@ const LogoutPage = () => {
 			console.log("logout() > response :>> ", response);
 		});
 		deleteCookie("x-auth-cookie");
+		deleteCookie("refresh_token");
 		router.push("/login");
 	}, []);
 

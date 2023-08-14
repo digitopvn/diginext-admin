@@ -55,6 +55,7 @@ export type ApiPagination = {
 
 export interface AccessTokenInfo {
 	access_token: string;
+	refresh_token: string;
 	expiredTimestamp: number;
 	expiredDate: Date;
 	expiredDateGTM7: string;
