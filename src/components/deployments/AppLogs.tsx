@@ -1,12 +1,12 @@
-import { CloseCircleOutlined } from "@ant-design/icons";
-import { Empty, Skeleton, theme, Timeline } from "antd";
+import { ArrowDownOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import { useScroll, useSize } from "ahooks";
+import { Button, Empty, Skeleton, theme } from "antd";
 import dayjs from "dayjs";
 import parser from "html-react-parser";
-import React from "react";
+import React, { useRef, useState } from "react";
 import sanitizeHtml from "sanitize-html";
-// eslint-disable-next-line import/no-extraneous-dependencies
-import isURL from "validator/lib/isURL";
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { useAppDeployEnvironmentLogsApi } from "@/api/api-app";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 
@@ -31,31 +31,98 @@ export const AppLogs = ({ slug }: { slug?: string }) => {
 	// api
 	// console.log("build_slug :>> ", build_slug);
 	const { data: logData = {}, status } = useAppDeployEnvironmentLogsApi(appSlug, { filter: { env } });
-	console.log({ logData });
+	// console.log({ logData });
 
-	const pods = Object.keys(logData) || [];
-	const firstPod = pods.filter((pod) => pod.indexOf(appSlug) > -1)[0];
-	const podLogs = firstPod ? logData[firstPod] : "";
+	const podNames = logData.status?.toString() === "0" ? [] : Object.keys(logData);
+	// console.log("podNames :>> ", podNames);
+	const firstPodName = podNames[0];
+	const podLogs = firstPodName ? logData[firstPodName] : "";
 	console.log({ podLogs });
 
 	const displayedData = stripAnsiCodes(podLogs);
 	// console.log("displayedData :>> ", displayedData);
 
-	const lines: any[] = displayedData
+	const messages: any[] = displayedData
 		.split("\n")
 		.map((line: any, i: number) => line.toString())
 		.filter((line) => line !== "0");
-	console.log("lines :>> ", lines);
+	// console.log("messages :>> ", messages);
 
 	const {
 		token: { colorText },
 	} = theme.useToken();
 
+	const [wrap, setWrap] = useState(false);
+	const bottomEl = useRef<any>(null);
+	const frameRef = useRef<any>(null);
+	const scroll = useScroll(frameRef);
+	const contentRef = useRef<any>(null);
+	const contentSize = useSize(contentRef);
+
+	const scrollToBottom = () => {
+		bottomEl?.current?.scrollIntoView({ behavior: "smooth" });
+	};
+
 	return (
-		<div style={{ color: colorText }}>
+		<div style={{ color: colorText }} className="flex h-full flex-col">
 			{status === "loading" && <Skeleton active />}
 
-			{lines.length === 0 ? (
+			<div className="flex-auto overflow-auto" ref={frameRef}>
+				{messages.length <= 1 && messages[0] === "" ? (
+					<Empty className="py-10" />
+				) : (
+					<pre
+						className="no-scrollbar mb-0 bg-black p-4 pt-6"
+						ref={contentRef}
+						style={{
+							width: wrap ? "100%" : "auto",
+							whiteSpace: wrap ? "normal" : "nowrap",
+						}}
+					>
+						{messages
+							.filter((m) => m !== "")
+							// .reverse()
+							.map((message, index) => {
+								const msg = `${message}`;
+								if (msg.toLowerCase().indexOf("error") > -1)
+									return (
+										<p key={`log-line-${index}`}>
+											<CloseCircleOutlined className="text-red-600" />{" "}
+											<span className="text-red-600">{parser(`${message}`)}</span>
+										</p>
+									);
+
+								if (msg.indexOf("http://") > -1 || msg.indexOf("https://") > -1) {
+									// console.log("msg :>> ", msg);
+									const words = msg.split(" ");
+									const msgWithLink = words
+										.map((m) =>
+											m.indexOf("http://") > -1 || m.indexOf("https://") > -1
+												? `<a href="${m}" target="_blank" style="color: #008dff">${m}</a>`
+												: m
+										)
+										.join(" ");
+
+									return <p key={`log-line-${index}`}>{parser(msgWithLink)}</p>;
+								}
+
+								return <p key={`log-line-${index}`}>{parser(`${message}`)}</p>;
+							})}
+						<p ref={bottomEl}></p>
+					</pre>
+				)}
+			</div>
+
+			<div className="flex p-4">
+				<div className="flex-auto"></div>
+				{/* Go to bottom */}
+				<div className="flex gap-2">
+					<Button onClick={() => setWrap(!wrap)}>{wrap ? "UNWRAP" : "WRAP"}</Button>
+					<Button icon={<ArrowDownOutlined />} onClick={() => scrollToBottom()} />
+				</div>
+			</div>
+
+			{/* {lines.length === 0 ? (
 				<Empty />
 			) : (
 				<Timeline
@@ -83,7 +150,7 @@ export const AppLogs = ({ slug }: { slug?: string }) => {
 							return { children: parser(`${message}`) };
 						})}
 				/>
-			)}
+			)} */}
 		</div>
 	);
 };
