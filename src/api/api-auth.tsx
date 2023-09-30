@@ -32,29 +32,30 @@ export const useAuthApi = (props: { access_token?: string } = {}) => {
 		// staleTime: 5 * 60 * 1000, // 5 minutes
 		// cacheTime: 60 * 1000,
 		queryKey: ["auth"],
-		enabled: typeof access_token !== "undefined",
+		enabled: typeof access_token !== "undefined" && typeof refresh_token !== "undefined",
 		queryFn: async () => {
 			const query = Object.fromEntries(new URLSearchParams(router.asPath.indexOf("?") > -1 ? router.asPath.split("?")[1] : {}));
 
 			// try the best to get "access_token"...
 			access_token = access_token && endsWith(access_token, "%23") ? access_token.substring(0, access_token.length - 3) : access_token;
 			const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
-			// console.log("useAuthApi > queryFn > headers :>> ", headers);
+			// console.log("useAuthApi() > queryFn > headers :>> ", headers);
 
 			// console.log("query :>> ", query);
-			refresh_token = query.refresh_token?.toString();
-			// console.log("refresh_token :>> ", refresh_token);
+			refresh_token = query.refresh_token?.toString() || getCookie("refresh_token")?.toString();
+			// console.log("useAuthApi() > refresh_token :>> ", refresh_token);
 
 			try {
 				const url = `${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile`;
-				// console.log("useAuthApi > queryFn > url :>> ", url);
+				// console.log("useAuthApi() > queryFn > url :>> ", url);
 				const { data: response } = await axios.get(url, { headers, params: { access_token, refresh_token } });
-				console.log("useAuthApi > queryFn > profile :>> ", JSON.stringify(response, null, 2));
+				// console.log("useAuthApi() > queryFn > profile :>> ", JSON.stringify(response, null, 2));
+
 				if (response?.data?.token?.access_token) setCookie("x-auth-cookie", response?.data?.token?.access_token);
 				if (response?.data?.token?.refresh_token) setCookie("refresh_token", response?.data?.token?.refresh_token);
 				return response;
 			} catch (e) {
-				console.error("useAuthApi >", e);
+				console.error("[HOOK] useAuthApi >", e);
 				return undefined;
 			}
 		},
@@ -86,6 +87,7 @@ export const useAuth = () => {
 
 		// const access_token = (router.query.access_token || getCookie("x-auth-cookie")) as string;
 		// console.log("access_token :>> ", access_token);
+		// console.log("refresh_token :>> ", refresh_token);
 		// console.log("isStale :>> ", isStale);
 		// console.log("isRefetching :>> ", isRefetching);
 		// console.log(`---------------------------------- [1]`);
@@ -96,7 +98,11 @@ export const useAuth = () => {
 			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
 			return;
 		}
-		if (!refresh_token) return;
+		if (!refresh_token) {
+			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
+			return;
+		}
+
 		if (isRefetching) return;
 		if (typeof responseStatus === "undefined") return;
 		if (apiStatus === "loading") return;

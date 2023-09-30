@@ -291,7 +291,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 				</Space>
 			</PageTitle>
 
-			<div className="flex-auto overflow-auto" ref={frameRef}>
+			<div className="flex-auto overflow-x-auto overflow-y-scroll" ref={frameRef}>
 				<pre
 					className="no-scrollbar bg-black p-4 pt-6"
 					ref={contentRef}
@@ -332,7 +332,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 				</pre>
 			</div>
 
-			<div className="flex px-4 py-2">
+			<div className="flex-col px-4 py-2 md:flex">
 				{/* Status message */}
 				<div className="flex-auto">
 					{status === "in_progress" && (
