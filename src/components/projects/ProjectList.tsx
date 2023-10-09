@@ -32,9 +32,9 @@ import {
 	useAppArchiveApi,
 	useAppDeleteApi,
 	useAppDeployEnvironmentAwakeApi,
+	useAppDeployEnvironmentDeleteApi,
 	useAppDeployEnvironmentDownApi,
 	useAppDeployEnvironmentSleepApi,
-	useAppEnvVarsDeleteApi,
 	useAppUnarchiveApi,
 } from "@/api/api-app";
 import { useBuildStartApi, useBuildStopApi } from "@/api/api-build";
@@ -240,7 +240,7 @@ export const ProjectList = () => {
 
 	const [deleteProjectApi, deleteProjectApiStatus] = useProjectDeleteApi();
 	const [deleteAppApi, deleteAppApiStatus] = useAppDeleteApi();
-	const [deleteAppEnvApi, deleteAppEnvApiStatus] = useAppEnvVarsDeleteApi();
+	const [deleteAppEnvApi, deleteAppEnvApiStatus] = useAppDeployEnvironmentDeleteApi();
 	const [archiveAppApi, archiveAppApiStatus] = useAppArchiveApi();
 	const [unarchiveAppApi, unarchiveAppApiStatus] = useAppUnarchiveApi();
 
