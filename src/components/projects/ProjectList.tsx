@@ -19,6 +19,7 @@ import {
 	QrcodeOutlined,
 	RocketOutlined,
 } from "@ant-design/icons";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSize } from "ahooks";
 import { Button, Dropdown, notification, Popconfirm, Space, Table, Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
@@ -89,6 +90,7 @@ export const ProjectList = () => {
 	const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 
 	// fetch projects
+	const queryClient = useQueryClient();
 	const {
 		data,
 		status: apiStatus,
@@ -319,6 +321,10 @@ export const ProjectList = () => {
 	const deleteEnvironment = async (appId: string, env: string) => {
 		const result = await deleteAppEnvApi({ _id: appId, env });
 		console.log("[deleteEnvironment] result :>> ", result);
+
+		// reload project & app list
+		queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
+		queryClient.invalidateQueries({ queryKey: ["apps", "list"] });
 	};
 
 	// table pagination
