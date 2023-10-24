@@ -43,3 +43,8 @@ export const useUserJoinWorkspaceApi = (options?: ApiOptions) => {
 export const useUserAssignRoleApi = (options?: ApiOptions) => {
 	return useUpdateApi<IUser, { roleId: string }>(["users"], `/api/v1/user/assign-role`, options);
 };
+
+// Update user's permissions
+export const useUserUpdatePermissionsApi = (options?: ApiOptions) => {
+	return useUpdateApi<IUser, { userSlug: string; resource: { [name: string]: string } }>(["users"], `/api/v1/user/permissions`, options);
+};

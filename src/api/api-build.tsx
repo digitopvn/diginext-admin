@@ -79,7 +79,7 @@ export const useBuildStartApi = (options?: ApiOptions) => {
 };
 
 export const useBuildStopApi = (options?: ApiOptions) => {
-	return useUpdateApi<IBuild>(["builds", "stop"], `/api/v1/build/stop`, options);
+	return useCreateApi<IBuild>(["builds", "stop"], `/api/v1/build/stop`, options);
 };
 
 export const useBuildRerunApi = (options?: ApiOptions) => {

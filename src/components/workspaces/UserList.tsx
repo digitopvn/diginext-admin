@@ -122,7 +122,7 @@ export const UserList = () => {
 	const { data, status } = useUserListApi({ populate: "roles,teams", pagination: { page, size: pageSize } });
 	const { list, pagination } = data || {};
 	const { total_items } = pagination || {};
-	console.log("users :>> ", list);
+	// console.log("users :>> ", list);
 
 	const [deleteApi] = useUserDeleteApi();
 	const [query, { setQuery }] = useRouterQuery();

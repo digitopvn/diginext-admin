@@ -7,6 +7,8 @@ import SmartForm from "@/commons/smart-form/SmartForm";
 import type { SmartFormElementProps } from "@/commons/smart-form/SmartFormTypes";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 
+import UserPermissionSettings from "./UserPermissionSettings";
+
 type UserNewEditProps = { data?: IRole; isNew?: boolean };
 
 const UserNewEdit = (props: UserNewEditProps = {}) => {
@@ -47,7 +49,12 @@ const UserNewEdit = (props: UserNewEditProps = {}) => {
 		},
 	];
 
-	return <SmartForm name="user" api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />;
+	return (
+		<>
+			<SmartForm name="user" className="pb-2" api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />
+			<UserPermissionSettings user={user} />
+		</>
+	);
 };
 
 export default UserNewEdit;

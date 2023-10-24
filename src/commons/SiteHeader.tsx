@@ -1,5 +1,5 @@
 import { DownOutlined, GithubOutlined, MenuFoldOutlined, MenuUnfoldOutlined, QuestionCircleOutlined, UserOutlined } from "@ant-design/icons";
-import { Avatar, Button, Layout, Popover, Space, theme } from "antd";
+import { Avatar, Button, Layout, Popover, Space, Tag, theme } from "antd";
 import React, { useEffect } from "react";
 import { useDarkMode } from "usehooks-ts";
 
@@ -82,6 +82,9 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 								size={24}
 							/>
 							<span className="ml-2 hidden md:inline-block">{user?.name}</span>
+							<Tag color="green" className="ml-2">
+								{user?.activeRole?.name}
+							</Tag>
 							<DownOutlined className="ml-2" />
 						</div>
 					</Popover>

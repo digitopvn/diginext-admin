@@ -368,6 +368,23 @@ export interface IProviderInfo {
 	access_token?: string;
 }
 
+/**
+ * ### User access permission settings:
+ * - `undefined`: all
+ * - `[]`: none
+ * - `[ ...project_id... ]`: some
+ */
+export type UserAccessPermissions = {
+	projects?: string[];
+	apps?: string[];
+	clusters?: string[];
+	databases?: string[];
+	database_backups?: string[];
+	gits?: string[];
+	frameworks?: string[];
+	container_registries?: string[];
+};
+
 export interface IUser extends IGeneral {
 	/**
 	 * User name
@@ -439,6 +456,11 @@ export interface IUser extends IGeneral {
 	 * Active role ID in current workspace
 	 */
 	activeRole?: IRole;
+
+	/**
+	 * User access permission settings
+	 */
+	allowAccess?: UserAccessPermissions;
 }
 
 export interface IServiceAccount extends IUser {}

@@ -294,6 +294,7 @@ export const useUpdateApi = <R = any, T = R>(keys: any[], apiPath: string, optio
 	const sortParams = `sort=${sort}&`;
 	const populateParams = populate ? `populate=${populate}&` : "";
 	const paginationParams = new URLSearchParams(pagination as any).toString();
+	const originUrl = global?.window?.location?.origin ?? Config.NEXT_PUBLIC_BASE_URL;
 	const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}${sortParams}${populateParams}${paginationParams}`;
 
 	const mutation = useMutation<ApiResponse<R | R[]>, Error, T, { id?: string; previousData?: any }>({

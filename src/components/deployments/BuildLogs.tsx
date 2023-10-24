@@ -257,7 +257,15 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 					</Tag>,
 					<Tag
 						key="status"
-						color="green"
+						color={
+							build?.status === "success"
+								? "green"
+								: build?.status === "building"
+								? "blue"
+								: build?.status === "failed"
+								? "red"
+								: "default"
+						}
 						icon={
 							build?.status === "success" ? (
 								<CheckCircleOutlined />
@@ -293,7 +301,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 
 			<div className="flex-auto overflow-x-auto overflow-y-scroll" ref={frameRef}>
 				<pre
-					className="no-scrollbar bg-black p-4 pt-6"
+					className="no-scrollbar bg-black p-4 pt-6 text-neutral-200"
 					ref={contentRef}
 					style={{
 						width: wrap ? "100%" : "auto",

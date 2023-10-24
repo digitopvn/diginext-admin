@@ -79,9 +79,10 @@ a:hover {
 .full-height {
 	height: 100vh;
 }
+
 @supports (-webkit-touch-callout: none) {
 	.full-height {
-		height: -webkit-fill-available;
+		max-height: -webkit-fill-available !important;
 	}
 }
 
