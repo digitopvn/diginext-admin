@@ -9,6 +9,7 @@ import type { ReactNode } from "react";
 import { useEffect } from "react";
 
 import CenterContainer from "@/commons/CenterContainer";
+import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { Config } from "@/utils/AppConfig";
 
 import type { IUser } from "./api-types";
@@ -23,8 +24,10 @@ export const login = (params: { redirectURL?: string } = {}) => {
 
 export const useAuthApi = (props: { access_token?: string } = {}) => {
 	const router = useRouter();
-	let access_token = (router.query.access_token?.toString() || getCookie("x-auth-cookie")) as string | undefined;
-	let refresh_token = (router.query.refresh_token?.toString() || getCookie("refresh_token")) as string | undefined;
+	const [urlQuery] = useRouterQuery();
+
+	let access_token = (urlQuery.access_token?.toString() || getCookie("x-auth-cookie")) as string | undefined;
+	let refresh_token = (urlQuery.refresh_token?.toString() || getCookie("refresh_token")) as string | undefined;
 	// console.log("useAuthApi > access_token :>> ", access_token);
 	// console.log("refresh_token :>> ", refresh_token);
 
@@ -64,6 +67,7 @@ export const useAuthApi = (props: { access_token?: string } = {}) => {
 
 export const useAuth = () => {
 	const router = useRouter();
+	const [urlQuery] = useRouterQuery();
 
 	const authActions = useAuthApi();
 	const { data: response, status: apiStatus, refetch, isStale, isRefetching } = authActions;
@@ -76,8 +80,9 @@ export const useAuth = () => {
 		await refetch();
 	};
 
-	const access_token = (router.query.access_token || getCookie("x-auth-cookie")) as string;
-	const refresh_token = (router.query.refresh_token || getCookie("refresh_token")) as string;
+	const access_token = (urlQuery.access_token || getCookie("x-auth-cookie")) as string;
+	const refresh_token = (urlQuery.refresh_token || getCookie("refresh_token")) as string;
+	// console.log("url query > tokens :>> ", urlQuery);
 
 	useEffect(() => {
 		// console.log(`[1] ----------------------------------`);
@@ -108,12 +113,13 @@ export const useAuth = () => {
 		if (apiStatus === "loading") return;
 
 		if (!responseStatus && !user) {
+			console.log(`Redirect to "Login" page :>>`, { access_token, refresh_token });
 			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
 			return;
 		}
 
 		if (isEmpty(user?.activeWorkspace) || isEmpty(user?.activeRole)) {
-			console.log({ access_token, refresh_token });
+			console.log(`Redirect to "Select Workspace" page :>>`, { access_token, refresh_token });
 			router.push(`/workspace/select`, { query: { access_token, refresh_token } });
 		}
 	}, [apiStatus, access_token, refresh_token]);
