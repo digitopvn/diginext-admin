@@ -613,10 +613,16 @@ export interface IGitProvider extends IBase {
 	host?: string;
 
 	/**
-	 * The Git workspace of the Git provider.
+	 * The Git workspace (ORG) of the Git provider.
 	 *
 	 * @type {string}
 	 * @memberof IGitProvider
+	 */
+	org?: string;
+
+	/**
+	 * Alias of `org` field, will be remove soon.
+	 * @deprecated
 	 */
 	gitWorkspace?: string;
 

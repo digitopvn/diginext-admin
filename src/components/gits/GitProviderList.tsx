@@ -139,7 +139,6 @@ export const GitProviderList = () => {
 
 	return (
 		<>
-			{/* Page title & desc here */}
 			<div className="h-full flex-auto overflow-hidden" ref={ref}>
 				<Table
 					sticky

@@ -1,3 +1,5 @@
+import { InfoCircleOutlined } from "@ant-design/icons";
+import { Tooltip } from "antd";
 import { useState } from "react";
 
 import { useCloudProviderListApi } from "@/api/api-cloud-provider";
@@ -27,7 +29,20 @@ const ClusterNewEdit = (props: ClusterNewEditProps = {}) => {
 
 	const smartFormConfigs: SmartFormElementProps[] = [
 		{ type: "input", label: "Name", name: "name", placeholder: "Cluster name" },
-		{ type: "input", label: "Short name", name: "shortName", placeholder: "Short name" },
+		{
+			type: "input",
+			label: (
+				<>
+					Short name{" "}
+					<Tooltip title="Get this from your cloud provider console panel.">
+						<InfoCircleOutlined />
+					</Tooltip>
+				</>
+			),
+			name: "shortName",
+			placeholder: "Short name",
+			visible: providerShortName !== "custom",
+		},
 		{
 			type: "select",
 			label: "Cloud Provider",

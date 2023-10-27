@@ -1,6 +1,6 @@
-import { GithubOutlined, InboxOutlined, PlusOutlined } from "@ant-design/icons";
+import { GithubOutlined, InboxOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Button, Dropdown, Modal } from "antd";
+import { Button, Modal } from "antd";
 import { useState } from "react";
 
 import { AuthPage } from "@/api/api-auth";
@@ -56,11 +56,27 @@ const GitListPage = () => {
 					title="Git Providers"
 					breadcrumbs={[{ name: "Workspace" }]}
 					actions={[
-						<Dropdown key="git-connect-btn" menu={{ items }} placement="bottomRight" arrow>
-							<Button type="default" icon={<PlusOutlined className="align-middle" />}>
-								Connect
-							</Button>
-						</Dropdown>,
+						// <Dropdown key="git-connect-btn" menu={{ items }} placement="bottomRight" arrow>
+						// 	<Button type="default" icon={<PlusOutlined className="align-middle" />}>
+						// 		Connect
+						// 	</Button>
+						// </Dropdown>,
+						<Button
+							key={"btn-bitbucket"}
+							icon={<InboxOutlined className="align-middle" />}
+							type="default"
+							onClick={() => showConnectModal("bitbucket")}
+						>
+							Connect to Bitbucket
+						</Button>,
+						<Button
+							key={"btn-github"}
+							icon={<GithubOutlined className="align-middle" />}
+							type="default"
+							onClick={() => showConnectModal("github")}
+						>
+							Connect to Github
+						</Button>,
 					]}
 				/>
 

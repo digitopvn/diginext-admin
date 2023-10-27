@@ -1,5 +1,5 @@
 import type { langNames } from "@uiw/codemirror-extensions-langs";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type React from "react";
 
 export type SmartFormElementProps<T = any> = {
@@ -12,7 +12,7 @@ export type SmartFormElementProps<T = any> = {
 	value?: T;
 	defaultValue?: T;
 	initialValue?: T;
-	label?: string;
+	label?: string | ReactNode;
 	postLabel?: any;
 	requiredMessage?: string;
 	status?: any;
