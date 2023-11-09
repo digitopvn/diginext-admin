@@ -98,6 +98,11 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 
 	useEffect(() => {
 		// console.log("lv1 :>> ", lv1);
+
+		/**
+		 * NOTE: Find in: <NewEditPage />
+		 */
+
 		switch (lv1) {
 			case "build":
 				openBuildList();
@@ -142,6 +147,9 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 				break;
 		}
 
+		/**
+		 * NOTE: Find in: <NewEditPage />
+		 */
 		switch (lv2) {
 			case "build":
 				openBuildList(2);

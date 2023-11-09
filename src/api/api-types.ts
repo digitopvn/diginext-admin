@@ -99,6 +99,23 @@ export type RegistryProviderType = (typeof registryProviderList)[number];
 export const cloudProviderList = ["gcloud", "digitalocean", "custom"] as const;
 export type CloudProviderType = (typeof cloudProviderList)[number];
 
+// cloud storage providers
+export const storageProviderList = ["gcloud", "do_space", "aws_s3"] as const;
+export type StorageProvider = { name: string; slug: (typeof storageProviderList)[number] };
+export const storageProviders = storageProviderList.map((provider) => {
+	switch (provider) {
+		case "aws_s3":
+			return { name: "Amazon S3 Storage", slug: "aws_s3" } as StorageProvider;
+		case "gcloud":
+			return { name: "Google Cloud Storage", slug: "gcloud" } as StorageProvider;
+		case "do_space":
+			return { name: "DigitalOcean Space Storage", slug: "do_space" } as StorageProvider;
+		default:
+			return undefined;
+	}
+});
+export type StorageProviderType = (typeof storageProviderList)[number];
+
 // database providers
 export const cloudDatabaseList = [
 	"mongodb",
@@ -1464,3 +1481,47 @@ export interface ICloudDatabaseBackup extends IBase {
 	database?: string | ICloudDatabase;
 }
 export type CloudDatabaseBackupDto = Omit<ICloudDatabaseBackup, keyof HiddenBodyKeys>;
+
+export interface ICloudStorage extends IBase {
+	name?: string;
+	verified?: boolean;
+	provider?: CloudProviderType;
+	/**
+	 * The host (domain) of your cloud storage.
+	 * @example "cdn.example.com"
+	 */
+	host?: string;
+	/**
+	 * Storage origin URL
+	 * @example "https://storage.googleapis.com/<project-id>"
+	 */
+	origin?: string;
+	/**
+	 * Bucket name
+	 */
+	bucket?: string;
+	/**
+	 * Storage region
+	 */
+	region?: string;
+	/**
+	 * Authentication
+	 */
+	auth?: {
+		/**
+		 * ### NOTE: For Google Cloud Storage
+		 * JSON string containing "client_email" and "private_key" properties, or the external account client options.
+		 */
+		service_account?: string;
+		/**
+		 * ### NOTE: For AWS S3 & DigitalOcean Space Storage
+		 * Your AWS access key ID
+		 */
+		key_id?: string;
+		/**
+		 * ### NOTE: For AWS S3 & DigitalOcean Space Storage
+		 * Your AWS secret access key
+		 */
+		key_secret?: string;
+	};
+}

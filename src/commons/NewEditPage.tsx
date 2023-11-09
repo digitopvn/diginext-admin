@@ -4,6 +4,7 @@ import FrameworkNewEdit from "@/components/frameworks/FrameworkNewEdit";
 import GitProviderNewEdit from "@/components/gits/GitProviderNewEdit";
 import AppNewEdit from "@/components/projects/AppNewEdit";
 import ContainerRegistryNewEdit from "@/components/registries/ContainerRegistryNewEdit";
+import CloudStorageNewEdit from "@/components/storages/CloudStorageNewEdit";
 import RoleNewEdit from "@/components/workspaces/RoleNewEdit";
 import UserNewEdit from "@/components/workspaces/UserNewEdit";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -31,6 +32,10 @@ const NewEditPage = () => {
 
 		case "registry":
 			children = <ContainerRegistryNewEdit />;
+			break;
+
+		case "storage":
+			children = <CloudStorageNewEdit />;
 			break;
 
 		case "database":

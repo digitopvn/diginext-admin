@@ -130,7 +130,9 @@ export const ProjectList = () => {
 							{record.name}
 						</span>{" "}
 						<Tag>{record.slug}</Tag>
-						<Tag color="cyan">{(record as IApp).git?.provider}</Tag>
+						<Link href={(record as IApp).git?.repoURL || "#"} target="_blank">
+							<Tag color="cyan">{(record as IApp).git?.provider}</Tag>
+						</Link>
 					</>
 				) : (
 					value
