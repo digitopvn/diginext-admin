@@ -19,7 +19,7 @@ const CloudStorageNewEdit = (props: ContainerRegistryNewEditProps = {}) => {
 	const useCreateApi = useCloudStorageCreateApi();
 
 	const [providerShortName, setProviderShortName] = useState<string>();
-	console.log("providerShortName :>> ", providerShortName);
+	// console.log("providerShortName :>> ", providerShortName);
 
 	useEffect(() => {
 		if (registry?.provider) setProviderShortName(registry.provider);

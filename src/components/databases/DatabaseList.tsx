@@ -135,7 +135,7 @@ export const DatabaseList = () => {
 	const backupDatabase = async (id?: string) => {
 		if (!id) notification.error({ message: `Unable to backup.` });
 		const res = await backupApi({ _id: id });
-		if (res?.status) notification.success({ message: `Database has been backed up successfully.` });
+		if (res?.status) notification.success({ message: `Starting database back up process in the background, we will notify you when it's done.` });
 	};
 
 	const restoreDatabase = async (id?: string) => {
@@ -147,7 +147,7 @@ export const DatabaseList = () => {
 	const autoBackupDatabase = async (id?: string) => {
 		if (!id) notification.error({ message: `Unable to auto backup.` });
 		const res = await autoBackupApi({ _id: id });
-		if (res?.status) notification.success({ message: `Database has been enabled auto-backup.` });
+		if (res?.status) notification.success({ message: `This database has been enabled daily auto-backup.` });
 	};
 
 	const deleteItem = async (id?: string) => {

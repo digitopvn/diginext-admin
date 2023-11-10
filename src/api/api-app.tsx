@@ -1,5 +1,5 @@
 import { useCreateApi, useDeleteApi, useItemApi, useItemSlugApi, useListApi, useUpdateApi } from "./api";
-import type { ApiOptions, AppGitInfo, IApp, IDeployEnvironment, IFramework, KubeEnvironmentVariable } from "./api-types";
+import type { ApiOptions, AppGitInfo, DeployEnvironmentVolume, IApp, IDeployEnvironment, IFramework, KubeEnvironmentVariable } from "./api-types";
 
 interface NewAppParams {
 	/**
@@ -200,8 +200,33 @@ export const useAppDeployEnvironmentAwakeApi = () => {
 	);
 };
 
-// LOGS
-
+/**
+ * Get logs of an application's deploy environment.
+ * @param slug
+ * @param options
+ * @returns
+ */
 export const useAppDeployEnvironmentLogsApi = (slug: string, options?: ApiOptions) => {
 	return useItemSlugApi<{ [pod: string]: string }>(["app_logs", slug], `/api/v1/app/environment/logs`, slug, options);
+};
+
+/**
+ * Add new volume to app's deploy environment.
+ */
+export const useAppDeployEnvironmentAddVolume = (options?: ApiOptions) => {
+	return useCreateApi<DeployEnvironmentVolume, null, Pick<DeployEnvironmentVolume, "name" | "size" | "mountPath">>(
+		["volume"],
+		`/api/v1/app/deploy_environment/volume`,
+		options
+	);
+};
+
+/**
+ * Remove a volume of app's deploy environment.
+ */
+export const useAppDeployEnvironmentRemoveVolume = () => {
+	return useDeleteApi<{ success: boolean; message: string }, { _id?: string; slug?: string; env: string; name: string }>(
+		["volume"],
+		`/api/v1/app/deploy_environment/volume`
+	);
 };

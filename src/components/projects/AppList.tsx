@@ -169,9 +169,9 @@ export const AppList = () => {
 	const { list: apps } = appResponse || {};
 
 	const displayedApps: DataType[] = (apps || []).map((app) => {
-		const envList = Object.keys(app.deployEnvironment ?? {});
+		const envList = Object.keys(app.deployEnvironment ?? ({} as any));
 		const environments: DataType[] = envList.map((envName) => {
-			const deployEnvironment = (app.deployEnvironment || {})[envName] || {};
+			const deployEnvironment = (app.deployEnvironment || ({} as any))[envName] || {};
 			return {
 				name: envName.toUpperCase(),
 				key: `${app.slug}-${envName}`,

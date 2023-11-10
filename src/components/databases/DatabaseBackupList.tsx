@@ -74,6 +74,13 @@ export const DatabaseBackupList = () => {
 			onFilter: (value, record) => (record.name ? record.name.indexOf(value.toString()) > -1 : true),
 		},
 		{
+			title: "Status",
+			dataIndex: "status",
+			key: "status",
+			width: 18,
+			render: (value, record) => <Tag>{value}</Tag>,
+		},
+		{
 			title: "Type",
 			dataIndex: "type",
 			key: "type",

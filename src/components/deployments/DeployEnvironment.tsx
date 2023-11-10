@@ -10,21 +10,20 @@ import SmartForm from "@/commons/smart-form/SmartForm";
 import type { SmartFormElementProps } from "@/commons/smart-form/SmartFormTypes";
 import { getContainerResourceBySize } from "@/plugins/container-utils";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
-import { useDrawerProvider } from "@/providers/DrawerProvider";
+
+import DeployEnvironmentVolumeManager from "./DeployEnvironmentVolume";
 
 const DeployEnvironment = () => {
 	const [{ project: projectSlug, app: appSlug, env }, { setQuery }] = useRouterQuery();
 	const responsive = useResponsive();
 
 	const [sslIssuer, setSSLIssuer] = useState("");
-	// console.log("sslIssuer :>> ", sslIssuer);
-	const { closeDrawer } = useDrawerProvider();
 
 	// clusters
 	const { data } = useClusterListApi({ populate: "owner", pagination: { page: 0, size: 100 } });
 	const { list: clusters = [], pagination } = data || {};
 
-	// rergistries
+	// registries
 	const { data: registryRes } = useContainerRegistryListApi({ populate: "owner", pagination: { page: 0, size: 100 } });
 	const { list: registries = [] } = registryRes || {};
 
@@ -138,6 +137,9 @@ const DeployEnvironment = () => {
 			</div>
 			{/* FORM */}
 			<SmartForm name="deploy_environment" api={{ useSlugApi, useUpdateApi }} configs={smartFormConfigs} className="h-auto">
+				<div className="clear-both mb-4 w-full">
+					<DeployEnvironmentVolumeManager values={useSlugApi.data?.volumes} />
+				</div>
 				<div className="clear-both w-full">
 					<Row gutter={[16, 16]} align="stretch">
 						<Col span={12}>

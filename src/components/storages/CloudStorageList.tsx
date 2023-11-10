@@ -132,10 +132,7 @@ export const CloudStorageList = () => {
 				...item,
 				actions: (
 					<Space.Compact>
-						<Button
-							icon={<EditOutlined />}
-							onClick={() => setQuery({ lv1: "edit", type: "registry", registry_slug: item.slug })}
-						></Button>
+						<Button icon={<EditOutlined />} onClick={() => setQuery({ lv1: "edit", type: "storage", registry_slug: item.slug })}></Button>
 						<Popconfirm
 							title="Are you sure to delete this item?"
 							description={<span className="text-red-500">Caution: this is permanent and cannot be rolled back.</span>}
