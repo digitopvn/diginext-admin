@@ -111,7 +111,7 @@ const WorkspaceSetupPage = () => {
 					<CenterContainer className="text-center">
 						<DiginextLogo />
 
-						{workspaces.length > 0 && (
+						{workspaces.length > 0 && createStatus !== "loading" && createStatus !== "success" && (
 							<div>
 								<Title level={3}>Select a workspace:</Title>
 								<p>Choose a workspace which you want to interact with:</p>
