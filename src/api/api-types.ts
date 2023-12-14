@@ -172,6 +172,10 @@ export const gitProviderDomain = {
 export const buildStatusList = ["start", "building", "failed", "success"] as const;
 export type BuildStatus = (typeof buildStatusList)[number];
 
+// deploy status
+export const deployStatusList = ["pending", "in_progress", "failed", "success", "cancelled"] as const;
+export type DeployStatus = (typeof deployStatusList)[number];
+
 // backup status
 export const backupStatusList = ["start", "in_progress", "failed", "success", "cancelled"] as const;
 export type BackupStatus = (typeof backupStatusList)[number];
@@ -1348,7 +1352,21 @@ export interface IRelease extends IGeneral {
 	appSlug?: string;
 	providerProjectId?: string;
 	buildStatus?: "start" | "building" | "failed" | "success";
+
+	status?: DeployStatus;
 	active?: boolean;
+	/**
+	 * Deploy start time
+	 */
+	startTime?: Date;
+	/**
+	 * Deploy end time
+	 */
+	endTime?: Date;
+	/**
+	 * Deploy duration in miliseconds
+	 */
+	duration?: number;
 
 	/**
 	 * ID of the app

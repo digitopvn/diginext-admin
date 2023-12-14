@@ -27,6 +27,7 @@ import sanitizeHtml from "sanitize-html";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { useBuildRerunApi, useBuildSlugApi, useBuildStopApi } from "@/api/api-build";
 import { useDeployFromAppApi } from "@/api/api-deploy";
+import { useReleaseListApi } from "@/api/api-release";
 import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { Config } from "@/utils/AppConfig";
@@ -57,7 +58,6 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	const { data: build = {}, refetch: refetchBuildApi } = useBuildSlugApi(build_slug);
 	const logData = build?.logs || "";
 	const displayedData = stripAnsiCodes(logData);
-	// console.log("displayedData :>> ", displayedData);
 
 	// action APIs
 	const [rerunBuildApi, rerunBuildStatus] = useBuildRerunApi();
@@ -67,19 +67,26 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	// build info
 	const { status: buildStatus } = build;
 
+	// log text lines
 	const lines: any[] = displayedData.split("\n").map((line: any, i: number) => line.toString());
 
 	// socket
 	const SOCKET_ROOM = build_slug;
 	const SOCKET_URL = typeof window !== "undefined" ? window.location.origin : Config.NEXT_PUBLIC_API_BASE_URL;
-	// console.log("SOCKET_URL :>> ", SOCKET_URL);
 
+	// build
 	const [messages, setMessages] = useState<string[]>(["Connecting..."]);
-	const [status, setStatus] = useState<"failed" | "in_progress" | "success">("in_progress"); // failed, in_progress, success
+	const [status, setStatus] = useState<"failed" | "in_progress" | "success">("in_progress"); // build status: failed, in_progress, success
 	const [isFinished, setIsFinished] = useState(false);
 	const [wrap, setWrap] = useState(false);
 	const [buildDuration, setBuildDuration] = useState("0");
 
+	// releases
+	const { data: releaseReq, refetch: refetchReleaseApi } = useReleaseListApi({ filter: { build: build._id }, enabled: status === "success" });
+	const { list: releaseList = [] } = releaseReq || {};
+	const release = releaseList[0];
+
+	// scroll to bottom
 	const bottomEl = useRef<any>(null);
 	const frameRef = useRef<any>(null);
 	const scroll = useScroll(frameRef);
@@ -88,6 +95,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 
 	const preventScrollBottom = typeof window === "undefined" ? false : (scroll?.top || 0) > (contentSize?.height || 0) - (window?.innerHeight || 0);
 
+	// text color
 	const {
 		token: { colorText },
 	} = theme.useToken();
@@ -172,11 +180,39 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 		const buildLog = logData?.toString().toLowerCase() || "";
 
 		// check whether the build was finished yet or not...
-		if (build?.status === "failed" || build?.status === "success") setIsFinished(true);
+		if (build?.status === "failed") {
+			setStatus("failed");
+			setIsFinished(true);
+		}
 
 		// display result...
-		if (build?.status === "success") setStatus("success");
-		if (build?.status === "failed") setStatus("failed");
+		if (build?.status === "success") {
+			if (env) {
+				// set status for this build process only
+				setStatus("success");
+				setIsFinished(true);
+			} else {
+				// set status for this build & deploy process
+				switch (release?.status) {
+					case "cancelled":
+					case "failed":
+						setStatus("failed");
+						setIsFinished(true);
+						break;
+
+					case "success":
+						setStatus("success");
+						setIsFinished(true);
+						break;
+
+					case "pending":
+					case "in_progress":
+					default:
+						setStatus("in_progress");
+						break;
+				}
+			}
+		}
 
 		// no need to connect to socket if the room is not available:
 		if (!SOCKET_ROOM) return () => false;
@@ -235,9 +271,15 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 			}
 			setMessages([]);
 		};
-	}, [build?.status, logData, SOCKET_ROOM]);
+	}, [build?.status, release?.status, logData, SOCKET_ROOM]);
 
-	return (
+	// mount
+	const [mounted, setMounted] = useState(false);
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	return mounted ? (
 		<div style={{ color: colorText }} className="flex h-full flex-col">
 			{/* Page title & desc here */}
 			<PageTitle
@@ -257,28 +299,20 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 					</Tag>,
 					<Tag
 						key="status"
-						color={
-							build?.status === "success"
-								? "green"
-								: build?.status === "building"
-								? "blue"
-								: build?.status === "failed"
-								? "red"
-								: "default"
-						}
+						color={status === "success" ? "green" : status === "in_progress" ? "blue" : status === "failed" ? "red" : "default"}
 						icon={
-							build?.status === "success" ? (
+							status === "success" ? (
 								<CheckCircleOutlined />
-							) : build?.status === "building" ? (
+							) : status === "in_progress" ? (
 								<LoadingOutlined />
-							) : build?.status === "failed" ? (
+							) : status === "failed" ? (
 								<ExclamationCircleOutlined />
 							) : (
 								<></>
 							)
 						}
 					>
-						{build?.status}
+						{status}
 					</Tag>,
 				]}
 			>
@@ -324,11 +358,16 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 								// console.log("msg :>> ", msg);
 								const words = msg.split(" ");
 								const msgWithLink = words
-									.map((m) =>
-										m.indexOf("http://") > -1 || m.indexOf("https://") > -1
-											? `<a href="${m}" target="_blank" style="color: #008dff">${m}</a>`
-											: m
-									)
+									.map((m) => {
+										let _m = m;
+										if (m.indexOf("http://") > -1 || m.indexOf("https://") > -1) {
+											_m = `<a href="${m.replace(/"/gi, "")}" target="_blank" style="color: #008dff">${m.replace(
+												/"/gi,
+												""
+											)}</a>`;
+										}
+										return _m;
+									})
 									.join(" ");
 
 								return <p key={`log-line-${index}`}>{parser(msgWithLink)}</p>;
@@ -385,5 +424,5 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 				</div>
 			</div>
 		</div>
-	);
+	) : null;
 };

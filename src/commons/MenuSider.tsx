@@ -24,7 +24,7 @@ import Sider from "antd/lib/layout/Sider";
 import { trimEnd, trimStart } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDarkMode } from "usehooks-ts";
 
 import { useAuth } from "@/api/api-auth";
@@ -214,7 +214,24 @@ export const MenuSider = () => {
 		router.push(path);
 	};
 
-	return (
+	// logo
+	const [logoSrc, setLogoSrc] = useState(`${router.basePath}/assets/images/diginext_logo_white.svg`);
+	const [iconSrc, setIconSrc] = useState(`${router.basePath}/assets/images/diginext-icon-white.svg`);
+
+	useEffect(() => {
+		setLogoSrc(isDarkMode ? `${router.basePath}/assets/images/diginext_logo_white.svg` : `${router.basePath}/assets/images/diginext_logo.svg`);
+		setIconSrc(
+			isDarkMode ? `${router.basePath}/assets/images/diginext-icon-white.svg` : `${router.basePath}/assets/images/diginext-icon-black.svg`
+		);
+	}, [isDarkMode]);
+
+	// mount
+	const [mounted, setMounted] = useState(false);
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	return mounted ? (
 		<Sider
 			theme="light"
 			collapsible={isCollapsible}
@@ -228,27 +245,13 @@ export const MenuSider = () => {
 			{sidebarCollapsed ? (
 				<div className="mx-auto my-5 w-[32px]">
 					<Link href="/">
-						<img
-							src={
-								isDarkMode
-									? `${router.basePath}/assets/images/diginext-icon-white.svg`
-									: `${router.basePath}/assets/images/diginext-icon-black.svg`
-							}
-							alt="Diginext Logo"
-						/>
+						<img src={iconSrc} alt="Diginext Logo" />
 					</Link>
 				</div>
 			) : (
 				<div className="mx-auto my-5 w-36">
 					<Link href="/">
-						<img
-							src={
-								isDarkMode
-									? `${router.basePath}/assets/images/diginext_logo_white.svg`
-									: `${router.basePath}/assets/images/diginext_logo.svg`
-							}
-							alt="Diginext Logo"
-						/>
+						<img src={logoSrc} alt="Diginext Logo" />
 					</Link>
 				</div>
 			)}
@@ -263,5 +266,5 @@ export const MenuSider = () => {
 				// className="md:w-[250px] md:min-w-[250px] md:max-w-[250px] md:flex-[0_0_250px]"
 			/>
 		</Sider>
-	);
+	) : null;
 };

@@ -1,7 +1,7 @@
 import { EllipsisOutlined, HomeOutlined, SettingOutlined } from "@ant-design/icons";
 import { Breadcrumb, Button, Space, theme } from "antd";
 import { useRouter } from "next/router";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { useDarkMode } from "usehooks-ts";
 
 export type IPageTitleProps = {
@@ -45,7 +45,12 @@ export const PageTitle = (props: IPageTitleProps = {}) => {
 		token: { colorTextHeading },
 	} = theme.useToken();
 
-	return (
+	const [mounted, setMounted] = useState(false);
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	return mounted ? (
 		<div className="border-b border-gray-300 px-6 py-4">
 			<Breadcrumb>
 				<Breadcrumb.Item href={`${router.basePath}/`} key="breadcrumb-home">
@@ -75,5 +80,5 @@ export const PageTitle = (props: IPageTitleProps = {}) => {
 			</div>
 			{children}
 		</div>
-	);
+	) : null;
 };

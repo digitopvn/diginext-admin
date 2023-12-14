@@ -1,6 +1,6 @@
 import { DownOutlined, GithubOutlined, MenuFoldOutlined, MenuUnfoldOutlined, QuestionCircleOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Button, Layout, Popover, Space, Tag, theme } from "antd";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDarkMode } from "usehooks-ts";
 
 import { useAuth } from "@/api/api-auth";
@@ -23,7 +23,13 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 
 	useEffect(() => onSidebarChange && onSidebarChange(sidebarCollapsed), [sidebarCollapsed]);
 
-	return (
+	// mount
+	const [mounted, setMounted] = useState(false);
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	return mounted ? (
 		<Header
 			className="w-full"
 			style={{ position: "sticky", top: 0, paddingInline: 24, lineHeight: "48px", height: 48, zIndex: 100, background: colorBgContainer }}
@@ -91,5 +97,5 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 				</Space>
 			</div>
 		</Header>
-	);
+	) : null;
 };

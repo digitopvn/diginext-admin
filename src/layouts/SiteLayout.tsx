@@ -200,12 +200,12 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 
 			{/* Sidebar here */}
 			<div className="full-height fixed z-[102] overflow-visible md:relative md:overflow-y-auto md:overflow-x-hidden">
-				{useSidebar && <MenuSider />}
+				{useSidebar && typeof window !== "undefined" ? <MenuSider /> : null}
 			</div>
 
 			<Layout className="full-height overflow-auto transition-all">
 				{/* Site Header */}
-				{useSidebar && <SiteHeader />}
+				{useSidebar && typeof window !== "undefined" ? <SiteHeader /> : null}
 
 				{/* Page content here */}
 				<div className="flex flex-auto flex-col overflow-auto">{props.children}</div>
