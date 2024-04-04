@@ -17,6 +17,7 @@ export type SmartFormElementProps<T = any> = {
 	requiredMessage?: string;
 	status?: any;
 	autoSave?: boolean;
+	alwaysSend?: boolean;
 	isNew?: boolean;
 	required?: boolean;
 	placeholder?: string;

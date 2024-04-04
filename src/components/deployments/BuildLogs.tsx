@@ -18,7 +18,6 @@ import dayjs from "dayjs";
 import parser from "html-react-parser";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { HumanizeDuration, HumanizeDurationLanguage } from "humanize-duration-ts";
-import { isEmpty } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
@@ -168,7 +167,9 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	}, [build?.duration]);
 
 	useEffect(() => {
-		if (isEmpty(logData)) return;
+		// console.log("logData :>> ", logData);
+		// console.log("lines :>> ", lines);
+		if (!logData) return;
 		setMessages(lines);
 	}, [lines.length]);
 
@@ -269,7 +270,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 				socket.disconnect();
 				refetchBuildApi(); // <-- reload build api to get build's info
 			}
-			setMessages([]);
+			// setMessages([]);
 		};
 	}, [build?.status, release?.status, logData, SOCKET_ROOM]);
 
@@ -358,15 +359,15 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 								// console.log("msg :>> ", msg);
 								const words = msg.split(" ");
 								const msgWithLink = words
-									.map((m) => {
-										let _m = m;
-										if (m.indexOf("http://") > -1 || m.indexOf("https://") > -1) {
-											_m = `<a href="${m.replace(/"/gi, "")}" target="_blank" style="color: #008dff">${m.replace(
+									.map((word) => {
+										let _word = word;
+										if (word.indexOf("http://") > -1 || word.indexOf("https://") > -1) {
+											_word = `<a href="${word.replace(/"/gi, "")}" target="_blank" style="color: #008dff">${word.replace(
 												/"/gi,
 												""
 											)}</a>`;
 										}
-										return _m;
+										return _word;
 									})
 									.join(" ");
 

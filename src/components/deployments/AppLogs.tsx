@@ -72,7 +72,7 @@ export const AppLogs = ({ slug }: { slug?: string }) => {
 					<Empty className="py-10" />
 				) : (
 					<pre
-						className="no-scrollbar mb-0 bg-black p-4 pt-6"
+						className={`no-scrollbar mb-0 p-4 pt-6 dark:bg-black`}
 						ref={contentRef}
 						style={{
 							width: wrap ? "100%" : "auto",

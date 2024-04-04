@@ -64,7 +64,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 	}, [status]);
 
 	const onFinish = async (values: any) => {
-		console.log(isNew ? "[NEW]" : "[UPDATE]", "Submit:", values);
+		// console.log(isNew ? "[NEW]" : "[UPDATE]", "Submit:", values);
 		const postData = { ...values };
 
 		let result: ApiResponse<T | T[]> | undefined;
@@ -78,6 +78,8 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 				}
 			});
 
+			console.log("[NEW] Submit:", postData);
+
 			result = await createApi(postData);
 			console.log("[NEW] result :>> ", result);
 
@@ -90,14 +92,16 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 			if (!updateApi) return;
 			if (!ready) return;
 			const statuses: Record<string, "error" | "idle" | "loading" | "success" | undefined> = {};
+
 			Object.entries(postData).forEach(([field, value]) => {
 				if (item && value !== (item as any)[field]) {
 					statuses[field] = "loading";
 				} else {
 					delete statuses[field];
-					delete postData[field];
+					if (!configs.find((fieldConfig) => fieldConfig.name === field)?.alwaysSend) delete postData[field];
 				}
 			});
+			console.log("[UPDATE] Submit:", postData);
 
 			if (!isEmpty(statuses)) {
 				result = await updateApi(postData);
@@ -203,11 +207,11 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 								);
 
 							case "select": {
-								let { displayKey } = field;
-								if (typeof displayKey === "undefined") displayKey = "name";
+								// let { displayKey } = field;
+								// if (typeof displayKey === "undefined") displayKey = "name";
 
-								const selectedValue = _.get(item, displayKey ? `${displayKey}` : field.name);
-								// console.log("selectedValue :>> ", selectedValue);
+								const selectedValue = _.get(item, field.name);
+
 								return (
 									<SmartSelect
 										key={`${name}-${field.name}`}
