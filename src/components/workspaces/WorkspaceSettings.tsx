@@ -53,7 +53,7 @@ export const WorkspaceSettings = () => {
 			{/* SSH PUBLIC KEY */}
 			<Card title="PUBLIC KEY">
 				<div key={`ssh-public-key`}>
-					<CopyCode mode="inline" value={publicKeyRes?.data.publicKey || ""} />
+					<CopyCode mode="inline" value={publicKeyRes?.data?.publicKey || ""} />
 				</div>
 			</Card>
 		</div>
