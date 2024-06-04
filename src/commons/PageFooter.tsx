@@ -10,7 +10,8 @@ export const PageFooter = (props: { children?: ReactNode } = {}) => {
 		<div>
 			{props.children}
 			<div className="border-t border-gray-300 py-4 text-center text-xs">
-				Version <strong className="text-brand">{data?.data?.version}</strong>
+				Version <strong className="text-brand">{data?.data?.version}</strong> - Location:{" "}
+				<strong className="text-brand">{data?.data?.location || "unknown"}</strong>
 				<br />
 				Copyright {new Date().getFullYear()} ©{" "}
 				<Link href="https://diginext.site/?ref=diginext-dashboard" target="_blank">
