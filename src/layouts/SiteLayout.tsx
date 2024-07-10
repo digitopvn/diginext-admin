@@ -132,6 +132,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 				openEnvVarsPage();
 				break;
 
+			case "deployment_yaml":
+				openDeploymentYamlPage(1);
+				break;
+
 			case "app_logs":
 				openAppDeployEnvLogsPage();
 				break;

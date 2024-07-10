@@ -194,7 +194,7 @@ export const useAppDeployEnvironmentSleepApi = () => {
  * Wake a sleeping deploy environment up by scale it to 1 (Will FAIL if this environment hasn't been deployed).
  */
 export const useAppDeployEnvironmentAwakeApi = () => {
-	return useDeleteApi<{ success: boolean; message: string }, { _id?: string; slug?: string; env: string }>(
+	return useUpdateApi<{ success: boolean; message: string }, { _id?: string; slug?: string; env: string }>(
 		["deploy_environment", "awake"],
 		`/api/v1/app/deploy_environment/awake`
 	);

@@ -61,6 +61,10 @@ body {
 	font-size: 12px;
 }
 
+.ant-modal-confirm .ant-modal-confirm-body .ant-modal-confirm-title + .ant-modal-confirm-content {
+	max-width: 100%;
+}
+
 .ant-form-item .ant-form-item-control-input {
 	align-items: flex-start;
 }

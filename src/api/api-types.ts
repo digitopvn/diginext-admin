@@ -1276,7 +1276,8 @@ export interface IBuild extends IGeneral {
 	branch?: string;
 	logs?: string;
 	createdBy?: string;
-	status?: "start" | "building" | "failed" | "success";
+	status?: BuildStatus;
+	deployStatus?: DeployStatus;
 	projectSlug?: string;
 	appSlug?: string;
 
@@ -1351,10 +1352,10 @@ export interface IRelease extends IGeneral {
 	projectSlug?: string;
 	appSlug?: string;
 	providerProjectId?: string;
-	buildStatus?: "start" | "building" | "failed" | "success";
-
+	buildStatus?: BuildStatus;
 	status?: DeployStatus;
 	active?: boolean;
+	message?: string;
 	/**
 	 * Deploy start time
 	 */

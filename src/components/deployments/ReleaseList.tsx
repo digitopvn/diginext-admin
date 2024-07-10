@@ -1,15 +1,18 @@
-import { CheckCircleOutlined, CloseCircleOutlined, EyeOutlined, InfoCircleOutlined, LoadingOutlined, RocketOutlined } from "@ant-design/icons";
-import { App, Button, Space, Table, Tag, Tooltip } from "antd";
+import { CheckCircleOutlined, CloseCircleOutlined, CrownOutlined, InfoCircleOutlined, LoadingOutlined, RocketOutlined } from "@ant-design/icons";
+import { App, Button, Space, Table, Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import { isArray, isEmpty } from "lodash";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 
+import { useAppSlugApi } from "@/api/api-app";
 import { usePreviewPrereleaseApi, useReleaseListApi, useReleaseRollOutApi } from "@/api/api-release";
-import type { IRelease, IUser } from "@/api/api-types";
+import type { DeployStatus, IApp, IRelease, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
+
+import PromoteDeployEnvironmentModal from "../projects/PromoteDeployEnvironmentModal";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -23,7 +26,6 @@ interface DataType {
 	id?: string;
 	key?: React.Key;
 	children?: DataType[];
-	state?: "none" | "loading" | "failed" | "success";
 }
 
 const columns: ColumnsType<IRelease & DataType> = [
@@ -42,6 +44,8 @@ const columns: ColumnsType<IRelease & DataType> = [
 					<strong>{value}</strong>
 				</p>
 				<p>
+					Revision: {record.message ?? "-"}
+					<br />
 					Author: {(record.owner as IUser)?.name ?? "-"}
 					<br />
 					Created <DateDisplay date={record.createdAt} />
@@ -50,10 +54,10 @@ const columns: ColumnsType<IRelease & DataType> = [
 		),
 	},
 	{
-		title: "Build status",
-		dataIndex: "buildStatus",
+		title: "Deploy status",
+		dataIndex: "status",
 		// fixed: "right",
-		key: "buildStatus",
+		key: "status",
 		width: 30,
 		filters: [
 			{ text: "start", value: "start" },
@@ -61,11 +65,11 @@ const columns: ColumnsType<IRelease & DataType> = [
 			{ text: "success", value: "success" },
 			{ text: "building", value: "building" },
 		],
-		render: (value) => {
+		render: (value: DeployStatus) => {
 			let color = "warning";
 			let icon = <InfoCircleOutlined />;
 			switch (value) {
-				case "building":
+				case "in_progress":
 					color = "processing";
 					icon = <LoadingOutlined className="align-middle" />;
 					break;
@@ -77,7 +81,11 @@ const columns: ColumnsType<IRelease & DataType> = [
 					color = "success";
 					icon = <CheckCircleOutlined className="align-middle" />;
 					break;
-				case "start":
+				case "cancelled":
+					color = "warning";
+					icon = <CloseCircleOutlined className="align-middle" />;
+					break;
+				case "pending":
 				default:
 					color = "default";
 					icon = <InfoCircleOutlined />;
@@ -130,29 +138,42 @@ export const ReleaseList = () => {
 	const router = useRouter();
 	const root = useApp();
 	const [query] = useRouterQuery();
+	// const { modal } = useModalProvider();
+	const { modal } = App.useApp();
 
-	const { project, app, offsetHeader = 0, env = "prod" } = query;
+	const { project, app: appSlug, offsetHeader = 0, env = "prod" } = query;
 
 	const filter: any = {};
 	if (project) filter.projectSlug = project;
-	if (app) filter.appSlug = app;
+	if (appSlug) filter.appSlug = appSlug;
 	if (env) filter.env = env;
 
 	// const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 	const [page, setPage] = useState(1);
 
-	const { data, status } = useReleaseListApi({ populate: "owner", pagination: { page, size: pageSize }, filter });
+	// release
+	const { data, status, refetch } = useReleaseListApi({
+		filter,
+		sort: "-createdAt",
+		populate: "owner",
+		pagination: { page, size: pageSize },
+	});
 	const { list: releases = [], pagination } = data || {};
 	const { total_items } = pagination || {};
 
+	// app
+	const useSlugApi = useAppSlugApi(appSlug, { populate: "owner" });
+	const { data: app } = useSlugApi;
+
+	// roll out api
 	const [rolloutApi, rolloutApiStatus] = useReleaseRollOutApi();
-	console.log("rolloutApiStatus :>> ", rolloutApiStatus);
-	const [rolloutId, setRolloutId] = useState("");
+	const [releaseId, setReleaseId] = useState("");
 
 	const [previewApi] = usePreviewPrereleaseApi();
 
 	const rollout = async (id: string) => {
 		// show loading ?
+		refetch();
 
 		if (isEmpty(id)) {
 			root.notification.error({
@@ -163,13 +184,14 @@ export const ReleaseList = () => {
 			return;
 		}
 
-		setRolloutId(id);
+		setReleaseId(id);
 
 		try {
 			const res = await rolloutApi({ id });
 			const release = isArray(res?.data) ? res?.data[0] : res?.data;
 
-			if (res?.status)
+			if (res?.status) {
+				refetch();
 				root.notification.success({
 					message: `Congrats, the release has been rolled out successfully!`,
 					description: (
@@ -182,6 +204,7 @@ export const ReleaseList = () => {
 					),
 					placement: "top",
 				});
+			}
 		} catch (e) {
 			console.error(`Could not process rolling out this release:`, e);
 
@@ -192,7 +215,7 @@ export const ReleaseList = () => {
 			});
 		}
 
-		setRolloutId("");
+		setReleaseId("");
 	};
 
 	const previewPrerelease = async (id: string) => {
@@ -231,25 +254,65 @@ export const ReleaseList = () => {
 		}
 	};
 
+	const openPromoteDeployEnvironmentModal = (_app: IApp, fromEnv: string, toEnv?: string) => {
+		// console.log("modal :>> ", modal);
+		const instance = modal?.info({
+			title: <Typography.Title level={3}>Promote to {toEnv ? toEnv.toUpperCase() : "another"} deploy environment</Typography.Title>,
+			icon: null,
+			content: (
+				<PromoteDeployEnvironmentModal
+					app={_app}
+					fromEnv={fromEnv}
+					toEnv={toEnv}
+					next={() => {
+						instance?.destroy();
+						// reload project & app list
+						// refetchProjecAndApps();
+					}}
+				/>
+			),
+			footer: null,
+			closable: true,
+			maskClosable: true,
+			width: 500,
+			bodyStyle: { margin: 0, width: "100%", justifyContent: "stretch" },
+			onOk() {},
+		});
+	};
+
 	const displayedReleases = releases.map((release) => {
 		return {
 			...release,
 			id: release._id,
-			// state: release.active === true ? "success" : "none",
-			// eslint-disable-next-line no-nested-ternary
-			state: rolloutId !== "" ? rolloutApiStatus : release.active === true ? "success" : "none",
+			status: releaseId === release._id && rolloutApiStatus === "loading" ? "in_progress" : release.status,
 			action: (
-				<Space.Compact>
-					<Tooltip title="Roll out">
-						<Button
-							icon={rolloutId !== "" && rolloutApiStatus === "loading" ? <LoadingOutlined /> : <RocketOutlined />}
-							onClick={() => rollout(release._id as string)}
-						/>
-					</Tooltip>
-					<Tooltip title="Preview">
+				<>
+					<Space.Compact>
+						<Tooltip title="Roll out">
+							<Button
+								disabled={releaseId === release._id && rolloutApiStatus === "loading"}
+								icon={<RocketOutlined />}
+								onClick={() => rollout(release._id as string)}
+							/>
+						</Tooltip>
+						{/* <Tooltip title="Preview">
 						<Button icon={<EyeOutlined />} onClick={() => previewPrerelease(release._id as string)} target="_blank" />
-					</Tooltip>
-				</Space.Compact>
+					</Tooltip> */}
+						<Tooltip title="Promote to another deploy environment" arrow={false}>
+							<Button
+								icon={<CrownOutlined />}
+								onClick={() => {
+									if (app) {
+										openPromoteDeployEnvironmentModal(app, env);
+									} else {
+										console.log(`App "${appSlug}" not found.`);
+									}
+								}}
+								target="_blank"
+							/>
+						</Tooltip>
+					</Space.Compact>
+				</>
 			),
 		} as IRelease & DataType;
 	});

@@ -1,17 +1,20 @@
 import {
 	AlertOutlined,
 	AppstoreAddOutlined,
+	AppstoreOutlined,
 	BuildOutlined,
 	ClearOutlined,
 	CloudUploadOutlined,
+	CrownOutlined,
 	DeleteOutlined,
 	DeploymentUnitOutlined,
 	EditOutlined,
 	EyeInvisibleOutlined,
 	EyeOutlined,
-	GlobalOutlined,
+	FileDoneOutlined,
 	ImportOutlined,
 	InfoCircleOutlined,
+	LinkOutlined,
 	MoreOutlined,
 	PlusCircleFilled,
 	PlusOutlined,
@@ -39,6 +42,8 @@ import {
 	useAppUnarchiveApi,
 } from "@/api/api-app";
 import { useBuildStartApi, useBuildStopApi } from "@/api/api-build";
+import { useClusterListApi } from "@/api/api-cluster";
+import { usePromoteDeployEnvironmentApi } from "@/api/api-deploy";
 import { useProjectDeleteApi, useProjectListWithAppsApi } from "@/api/api-project";
 import type { IApp, IDeployEnvironment, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
@@ -51,6 +56,7 @@ import { AppConfig } from "@/utils/AppConfig";
 
 import AddDomainForm from "./AddDomainForm";
 import NewAppModal from "./NewAppModal";
+import PromoteDeployEnvironmentModal from "./PromoteDeployEnvironmentModal";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -99,19 +105,37 @@ export const ProjectList = () => {
 	const { list: projects, pagination } = data || {};
 	const { total_pages, total_items } = pagination || {};
 
+	// FIXME: page size -> all or pagination?
+	// fetch clusters
+	const { data: dataCluster, status: listClusterApiStatus } = useClusterListApi({ pagination: { page, size: 50 } });
+	const { list: clusters } = dataCluster || {};
+	// const { total_items } = pagination || {};
+
 	// table config
 	const columns: ColumnsType<DataType> = [
 		{
-			title: "Project/app",
+			title: "Projects",
 			width: responsive?.md ? 60 : 40,
 			dataIndex: "name",
 			key: "name",
 			fixed: responsive?.md ? "left" : undefined,
 			filterSearch: true,
+			defaultFilteredValue: query.project,
 			filters: projects?.map((item) => {
 				return { text: item?.slug || "", value: item?.slug || "" };
 			}),
-			onFilter: (value, record) => (record?.slug ? record?.slug.indexOf(value.toString()) > -1 : true),
+			// onFilterDropdownOpenChange: (open) => {
+			// 	console.log("onFilterDropdownOpenChange > open :>> ", open);
+			// },
+			onFilter: (value, record) => {
+				if (record?.slug) {
+					// setQuery({ project: record?.slug });
+					// console.log("value :>> ", value);
+					// console.log("record.slug :>> ", record.slug);
+					return record?.slug.indexOf(value.toString()) > -1;
+				}
+				return true;
+			},
 			render: (value, record) =>
 				// eslint-disable-next-line no-nested-ternary
 				record.type === "project" ? (
@@ -148,54 +172,28 @@ export const ProjectList = () => {
 					{value}
 				</Button>
 			),
-			filterSearch: true,
-			filters: [{ text: "goon", value: "goon" }],
-			onFilter: (value, record) => (record.cluster && record.cluster.indexOf(value.toString()) > -1) || true,
-		},
-		{
-			title: "Ready",
-			width: 20,
-			dataIndex: "readyCount",
-			key: "readyCount",
-			render: (value, record) =>
-				value && record.replicas ? (
-					<Tag>
-						{value}/{record.replicas}
-					</Tag>
-				) : (
-					<></>
-				),
-		},
-		{
-			title: "Last updated by",
-			dataIndex: "lastUpdatedBy",
-			key: "lastUpdatedBy",
-			width: 35,
-			filterSearch: true,
+			// filterSearch: true,
 			// filters: [{ text: "goon", value: "goon" }],
-			// onFilter: (value, record) => (record.owner && record.owner.indexOf(value.toString()) > -1) || true,
-			render: (value, record) => <>{value || (record.owner as IUser)?.name}</>,
+			// onFilter: (value, record) => (record.cluster && record.cluster.indexOf(value.toString()) > -1) || true,
 		},
-		{
-			title: "Last updated",
-			dataIndex: "updatedAt",
-			key: "updatedAt",
-			width: 30,
-			render: (value) => <DateDisplay date={value} />,
-			sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
-		},
-		{
-			title: "Created at",
-			dataIndex: "createdAt",
-			key: "createdAt",
-			width: 30,
-			render: (value) => <DateDisplay date={value} />,
-			sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
-		},
+		// {
+		// 	title: "Ready",
+		// 	width: 20,
+		// 	dataIndex: "readyCount",
+		// 	key: "readyCount",
+		// 	render: (value, record) =>
+		// 		value && record.replicas ? (
+		// 			<Tag>
+		// 				{value}/{record.replicas}
+		// 			</Tag>
+		// 		) : (
+		// 			<></>
+		// 		),
+		// },
 		{
 			title: "Status",
 			dataIndex: "status",
-			fixed: responsive?.md ? "right" : undefined,
+			// fixed: responsive?.md ? "right" : undefined,
 			key: "status",
 			width: responsive?.md ? 20 : 15,
 			filters: [
@@ -233,6 +231,32 @@ export const ProjectList = () => {
 			},
 		},
 		{
+			title: "Last updated by",
+			dataIndex: "lastUpdatedBy",
+			key: "lastUpdatedBy",
+			width: 35,
+			filterSearch: true,
+			// filters: [{ text: "goon", value: "goon" }],
+			// onFilter: (value, record) => (record.owner && record.owner.indexOf(value.toString()) > -1) || true,
+			render: (value, record) => <>{value || (record.owner as IUser)?.name}</>,
+		},
+		{
+			title: "Last updated",
+			dataIndex: "updatedAt",
+			key: "updatedAt",
+			width: 30,
+			render: (value) => <DateDisplay date={value} />,
+			sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
+		},
+		{
+			title: "Created at",
+			dataIndex: "createdAt",
+			key: "createdAt",
+			width: 30,
+			render: (value) => <DateDisplay date={value} />,
+			sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
+		},
+		{
 			title: <Typography.Text className="text-xs md:text-sm">Action</Typography.Text>,
 			key: "action",
 			fixed: "right",
@@ -250,6 +274,8 @@ export const ProjectList = () => {
 
 	const [startBuildApi, startBuildApiStatus] = useBuildStartApi();
 	const [stopBuildApi, stopBuildApiStatus] = useBuildStopApi();
+
+	const [promoteToDeployEnvApi, promoteToEnvApiStatus] = usePromoteDeployEnvironmentApi();
 
 	const [sleepDeployEnvApi, sleepDeployEnvApiStatus] = useAppDeployEnvironmentSleepApi();
 	const [awakeDeployEnvApi, awakeDeployEnvApiStatus] = useAppDeployEnvironmentAwakeApi();
@@ -292,6 +318,32 @@ export const ProjectList = () => {
 			footer: null,
 			closable: true,
 			maskClosable: true,
+			onOk() {},
+		});
+	};
+
+	const openPromoteDeployEnvironmentModal = (_app: IApp, fromEnv: string, toEnv?: string) => {
+		// console.log("modal :>> ", modal);
+		const instance = modal?.info({
+			title: <Typography.Title level={3}>Promote to {toEnv ? toEnv.toUpperCase() : "another"} deploy environment</Typography.Title>,
+			icon: null,
+			content: (
+				<PromoteDeployEnvironmentModal
+					app={_app}
+					fromEnv={fromEnv}
+					toEnv={toEnv}
+					next={() => {
+						instance?.destroy();
+						// reload project & app list
+						refetchProjecAndApps();
+					}}
+				/>
+			),
+			footer: null,
+			closable: true,
+			maskClosable: true,
+			width: 500,
+			bodyStyle: { margin: 0, width: "100%", justifyContent: "stretch" },
 			onOk() {},
 		});
 	};
@@ -372,9 +424,28 @@ export const ProjectList = () => {
 							// console.log("envStr :>> ", envStr);
 							const deployEnvironment = ((app.deployEnvironment || {})[envName] || {}) as IDeployEnvironment;
 
+							const mainUrl = `https://${deployEnvironment.domains?.[0]}`;
+
 							const record: any = {
 								name: (
 									<>
+										<Tooltip
+											title={
+												deployEnvironment.domains?.map((domain) => (
+													<ul key={domain} style={{ listStyleType: "disc" }}>
+														<li style={{ listStyleType: "disc", display: "list-item" }}>
+															<Link href={`https://${domain}`} target="_blank">
+																https://{domain}
+															</Link>
+														</li>
+													</ul>
+												)) || "No domains"
+											}
+										>
+											<Link key={mainUrl} href={mainUrl} target="_blank">
+												<LinkOutlined />
+											</Link>
+										</Tooltip>
 										<Button
 											type="link"
 											onClick={() => setQuery({ lv1: "deploy_environment", project: p.slug, app: app.slug, env: envName })}
@@ -391,198 +462,148 @@ export const ProjectList = () => {
 								projectSlug: p.slug,
 								appSlug: app.slug,
 								type: envName !== "prod" ? "env" : "env-prod",
-								status: "N/A",
+								// status: deployEnvironment.status,
 								url: deployEnvironment.domains ? `https://${deployEnvironment.domains[0]}` : "",
-								prereleaseUrl:
-									envName === "prod"
-										? deployEnvironment.prereleaseUrl ?? `https://${app.slug}.prerelease.diginext.site`.toLowerCase()
-										: "",
 								...(deployEnvironment as any),
 							};
 
-							record.actions =
-								envName === "prod" ? (
-									<Space.Compact>
-										<Tooltip title="Preview pre-release site">
-											<Button
-												icon={<EyeOutlined />}
-												href={record.prereleaseUrl}
-												target="_blank"
-												disabled={isEmpty(record.prereleaseUrl)}
-											/>
-										</Tooltip>
-										<Tooltip title="View live website">
-											<Button icon={<GlobalOutlined />} href={record.url} target="_blank" disabled={isEmpty(record.url)} />
-										</Tooltip>
-										{/* <Tooltip title="Take down">
-											<Button icon={<PauseCircleOutlined />} />
-										</Tooltip> */}
-										<Dropdown
-											menu={{
-												items: [
-													{
-														label: "Deploy now",
-														key: "deploy-now",
-														icon: <RocketOutlined />,
-														onClick: () => {
-															let path = `/deploy?app=${app.slug}&env=${envName}`;
-															if (deployEnvironment.registry) path += `&registry=${deployEnvironment.registry}`;
-															if (deployEnvironment.cluster) path += `&cluster=${deployEnvironment.cluster}`;
-															if (deployEnvironment.port) path += `&port=${deployEnvironment.port}`;
-															router.push(path);
-														},
+							record.actions = (
+								<Space.Compact>
+									<Tooltip title="View website">
+										<Button icon={<EyeOutlined />} href={record.url} target="_blank" disabled={isEmpty(record.url)} />
+									</Tooltip>
+									{/* <Button icon={<PauseCircleOutlined />} /> */}
+									<Dropdown
+										menu={{
+											items: [
+												{
+													label: <Tooltip title="Build & deploy from latest git source">Deploy now</Tooltip>,
+													key: "deploy-now",
+													icon: <RocketOutlined />,
+													onClick: () =>
+														router.push(
+															`/deploy?app=${app.slug}&env=${envName}&registry=${deployEnvironment.registry}&cluster=${deployEnvironment.cluster}`
+														),
+												},
+												// {
+												// 	label: "Build now",
+												// 	key: "build-now",
+												// 	icon: <AimOutlined />,
+												// 	onClick: () => startBuildApi({}),
+												// },
+												{
+													label: (
+														<Tooltip title="Deploy current build of this environment to production">
+															Promote to PRODUCTION
+														</Tooltip>
+													),
+													key: "promote-to-production",
+													icon: <CrownOutlined />,
+													onClick: () => {
+														openPromoteDeployEnvironmentModal(app, envName, "prod");
+
+														// // check target deploy env exists
+														// if (!deployEnvironment.cluster) {
+														// 	// show popup select cluster
+														// 	openPromoteDeployEnvironmentModal(app, envName, "prod");
+														// 	return;
+														// }
+														// // promote to production
+														// promoteToDeployEnvApi({
+														// 	appSlug: app.slug,
+														// 	fromEnv: envName,
+														// 	env: "prod",
+														// });
 													},
-													// {
-													// 	label: "Build now",
-													// 	key: "build-now",
-													// 	icon: <AimOutlined />,
-													// 	onClick: () => startBuildApi({}),
-													// },
-													{
-														label: "List of builds",
-														key: "list-of-builds",
-														icon: <BuildOutlined />,
-														onClick: () => openBuildList(record.projectSlug, record.appSlug, record.id),
+												},
+												{
+													label: (
+														<Tooltip title="Deploy current build of this environment to production">
+															Promote to another
+														</Tooltip>
+													),
+													key: "promote-to-another",
+													icon: <CrownOutlined />,
+													onClick: () => {
+														openPromoteDeployEnvironmentModal(app, envName);
 													},
-													{
-														label: "List of releases",
-														key: "list-of-releases",
-														icon: <RocketOutlined />,
-														onClick: () => openReleaseList(record.projectSlug, record.appSlug, envName),
-													},
-													{
-														label: "Modify environment variables",
-														key: "env-vars",
-														icon: <QrcodeOutlined />,
-														onClick: () => openEnvVarsEdit(record.projectSlug, record.appSlug, envName),
-													},
-													{
-														label: "Add domains",
-														key: "add-domains",
-														icon: <AppstoreAddOutlined />,
-														onClick: () => openAddDomains(record.appSlug, envName),
-													},
-													{
-														label: "Sleep",
-														key: "sleep",
-														icon: <EyeInvisibleOutlined />,
-														onClick: () => sleepDeployEnvApi({ slug: record.appSlug, env: envName }),
-													},
-													{
-														label: "Awake",
-														key: "awake",
-														icon: <AlertOutlined />,
-														onClick: () => awakeDeployEnvApi({ slug: record.appSlug, env: envName }),
-													},
-													{
-														label: "Take down",
-														key: "take-down",
-														icon: <PoweroffOutlined />,
-														onClick: () => takeDownDeployEnvApi({ slug: record.appSlug, env: envName }),
-													},
-												],
-											}}
-										>
-											<Button style={{ padding: "4px 4px" }}>
-												<MoreOutlined />
-											</Button>
-										</Dropdown>
-										<Popconfirm
-											title="Are you sure to delete this environment?"
-											description={
-												<span className="text-red-500">
-													Caution: this is permanent and cannot be rolled back (excepts re-deploying).
-												</span>
-											}
-											onConfirm={() => deleteEnvironment(app._id as string, envName)}
-											okText="Yes"
-											cancelText="No"
-										>
-											<Button icon={<DeleteOutlined />} />
-										</Popconfirm>
-									</Space.Compact>
-								) : (
-									<Space.Compact>
-										<Tooltip title="View website">
-											<Button icon={<EyeOutlined />} href={record.url} target="_blank" disabled={isEmpty(record.url)} />
-										</Tooltip>
-										{/* <Button icon={<PauseCircleOutlined />} /> */}
-										<Dropdown
-											menu={{
-												items: [
-													{
-														label: "Deploy now",
-														key: "deploy-now",
-														icon: <RocketOutlined />,
-														onClick: () =>
-															router.push(
-																`/deploy?app=${app.slug}&env=${envName}&registry=${deployEnvironment.registry}&cluster=${deployEnvironment.cluster}`
-															),
-													},
-													// {
-													// 	label: "Build now",
-													// 	key: "build-now",
-													// 	icon: <AimOutlined />,
-													// 	onClick: () => startBuildApi({}),
-													// },
-													{
-														label: "List of builds",
-														key: "list-of-builds",
-														icon: <BuildOutlined />,
-														onClick: () => openBuildList(record.projectSlug, record.appSlug, record.id),
-													},
-													{
-														label: "Modify environment variables",
-														key: "env-vars",
-														icon: <QrcodeOutlined />,
-														onClick: () => openEnvVarsEdit(record.projectSlug, record.appSlug, envName),
-													},
-													{
-														label: "Add domains",
-														key: "add-domains",
-														icon: <AppstoreAddOutlined />,
-														onClick: () => openAddDomains(record.appSlug, envName),
-													},
-													{
-														label: "Sleep",
-														key: "sleep",
-														icon: <EyeInvisibleOutlined />,
-														onClick: () => sleepDeployEnvApi({ slug: record.appSlug, env: envName }),
-													},
-													{
-														label: "Awake",
-														key: "awake",
-														icon: <AlertOutlined />,
-														onClick: () => awakeDeployEnvApi({ slug: record.appSlug, env: envName }),
-													},
-													{
-														label: "Take down",
-														key: "take-down",
-														icon: <PoweroffOutlined />,
-														onClick: () => takeDownDeployEnvApi({ slug: record.appSlug, env: envName }),
-													},
-												],
-											}}
-										>
-											<Button style={{ padding: "4px 4px" }}>
-												<MoreOutlined />
-											</Button>
-										</Dropdown>
-										<Popconfirm
-											title="Are you sure to delete this environment?"
-											description={
-												<span className="text-red-500">
-													Caution: this is permanent and cannot be rolled back (excepts re-deploying).
-												</span>
-											}
-											onConfirm={() => deleteEnvironment(app._id as string, envName)}
-											okText="Yes"
-											cancelText="No"
-										>
-											<Button icon={<DeleteOutlined />} />
-										</Popconfirm>
-									</Space.Compact>
-								);
+												},
+												{
+													label: "List of releases",
+													key: "list-of-releases",
+													icon: <AppstoreOutlined />,
+													onClick: () => openReleaseList(record.projectSlug, record.appSlug, envName),
+												},
+												{
+													label: "List of builds",
+													key: "list-of-builds",
+													icon: <BuildOutlined />,
+													onClick: () => openBuildList(record.projectSlug, record.appSlug, record.id),
+												},
+												{
+													label: "Deployment YAML",
+													key: "deployment-yaml",
+													icon: <FileDoneOutlined />,
+													onClick: () =>
+														setQuery({
+															lv1: "deployment_yaml",
+															project: record.projectSlug,
+															app: record.appSlug,
+															env: envName,
+														}),
+												},
+												{
+													label: "Environment variables",
+													key: "env-vars",
+													icon: <QrcodeOutlined />,
+													onClick: () => openEnvVarsEdit(record.projectSlug, record.appSlug, envName),
+												},
+												{
+													label: "Add domains",
+													key: "add-domains",
+													icon: <AppstoreAddOutlined />,
+													onClick: () => openAddDomains(record.appSlug, envName),
+												},
+												{
+													label: "Sleep",
+													key: "sleep",
+													icon: <EyeInvisibleOutlined />,
+													onClick: () => sleepDeployEnvApi({ slug: record.appSlug, env: envName }),
+												},
+												{
+													label: "Awake",
+													key: "awake",
+													icon: <AlertOutlined />,
+													onClick: () => awakeDeployEnvApi({ slug: record.appSlug, env: envName }),
+												},
+												{
+													label: "Take down",
+													key: "take-down",
+													icon: <PoweroffOutlined />,
+													onClick: () => takeDownDeployEnvApi({ slug: record.appSlug, env: envName }),
+												},
+											],
+										}}
+									>
+										<Button style={{ padding: "4px 4px" }}>
+											<MoreOutlined />
+										</Button>
+									</Dropdown>
+									<Popconfirm
+										title="Are you sure to delete this environment?"
+										description={
+											<span className="text-red-500">
+												Caution: this is permanent and cannot be rolled back (excepts re-deploying).
+											</span>
+										}
+										onConfirm={() => deleteEnvironment(app._id as string, envName)}
+										okText="Yes"
+										cancelText="No"
+									>
+										<Button icon={<DeleteOutlined />} />
+									</Popconfirm>
+								</Space.Compact>
+							);
 
 							return record;
 						});
@@ -634,6 +655,7 @@ export const ProjectList = () => {
 	// console.log({ displayedProjects });
 
 	const onTableChange = (_pagination: TablePaginationConfig) => {
+		console.log("Table changed!");
 		const { current } = _pagination;
 		setQuery({ page: current ?? 1 });
 	};

@@ -83,6 +83,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 			style={{ display: visible ? "block" : "none", ...wrapperStyle }}
 		>
 			<CodeMirror
+				className="w-full"
 				height={height}
 				theme={isDarkMode ? "dark" : "light"}
 				extensions={[...lang.map((_lang) => langs[_lang]()), basicSetup({})]}

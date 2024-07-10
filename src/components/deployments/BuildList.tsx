@@ -118,12 +118,16 @@ export const BuildList = () => {
 			render: (value) => <>{value?.name}</>,
 		},
 		{
-			title: "Status",
+			title: "Build Status",
 			dataIndex: "status",
 			// fixed: "right",
 			key: "status",
 			width: 30,
-			filters: [{ text: "live", value: "live" }],
+			filters: [
+				{ text: "building", value: "building" },
+				{ text: "error", value: "error" },
+				{ text: "success", value: "success" },
+			],
 			render: (value) => {
 				let color = "warning";
 				let icon = <InfoCircleOutlined />;
@@ -154,6 +158,52 @@ export const BuildList = () => {
 			},
 		},
 		{
+			title: "Deploy Status",
+			dataIndex: "deployStatus",
+			key: "deployStatus",
+			width: 30,
+			// ["pending", "in_progress", "failed", "success", "cancelled"]
+			filters: [
+				{ text: "pending", value: "pending" },
+				{ text: "in_progress", value: "in_progress" },
+				{ text: "failed", value: "failed" },
+				{ text: "success", value: "success" },
+				{ text: "cancelled", value: "cancelled" },
+			],
+			render: (value) => {
+				let color = "warning";
+				let icon = <InfoCircleOutlined />;
+				switch (value) {
+					case "in_progress":
+						color = "processing";
+						icon = <LoadingOutlined className="align-middle" />;
+						break;
+					case "failed":
+						color = "error";
+						icon = <CloseCircleOutlined className="align-middle" />;
+						break;
+					case "success":
+						color = "success";
+						icon = <CheckCircleOutlined className="align-middle" />;
+						break;
+					case "cancelled":
+						color = "yellow";
+						icon = <CloseCircleOutlined className="align-middle" />;
+						break;
+					case "pending":
+					default:
+						color = "default";
+						icon = <InfoCircleOutlined />;
+						break;
+				}
+				return (
+					<Tag color={color} icon={icon}>
+						{value}
+					</Tag>
+				);
+			},
+		},
+		{
 			title: "Action",
 			key: "action",
 			width: 30,
@@ -169,11 +219,11 @@ export const BuildList = () => {
 	const [page, setPage] = useState(1);
 
 	// APIs
-	// const {} = useBuildSlugApi()
 	const [buildAndDeployFromAppApi, buildAndDeployFromAppStatus] = useDeployFromAppApi();
 	const [buildAndDeployFromGitApi, buildAndDeployFromGitStatus] = useDeployFromGitApi();
 	const [stopBuildApi, stopBuildStatus] = useBuildStopApi();
 
+	// API: List builds
 	const { data, status } = useBuildListApi({ sort: "-createdAt", populate: "owner", pagination: { page, size: pageSize }, filter });
 	const { list: builds, pagination } = data || {};
 	const { total_items } = pagination || {};

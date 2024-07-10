@@ -75,7 +75,8 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 
 	// build
 	const [messages, setMessages] = useState<string[]>(["Connecting..."]);
-	const [status, setStatus] = useState<"failed" | "in_progress" | "success">("in_progress"); // build status: failed, in_progress, success
+	const [status, setStatus] = useState<"start" | "building" | "failed" | "success">("building"); // build status: "start" | "building" | "failed" | "success"
+	const [deployStatus, setDeployStatus] = useState<"pending" | "in_progress" | "failed" | "success" | "cancelled">("in_progress"); // deploy status: "pending" | "in_progress" | "failed" | "success" | "cancelled"
 	const [isFinished, setIsFinished] = useState(false);
 	const [wrap, setWrap] = useState(false);
 	const [buildDuration, setBuildDuration] = useState("0");
@@ -180,39 +181,16 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	useEffect(() => {
 		const buildLog = logData?.toString().toLowerCase() || "";
 
-		// check whether the build was finished yet or not...
-		if (build?.status === "failed") {
-			setStatus("failed");
-			setIsFinished(true);
-		}
+		// display build status
+		setStatus(build?.status || "start");
 
-		// display result...
-		if (build?.status === "success") {
-			if (env) {
-				// set status for this build process only
-				setStatus("success");
-				setIsFinished(true);
-			} else {
-				// set status for this build & deploy process
-				switch (release?.status) {
-					case "cancelled":
-					case "failed":
-						setStatus("failed");
-						setIsFinished(true);
-						break;
-
-					case "success":
-						setStatus("success");
-						setIsFinished(true);
-						break;
-
-					case "pending":
-					case "in_progress":
-					default:
-						setStatus("in_progress");
-						break;
-				}
-			}
+		// display deploy status
+		if (env) {
+			setDeployStatus(build.deployStatus || "pending");
+			if (build.deployStatus !== "pending" && build.deployStatus !== "in_progress") setIsFinished(true);
+		} else {
+			if (build?.status !== "building") setIsFinished(true);
+			setDeployStatus("cancelled");
 		}
 
 		// no need to connect to socket if the room is not available:
@@ -272,7 +250,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 			}
 			// setMessages([]);
 		};
-	}, [build?.status, release?.status, logData, SOCKET_ROOM]);
+	}, [build?.status, build?.deployStatus, release?.status, logData, SOCKET_ROOM]);
 
 	// mount
 	const [mounted, setMounted] = useState(false);
@@ -300,11 +278,11 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 					</Tag>,
 					<Tag
 						key="status"
-						color={status === "success" ? "green" : status === "in_progress" ? "blue" : status === "failed" ? "red" : "default"}
+						color={status === "success" ? "green" : status === "building" ? "blue" : status === "failed" ? "red" : "default"}
 						icon={
 							status === "success" ? (
 								<CheckCircleOutlined />
-							) : status === "in_progress" ? (
+							) : status === "building" ? (
 								<LoadingOutlined />
 							) : status === "failed" ? (
 								<ExclamationCircleOutlined />
@@ -314,6 +292,33 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 						}
 					>
 						{status}
+					</Tag>,
+					<Tag
+						key="deployStatus"
+						color={
+							deployStatus === "success"
+								? "green"
+								: deployStatus === "in_progress"
+								? "blue"
+								: deployStatus === "failed"
+								? "red"
+								: deployStatus === "cancelled"
+								? "yellow"
+								: "default"
+						}
+						icon={
+							deployStatus === "success" ? (
+								<CheckCircleOutlined />
+							) : deployStatus === "in_progress" ? (
+								<LoadingOutlined />
+							) : deployStatus === "failed" || deployStatus === "cancelled" ? (
+								<ExclamationCircleOutlined />
+							) : (
+								<></>
+							)
+						}
+					>
+						{deployStatus || "N/A"}
 					</Tag>,
 				]}
 			>
@@ -381,25 +386,52 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 			</div>
 
 			<div className="flex-col px-4 py-2 md:flex">
-				{/* Status message */}
 				<div className="flex-auto">
-					{status === "in_progress" && (
+					{/* BUILD STATUS */}
+					{status === "building" && (
 						<h3 className="text-xl text-blue-600">
-							<LoadingOutlined /> Building...
+							<LoadingOutlined /> Build: In progress.
+						</h3>
+					)}
+					{status === "failed" && (
+						<h2 className="text-xl text-red-600">
+							<ExclamationCircleOutlined /> Build: Failed.
+						</h2>
+					)}
+					{status === "success" && (
+						<h2 className="text-xl text-green-600">
+							<CheckCircleOutlined /> Build: Success.
+						</h2>
+					)}
+
+					{/* DEPLOY STATUS */}
+					{deployStatus === "cancelled" ? (
+						<h3 className="text-xl text-yellow-600">
+							<ClockCircleOutlined /> Deploy: Cancelled.
+						</h3>
+					) : deployStatus === "in_progress" ? (
+						<h3 className="text-xl text-blue-600">
+							<LoadingOutlined /> Deploy: In progress.
+						</h3>
+					) : deployStatus === "failed" ? (
+						<h3 className="text-xl text-red-600">
+							<ExclamationCircleOutlined /> Deploy: Failed.
+						</h3>
+					) : deployStatus === "success" ? (
+						<h3 className="text-xl text-green-600">
+							<CheckCircleOutlined /> Deploy: Success.
+						</h3>
+					) : deployStatus === "pending" ? (
+						<h3 className="text-xl">
+							<ClockCircleOutlined /> Deploy: Wait for building.
+						</h3>
+					) : (
+						<h3 className="text-xl">
+							<ClockCircleOutlined /> Deploy: N/A.
 						</h3>
 					)}
 
-					{status === "failed" && (
-						<h2 className="text-xl text-red-600">
-							<ExclamationCircleOutlined /> Build failed.
-						</h2>
-					)}
-
-					{status === "success" && (
-						<h2 className="text-xl text-green-600">
-							<CheckCircleOutlined /> Congrats, your build process has been finished successfully!
-						</h2>
-					)}
+					{/* Congrats, your build process has been finished successfully! */}
 				</div>
 
 				{/* Go to bottom */}
