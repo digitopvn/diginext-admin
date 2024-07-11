@@ -120,7 +120,7 @@ const DeployEnvironment = () => {
 		<>
 			{/* SCREENSHOT */}
 			<div className=" hidden h-80 w-full p-6" style={{ display: useSlugApi.data?.screenshot ? "block" : "none" }}>
-				<Card hoverable className="relative h-full overflow-hidden" bodyStyle={{ height: "100%", padding: 0 }}>
+				<Card hoverable className="relative h-full overflow-hidden" styles={{ body: { height: "100%", padding: 0 } }}>
 					<div
 						className="h-full"
 						style={{

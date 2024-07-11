@@ -25,7 +25,7 @@ import sanitizeHtml from "sanitize-html";
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { useBuildRerunApi, useBuildSlugApi, useBuildStopApi } from "@/api/api-build";
-import { useDeployFromAppApi } from "@/api/api-deploy";
+import { useDeployFromAppApi, useDeployFromSourceApi } from "@/api/api-deploy";
 import { useReleaseListApi } from "@/api/api-release";
 import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -60,6 +60,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 
 	// action APIs
 	const [rerunBuildApi, rerunBuildStatus] = useBuildRerunApi();
+	const [buildAndDeployFromSourceApi, buildAndDeployFromSourceStatus] = useDeployFromSourceApi();
 	const [buildAndDeployFromAppApi, buildAndDeployFromAppStatus] = useDeployFromAppApi();
 	const [stopBuildApi, stopBuildStatus] = useBuildStopApi();
 

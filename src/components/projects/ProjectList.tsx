@@ -120,7 +120,7 @@ export const ProjectList = () => {
 			key: "name",
 			fixed: responsive?.md ? "left" : undefined,
 			filterSearch: true,
-			defaultFilteredValue: query.project,
+			// defaultFilteredValue: query.project,
 			filters: projects?.map((item) => {
 				return { text: item?.slug || "", value: item?.slug || "" };
 			}),

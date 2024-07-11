@@ -107,9 +107,10 @@ export const DrawerProvider = (props: { children?: ReactNode } = {}) => {
 				placement="right"
 				onClose={onCloseLv1}
 				open={drawerVisibility.lv1}
-				// size="large"
-				width={responsive?.md ? 736 : "100%"}
-				bodyStyle={{ overflow: "auto", overflowX: "hidden", flex: "auto", padding: 0 }}
+				width={responsive?.md ? "70%" : "100%"}
+				styles={{
+					body: { overflow: "auto", overflowX: "hidden", flex: "auto", padding: 0 },
+				}}
 				destroyOnClose
 			>
 				{content?.content}
@@ -120,9 +121,10 @@ export const DrawerProvider = (props: { children?: ReactNode } = {}) => {
 					placement="right"
 					onClose={onCloseLv2}
 					open={drawerVisibility.lv2}
-					// size="large"
-					width={responsive?.md ? 736 : "100%"}
-					bodyStyle={{ overflow: "auto", overflowX: "hidden", flex: "auto", padding: 0 }}
+					width={responsive?.md ? "70%" : "100%"}
+					styles={{
+						body: { overflow: "auto", overflowX: "hidden", flex: "auto", padding: 0 },
+					}}
 					destroyOnClose
 				>
 					{contentLv2?.content}

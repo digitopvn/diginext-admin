@@ -52,17 +52,28 @@ export const PageTitle = (props: IPageTitleProps = {}) => {
 
 	return mounted ? (
 		<div className="border-b border-gray-300 px-6 py-4">
-			<Breadcrumb>
-				<Breadcrumb.Item href={`${router.basePath}/`} key="breadcrumb-home">
-					<HomeOutlined />
-				</Breadcrumb.Item>
-				{breadcrumbs.map((item, i) => (
-					<Breadcrumb.Item href={item.url} key={`breadcrumb-${i}`}>
-						{item.icon}
-						<span>{item.name}</span>
-					</Breadcrumb.Item>
-				))}
-			</Breadcrumb>
+			<Breadcrumb
+				items={[
+					{
+						key: "breadcrumb-home",
+						href: `${router.basePath}/`,
+						title: (
+							<>
+								<HomeOutlined />
+							</>
+						),
+					},
+					...breadcrumbs.map((item, i) => ({
+						key: `breadcrumb-${i}`,
+						href: item.url,
+						title: (
+							<>
+								{item.icon} {item.name}
+							</>
+						),
+					})),
+				]}
+			/>
 			<div className=" flex w-full flex-col md:flex-row">
 				<Title value={title} />
 				<div>

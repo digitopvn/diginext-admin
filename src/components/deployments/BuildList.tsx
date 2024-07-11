@@ -53,6 +53,8 @@ type IBuildListProps = {
 	env: string;
 };
 
+const humanize = require("humanize-number");
+
 export const BuildList = () => {
 	// query params
 	const router = useRouter();
@@ -64,19 +66,16 @@ export const BuildList = () => {
 	const columns: ColumnsType<IBuild & DataType> = [
 		{
 			title: "Name",
-			width: 70,
+			width: 80,
 			dataIndex: "name",
 			key: "name",
-			// fixed: "left",
-			filterSearch: true,
-			filters: [{ text: "goon", value: "goon" }],
-			onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
+			// filterSearch: true,
+			// filters: [{ text: "goon", value: "goon" }],
+			// onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
 			render: (value, record) => (
 				<>
 					<p>
-						<Link
-							href={!record.env ? `/build/logs?build_slug=${record.slug}` : `/build/logs?build_slug=${record.slug}&env=${record.env}`}
-						>
+						<Link href={`/build/logs?build_slug=${record.slug}${record.env ? `&env=${record.env}` : ""}`}>
 							<strong>{value}</strong>
 						</Link>
 					</p>
@@ -87,35 +86,62 @@ export const BuildList = () => {
 						<li>
 							App: <Tag color="cyan">{record.appSlug}</Tag>
 						</li>
-						{record.duration ? (
+						<li>
+							Author: <Tag color="green">{(record.owner as IUser)?.name || "-"}</Tag>
+						</li>
+						{typeof record.duration !== "undefined" ? (
 							<li>
 								Duration:{" "}
 								<Tag key="duration" color="gold" icon={<ClockCircleOutlined />}>
-									{humanrizer.humanize(record.duration || 0, { round: true })}
+									{humanrizer.humanize(record.duration, { round: true })}
 								</Tag>
 							</li>
 						) : (
 							<></>
 						)}
-						<li>
+						{/* <li>
 							Created{" "}
 							<strong>
 								<DateDisplay date={record.createdAt} />
 							</strong>
-						</li>
+						</li> */}
 					</ul>
 				</>
 			),
 		},
+		// {
+		// 	title: "Created by",
+		// 	dataIndex: "owner",
+		// 	key: "owner",
+		// 	width: 40,
+		// 	filterSearch: true,
+		// 	filters: [{ text: "goon", value: "goon" }],
+		// 	onFilter: (value, record) => (record.owner && ((record.owner as IUser).slug || "").indexOf(value.toString()) > -1) || true,
+		// 	render: (value) => <>{value?.name}</>,
+		// },
 		{
-			title: "Created by",
-			dataIndex: "owner",
-			key: "owner",
-			width: 40,
-			filterSearch: true,
-			filters: [{ text: "goon", value: "goon" }],
-			onFilter: (value, record) => (record.owner && ((record.owner as IUser).slug || "").indexOf(value.toString()) > -1) || true,
-			render: (value) => <>{value?.name}</>,
+			title: "Created at",
+			dataIndex: "createdAt",
+			key: "createdAt",
+			width: 30,
+			render: (value) => <DateDisplay date={value} />,
+			sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
+		},
+		{
+			title: "Deploy Environment",
+			dataIndex: "env",
+			key: "env",
+			width: 35,
+			filters: [
+				{ text: "dev", value: "dev" },
+				{ text: "demo", value: "demo" },
+				{ text: "beta", value: "beta" },
+				{ text: "alpha", value: "alpha" },
+				{ text: "staging", value: "staging" },
+				{ text: "prod", value: "prod" },
+			],
+			onFilter: (value, record) => (record.env ? record.env === value : false),
+			render: (value) => <Tag color="pink">{value || "-"}</Tag>,
 		},
 		{
 			title: "Build Status",
@@ -128,6 +154,7 @@ export const BuildList = () => {
 				{ text: "error", value: "error" },
 				{ text: "success", value: "success" },
 			],
+			onFilter: (value, record) => (record.status ? record.status === value : false),
 			render: (value) => {
 				let color = "warning";
 				let icon = <InfoCircleOutlined />;
@@ -170,6 +197,7 @@ export const BuildList = () => {
 				{ text: "success", value: "success" },
 				{ text: "cancelled", value: "cancelled" },
 			],
+			onFilter: (value, record) => (record.deployStatus ? record.deployStatus === value : false),
 			render: (value) => {
 				let color = "warning";
 				let icon = <InfoCircleOutlined />;
@@ -240,7 +268,7 @@ export const BuildList = () => {
 
 	// release
 	const [releaseCreateFromBuildApi] = useCreateReleaseFromBuildApi();
-	const releaseBuild = async (buildId?: string) => {
+	const releaseBuild = async (buildId?: string, targetEnv?: string) => {
 		if (isEmpty(buildId)) {
 			root.notification.error({
 				message: `Failed to release the build.`,
@@ -251,7 +279,7 @@ export const BuildList = () => {
 		}
 
 		try {
-			const createRes = await releaseCreateFromBuildApi({ build: buildId, env } as IRelease);
+			const createRes = await releaseCreateFromBuildApi({ build: buildId, env: env ?? targetEnv } as IRelease);
 
 			if (createRes?.status) {
 				const release = createRes?.data;
@@ -320,11 +348,13 @@ export const BuildList = () => {
 					<Tooltip title="Open image URL">
 						<Button icon={<EyeOutlined />} href={`https://${build.image}`} target="_blank" />
 					</Tooltip>
-					{build.env === "prod" && (
-						<Tooltip title="Create a release from this build">
-							<Button icon={<RocketOutlined />} onClick={() => releaseBuild(build._id?.toString())} />
-						</Tooltip>
-					)}
+					<Tooltip title="Create a release from this build">
+						<Button
+							disabled={build.status !== "success"}
+							icon={<RocketOutlined />}
+							onClick={() => releaseBuild(build._id?.toString(), build.env)}
+						/>
+					</Tooltip>
 				</Space.Compact>
 			),
 		} as IBuild & DataType;
@@ -344,7 +374,7 @@ export const BuildList = () => {
 	return (
 		<>
 			{/* Page title & desc here */}
-			<PageTitle title={`Builds (${total_items ?? "-"})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
+			<PageTitle title={`Builds (${total_items ? humanize(total_items) : "-"})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
 			{/* Page Content */}
 			<div className="h-full flex-auto overflow-hidden" ref={ref}>
 				<Table
