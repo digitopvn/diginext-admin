@@ -1,5 +1,5 @@
 import { CheckOutlined, CloseOutlined, LoadingOutlined } from "@ant-design/icons";
-import { Form, Input, Space } from "antd";
+import { Button, Form, Input, Space } from "antd";
 import type { SyntheticEvent } from "react";
 import React, { useEffect, useState } from "react";
 import { useDebounce } from "usehooks-ts";
@@ -90,7 +90,21 @@ const SmartInput = (props: SmartFormElementProps) => {
 			style={{ display: visible ? "block" : "none", ...wrapperStyle }}
 		>
 			<Space direction="vertical" className="w-full">
-				<Input autoComplete="off" placeholder={placeholder} onChange={onChange} value={_value} disabled={disabled} />
+				<div>
+					<Input
+						autoComplete="off"
+						placeholder={placeholder}
+						onChange={onChange}
+						value={_value}
+						disabled={disabled}
+						hidden={visible === false || typeof props.displayValue !== "undefined"}
+					/>
+					{typeof props.displayValue !== "undefined" ? (
+						<Button disabled block>
+							{props.displayValue}
+						</Button>
+					) : null}
+				</div>
 
 				{/* Display manual save controller if auto save is off */}
 				{!autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}

@@ -14,11 +14,11 @@ export const PageFooter = (props: { children?: ReactNode } = {}) => {
 				<strong className="text-brand">{data?.data?.location || "unknown"}</strong>
 				<br />
 				Copyright {new Date().getFullYear()} ©{" "}
-				<Link href="https://diginext.site/?ref=diginext-dashboard" target="_blank">
+				<Link href="https://dxup.dev/?ref=dxup-dashboard" target="_blank">
 					{AppConfig.title.toUpperCase()}
 				</Link>
 				. Powered by{" "}
-				<a href="https://wearetopgroup.com/en?ref=diginext-dashboard" target="_blank" rel="noreferrer">
+				<a href="https://wearetopgroup.com/en?ref=dxup-dashboard" target="_blank" rel="noreferrer">
 					TOP GROUP
 				</a>
 				.

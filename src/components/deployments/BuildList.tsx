@@ -81,14 +81,24 @@ export const BuildList = () => {
 					</p>
 					<ul className="ml-4 list-disc">
 						<li>
-							Project: <Tag color="blue">{record.projectSlug}</Tag>
+							Project: <Tag>{record.projectSlug}</Tag>
 						</li>
 						<li>
-							App: <Tag color="cyan">{record.appSlug}</Tag>
+							App: <Tag>{record.appSlug}</Tag>
 						</li>
 						<li>
-							Author: <Tag color="green">{(record.owner as IUser)?.name || "-"}</Tag>
+							Author: <Tag>{(record.owner as IUser)?.name || "-"}</Tag>
 						</li>
+						<li>
+							CLI: <Tag>{record.cliVersion || "-"}</Tag>
+						</li>
+						<li>
+							Server: <Tag>{record.serverVersion || "-"}</Tag>
+						</li>
+						<li>
+							Location: <Tag>{record.serverLocation || "-"}</Tag>
+						</li>
+
 						{typeof record.duration !== "undefined" ? (
 							<li>
 								Duration:{" "}
@@ -99,12 +109,6 @@ export const BuildList = () => {
 						) : (
 							<></>
 						)}
-						{/* <li>
-							Created{" "}
-							<strong>
-								<DateDisplay date={record.createdAt} />
-							</strong>
-						</li> */}
 					</ul>
 				</>
 			),

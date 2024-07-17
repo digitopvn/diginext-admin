@@ -1,8 +1,8 @@
 /* eslint-disable no-nested-ternary */
 
 import dayjs from "dayjs";
-import { useRouter } from "next/router";
 
+import { useAuthApi } from "@/api/api-auth";
 import { BuildLogs } from "@/components/deployments/BuildLogs";
 import { Main } from "@/templates/Main";
 import { Meta } from "@/templates/Meta";
@@ -14,10 +14,10 @@ dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
 const BuildDetailPage = () => {
-	const router = useRouter();
+	const auth = useAuthApi();
 
 	return (
-		<Main meta={<Meta title="Build Detail" description="View the details of your build logs." />}>
+		<Main meta={<Meta title="Build Detail" description="View the details of your build logs." />} useSidebar={auth.status === "success"}>
 			{/* Page Content */}
 			<div className="flex-auto overflow-hidden">
 				<BuildLogs />

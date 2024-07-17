@@ -339,3 +339,17 @@ a:hover {
 	white-space: pre-wrap;
 	color: var(--gray11);
 }
+
+.cm-theme-dark {
+	background-color: #000000;
+	border-radius: 6px;
+	overflow: hidden;
+	border: #424242 1px solid;
+}
+.dark .ͼp .cm-gutters {
+	background-color: #000000;
+	border-right: #373737 1px solid;
+}
+.dark .ͼp .cm-activeLineGutter {
+	background-color: #1f1f1f;
+}

@@ -251,13 +251,13 @@ export const MenuSider = () => {
 			{sidebarCollapsed ? (
 				<div className="mx-auto my-5 w-[32px]">
 					<Link href="/" legacyBehavior={true}>
-						<img src={iconSrc} alt="Diginext Logo" />
+						<img src={iconSrc} alt="DXUP Logo" />
 					</Link>
 				</div>
 			) : (
 				<div className="mx-auto my-5 w-36">
 					<Link href="/" legacyBehavior={true}>
-						<img src={logoSrc} alt="Diginext Logo" />
+						<img src={logoSrc} alt="DXUP Logo" />
 					</Link>
 				</div>
 			)}

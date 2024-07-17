@@ -196,6 +196,8 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 								);
 
 							case "code-editor":
+								console.log("field.value :>> ", field.value);
+								console.log("_.get(item, field.name) :>> ", _.get(item, field.name));
 								return (
 									<SmartCodeEditor
 										key={`${name}-${field.name}`}
@@ -204,6 +206,13 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 										status={fieldsStatus}
 										isNew={isNew}
 									/>
+									// <SmartTextArea
+									// 	key={`${name}-${field.name}`}
+									// 	{...field}
+									// 	value={field.value ?? (item ? _.get(item, field.name) : "")}
+									// 	status={fieldsStatus}
+									// 	isNew={isNew}
+									// />
 								);
 
 							case "select": {

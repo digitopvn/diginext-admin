@@ -73,7 +73,7 @@ export type StartBuildParams = {
 	buildWatch?: boolean;
 
 	/**
-	 * Diginext CLI version of client user
+	 * DXUP CLI version of client user
 	 */
 	cliVersion?: string;
 
@@ -176,7 +176,7 @@ export type DeployBuildV2Options = {
 	 */
 	clusterSlug?: string;
 	/**
-	 * Current version of the Diginext CLI
+	 * Current version of the DXUP CLI
 	 */
 	cliVersion?: string;
 	/**

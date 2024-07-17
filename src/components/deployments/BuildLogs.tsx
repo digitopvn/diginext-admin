@@ -6,7 +6,10 @@ import {
 	CheckCircleOutlined,
 	ClockCircleOutlined,
 	CloseCircleOutlined,
+	CodeOutlined,
+	DatabaseOutlined,
 	ExclamationCircleOutlined,
+	GlobalOutlined,
 	LoadingOutlined,
 	RedoOutlined,
 	StopOutlined,
@@ -65,7 +68,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	const [stopBuildApi, stopBuildStatus] = useBuildStopApi();
 
 	// build info
-	const { status: buildStatus } = build;
+	const { status: buildStatus } = build || {};
 
 	// log text lines
 	const lines: any[] = displayedData.split("\n").map((line: any, i: number) => line.toString());
@@ -83,7 +86,10 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 	const [buildDuration, setBuildDuration] = useState("0");
 
 	// releases
-	const { data: releaseReq, refetch: refetchReleaseApi } = useReleaseListApi({ filter: { build: build._id }, enabled: status === "success" });
+	const { data: releaseReq, refetch: refetchReleaseApi } = useReleaseListApi({
+		filter: { build: build?._id },
+		enabled: typeof build !== "undefined" && status === "success",
+	});
 	const { list: releaseList = [] } = releaseReq || {};
 	const release = releaseList[0];
 
@@ -271,8 +277,14 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 					build?.env ? { name: `Env "${build?.env}"` } : {},
 				]}
 				actions={[
-					<Tag key="cli-version" color="gold" icon={<ClockCircleOutlined />}>
-						CLI: {build?.cliVersion || "unknown"}
+					<Tag key="cli-version" color="gold" icon={<CodeOutlined />}>
+						CLI: {build?.cliVersion || "-"}
+					</Tag>,
+					<Tag key="server-version" color="gold" icon={<DatabaseOutlined />}>
+						Server: {build?.serverVersion || "-"}
+					</Tag>,
+					<Tag key="server-location" color="gold" icon={<GlobalOutlined />}>
+						Location: {build?.serverLocation || "-"}
 					</Tag>,
 					<Tag key="duration" color="gold" icon={<ClockCircleOutlined />}>
 						Duration: {buildDuration}
@@ -292,7 +304,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 							)
 						}
 					>
-						{status}
+						Build: {status}
 					</Tag>,
 					<Tag
 						key="deployStatus"
@@ -319,7 +331,7 @@ export const BuildLogs = ({ slug }: { slug?: string }) => {
 							)
 						}
 					>
-						{deployStatus || "N/A"}
+						Deploy: {deployStatus || "N/A"}
 					</Tag>,
 				]}
 			>

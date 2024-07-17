@@ -27,12 +27,15 @@ const PromoteDeployEnvironmentModal = (props: {
 	const { list: clusters } = dataCluster || {};
 
 	const [promoteToDeployEnvApi, promoteToEnvApiStatus] = usePromoteDeployEnvironmentApi();
-	const [selectedCluster, setSelectedCluster] = React.useState<string | undefined>();
+	const [selectedCluster, setSelectedCluster] = React.useState<string | undefined>(app.deployEnvironment?.[fromEnv]?.cluster);
 	const [targetEnv, setTargetEnv] = React.useState<string>(toEnv || "");
 	const [allEnvs, setAllEnvs] = React.useState<string[]>(_allEnvs);
+	const [disabled, setDisabled] = React.useState<boolean>(false);
 
 	const onFinish = async (values: any) => {
 		console.log("PromoteDeployEnvironmentModal > Submit:", values);
+
+		setDisabled(true);
 
 		const response = await promoteToDeployEnvApi({
 			appSlug: app.slug!,
@@ -42,6 +45,8 @@ const PromoteDeployEnvironmentModal = (props: {
 		});
 
 		console.log("PromoteDeployEnvironmentModal > Response :>> ", response);
+
+		setDisabled(false);
 
 		if (response.status) {
 			notification.success({
@@ -59,6 +64,7 @@ const PromoteDeployEnvironmentModal = (props: {
 		// 	message: "Promote deploy environment failed",
 		// 	description: errorInfo.errorFields[0]?.errors[0],
 		// });
+		setDisabled(false);
 	};
 
 	useEffect(() => {
@@ -67,6 +73,13 @@ const PromoteDeployEnvironmentModal = (props: {
 			setSelectedCluster(targetCluster?.slug);
 		}
 	}, [clusterListApiStatus]);
+
+	useEffect(() => {
+		if (toEnv) {
+			console.log("toEnv :>> ", toEnv);
+			setTargetEnv(toEnv);
+		}
+	}, [toEnv]);
 
 	return (
 		<Form
@@ -77,18 +90,20 @@ const PromoteDeployEnvironmentModal = (props: {
 			onFinishFailed={onFinishFailed}
 			autoComplete="off"
 			preserve={false}
+			disabled={disabled}
 		>
 			{!toEnv && (
 				<Space>
 					<Form.Item
 						label="Select a target deploy environment"
 						name="toEnv"
+						initialValue={targetEnv}
 						// rules={[{ required: true, message: "Please select a target deploy environment." }]}
-						// initialValue={targetEnv}
 					>
 						<Select
 							showSearch
 							disabled={targetEnv !== ""}
+							value={targetEnv}
 							size="large"
 							placeholder="Select a target deploy environment"
 							filterOption={(input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())}
@@ -123,7 +138,7 @@ const PromoteDeployEnvironmentModal = (props: {
 					filterOption={(input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())}
 					defaultValue={selectedCluster}
 					options={clusters?.map((item) => ({
-						label: item.name,
+						label: `${item.name} (${item.slug})`,
 						value: item.slug,
 					}))}
 				/>

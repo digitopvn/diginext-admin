@@ -1,7 +1,6 @@
 import { CheckOutlined, CloseOutlined, LoadingOutlined } from "@ant-design/icons";
-import { basicSetup } from "@uiw/codemirror-extensions-basic-setup";
 import { langs } from "@uiw/codemirror-extensions-langs";
-import CodeMirror from "@uiw/react-codemirror";
+import CodeMirror, { minimalSetup } from "@uiw/react-codemirror";
 import { Form, Space } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDarkMode, useDebounce } from "usehooks-ts";
@@ -86,7 +85,12 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 				className="w-full"
 				height={height}
 				theme={isDarkMode ? "dark" : "light"}
-				extensions={[...lang.map((_lang) => langs[_lang]()), basicSetup({})]}
+				extensions={[
+					//
+					...lang.map((_lang) => langs[_lang]()),
+					// basicSetup({}),
+					minimalSetup({ syntaxHighlighting: true }),
+				]}
 				onChange={onChange}
 				value={_value}
 				editable={!disabled}

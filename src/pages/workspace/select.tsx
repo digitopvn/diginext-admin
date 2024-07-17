@@ -146,20 +146,6 @@ const WorkspaceSetupPage = () => {
 										>
 											<Input className="text-center text-lg" placeholder="Workspace name" onChange={onChange} />
 										</Form.Item>
-										{/* <Form.Item name="dx_key" style={{ flex: "auto" }} rules={[{ required: true, message: "Diginext Key is required." }]}>
-									<Input
-										className="text-center text-lg"
-										placeholder="Diginext KEY"
-										onChange={(e) => setDxKey(e.currentTarget.value)}
-										suffix={
-											<Tooltip title="Where can I get this?">
-												<Link href={Config.DX_SITE} target="_blank">
-													<QuestionCircleOutlined />
-												</Link>
-											</Tooltip>
-										}
-									/>
-								</Form.Item> */}
 										<Form.Item>
 											<Button type="primary" htmlType="submit" disabled={wsName === ""} className="h-[38px]">
 												GO!

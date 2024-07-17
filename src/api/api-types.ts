@@ -212,6 +212,7 @@ export interface IGeneral {
 	slug?: string;
 	createdAt?: string;
 	updatedAt?: string;
+	deletedAt?: string;
 	createdBy?: string;
 	metadata?: any;
 	active?: boolean;
@@ -1285,6 +1286,14 @@ export interface IBuild extends IGeneral {
 	 * CLI Version
 	 */
 	cliVersion?: string;
+	/**
+	 * Server version
+	 */
+	serverVersion?: string;
+	/**
+	 * Server location
+	 */
+	serverLocation?: string;
 	/**
 	 * Image tag is also "buildNumber"
 	 */

@@ -1,9 +1,9 @@
-# Diginext Admin UI
+# DXUP Admin UI
 
-An admin UI of [Diginext Build Server & CLI](https://github.com/digitopvn/diginext).
+An admin UI of [DXUP Build Server & CLI](https://github.com/digitopvn/diginext).
 
 <p align="center">
-    <img src="https://github.com/digitopvn/diginext/raw/main/di-banner.png?raw=true" alt="Diginext Admin UI" />
+    <img src="https://github.com/digitopvn/diginext/raw/main/di-banner.png?raw=true" alt="DXUP Admin UI" />
 </p>
 
 | *Build faster. Deploy easier. More flexible.*

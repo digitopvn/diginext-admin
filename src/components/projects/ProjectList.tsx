@@ -6,6 +6,7 @@ import {
 	ClearOutlined,
 	CloudUploadOutlined,
 	CrownOutlined,
+	DatabaseOutlined,
 	DeleteOutlined,
 	DeploymentUnitOutlined,
 	EditOutlined,
@@ -322,10 +323,14 @@ export const ProjectList = () => {
 		});
 	};
 
-	const openPromoteDeployEnvironmentModal = (_app: IApp, fromEnv: string, toEnv?: string) => {
+	const openPromoteDeployEnvironmentModal = (_app: IApp, fromEnv: string, toEnv?: string, options?: { title?: string }) => {
 		// console.log("modal :>> ", modal);
 		const instance = modal?.info({
-			title: <Typography.Title level={3}>Promote to {toEnv ? toEnv.toUpperCase() : "another"} deploy environment</Typography.Title>,
+			title: (
+				<Typography.Title level={3}>
+					{options?.title || `Promote to ${toEnv ? toEnv.toUpperCase() : "another"} deploy environment`}
+				</Typography.Title>
+			),
 			icon: null,
 			content: (
 				<PromoteDeployEnvironmentModal
@@ -343,7 +348,7 @@ export const ProjectList = () => {
 			closable: true,
 			maskClosable: true,
 			width: 500,
-			bodyStyle: { margin: 0, width: "100%", justifyContent: "stretch" },
+			styles: { body: { margin: 0, width: "100%", justifyContent: "stretch" } },
 			onOk() {},
 		});
 	};
@@ -501,19 +506,6 @@ export const ProjectList = () => {
 													icon: <CrownOutlined />,
 													onClick: () => {
 														openPromoteDeployEnvironmentModal(app, envName, "prod");
-
-														// // check target deploy env exists
-														// if (!deployEnvironment.cluster) {
-														// 	// show popup select cluster
-														// 	openPromoteDeployEnvironmentModal(app, envName, "prod");
-														// 	return;
-														// }
-														// // promote to production
-														// promoteToDeployEnvApi({
-														// 	appSlug: app.slug,
-														// 	fromEnv: envName,
-														// 	env: "prod",
-														// });
 													},
 												},
 												{
@@ -563,6 +555,15 @@ export const ProjectList = () => {
 													key: "add-domains",
 													icon: <AppstoreAddOutlined />,
 													onClick: () => openAddDomains(record.appSlug, envName),
+												},
+												{
+													label: "Change cluster",
+													key: "change-cluster",
+													icon: <DatabaseOutlined />,
+													onClick: () =>
+														openPromoteDeployEnvironmentModal(app, envName, envName, {
+															title: "Change to another cluster",
+														}),
 												},
 												{
 													label: "Sleep",
@@ -670,26 +671,28 @@ export const ProjectList = () => {
 				commands={projects?.map((p) => ({
 					label: `${p.name} (${p.slug})`,
 					value: p,
-					children: p.apps?.map((a) => ({
-						value: a,
-						label: (
-							<>
-								<Tag>{p.slug}</Tag>≫<Tag>{a.slug}</Tag>
-							</>
-						),
-						children: Object.keys(a.deployEnvironment || {}).map((env) => {
-							return {
-								label: (
-									<>
-										<DeploymentUnitOutlined />
-										{`Deploy environment ≫ ${env.toUpperCase()}`}
-									</>
-								),
-								value: (a.deployEnvironment || {})[env],
-								onSelect: (val) => setQuery({ lv1: "deploy_environment", project: p.slug, app: a.slug, env }),
-							};
-						}),
-					})),
+					children: p.apps
+						?.filter((a) => !a.deletedAt)
+						.map((a) => ({
+							value: a,
+							label: (
+								<>
+									<Tag>{p.slug}</Tag>≫<Tag>{a.slug}</Tag>
+								</>
+							),
+							children: Object.keys(a.deployEnvironment || {}).map((env) => {
+								return {
+									label: (
+										<>
+											<DeploymentUnitOutlined />
+											{`Deploy environment ≫ ${env.toUpperCase()}`}
+										</>
+									),
+									value: (a.deployEnvironment || {})[env],
+									onSelect: (val) => setQuery({ lv1: "deploy_environment", project: p.slug, app: a.slug, env }),
+								};
+							}),
+						})),
 				}))}
 			/>
 

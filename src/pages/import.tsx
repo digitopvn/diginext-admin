@@ -10,7 +10,7 @@ import { Meta } from "@/templates/Meta";
 const ImportPage = () => {
 	return (
 		<AuthPage>
-			<Main useSidebar={false} meta={<Meta title="Import to Diginext" description="Import a git repo to Diginext platform." />}>
+			<Main useSidebar={false} meta={<Meta title="Import to DXUP" description="Import a git repo to DXUP platform." />}>
 				{/* Page Content */}
 				<CenterContainer className="max-w-md ">
 					<Link href="/">

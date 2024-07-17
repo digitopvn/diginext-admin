@@ -15,8 +15,8 @@ const DiginextLogo = (props: { className?: HTMLAttributes<any> | string; useTagl
 
 	return (
 		<div className="text-center">
-			<div className={`mx-auto my-5 w-64 text-center ${props.className}`}>
-				<img src={src} alt="Diginext Logo" />
+			<div className={`mx-auto my-5 w-64 text-center ${props.className || ""}`}>
+				<img src={src} alt="DXUP Logo" className="inline-block" />
 			</div>
 			{props.useTagline && <div className="mb-6">Build faster. Deploy easier. More flexible.</div>}
 		</div>

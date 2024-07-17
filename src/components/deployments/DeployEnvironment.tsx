@@ -3,7 +3,7 @@ import { Button, Card, Col, Row } from "antd";
 import { useState } from "react";
 
 import { useAppDeployEnvironmentSlugApi, useAppDeployEnvironmentUpdateApi } from "@/api/api-app";
-import { useClusterListApi } from "@/api/api-cluster";
+import { useClusterSlugApi } from "@/api/api-cluster";
 import { useContainerRegistryListApi } from "@/api/api-registry";
 import { availableResourceSizes, sslIssuers } from "@/api/api-types";
 import SmartForm from "@/commons/smart-form/SmartForm";
@@ -19,10 +19,6 @@ const DeployEnvironment = () => {
 
 	const [sslIssuer, setSSLIssuer] = useState("");
 
-	// clusters
-	const { data } = useClusterListApi({ populate: "owner", pagination: { page: 0, size: 100 } });
-	const { list: clusters = [], pagination } = data || {};
-
 	// registries
 	const { data: registryRes } = useContainerRegistryListApi({ populate: "owner", pagination: { page: 0, size: 100 } });
 	const { list: registries = [] } = registryRes || {};
@@ -30,6 +26,11 @@ const DeployEnvironment = () => {
 	// deployEnvironment
 	const useSlugApi = useAppDeployEnvironmentSlugApi(appSlug, { filter: { env } });
 	const useUpdateApi = useAppDeployEnvironmentUpdateApi({ filter: { slug: appSlug, env } });
+
+	// clusters
+	// const { data } = useClusterListApi({ populate: "owner", pagination: { page: 0, size: 100 } });
+	// const { list: clusters = [], pagination } = data || {};
+	const { data: cluster } = useClusterSlugApi(useSlugApi.data?.cluster || "", { enabled: typeof useSlugApi.data?.cluster !== "undefined" });
 
 	const smartFormConfigs: SmartFormElementProps[] = [
 		// { type: "input", label: "Name", name: "name", placeholder: "Deploy environment name" },
@@ -39,11 +40,25 @@ const DeployEnvironment = () => {
 			name: "domains",
 		},
 		{
+			type: "input",
+			label: "Docker Image URL",
+			name: "imageURL",
+			placeholder: "Docker image URL",
+			disabled: true,
+			displayValue: useSlugApi.data?.imageURL ? useSlugApi.data?.imageURL : "",
+			// wrapperStyle: {
+			// 	float: responsive?.md ? "left" : "none",
+			// 	width: responsive?.md ? "35%" : "100%",
+			// 	marginRight: responsive?.md ? 15 : 0,
+			// },
+		},
+		{
 			type: "select",
 			label: "Container size",
 			name: "size",
 			placeholder: "Container size",
 			displayKey: "size", // the magic is here 😅...
+			defaultValue: "none",
 			options: availableResourceSizes.map((size) => {
 				const resource = getContainerResourceBySize(size || "none");
 				return { label: `${size} ${resource.limits ? `(cpu: ${resource.limits?.cpu}, mem: ${resource.limits?.memory})` : ""}`, value: size };
@@ -55,26 +70,10 @@ const DeployEnvironment = () => {
 			label: "Replicas",
 			name: "replicas",
 			placeholder: "1",
+			defaultValue: 1,
 			wrapperStyle: { float: responsive?.md ? "left" : "none", marginRight: responsive?.md ? 15 : 0 },
 		},
 		{ type: "input", label: "PORT", name: "port", placeholder: "3000" },
-		{
-			type: "select",
-			label: "Cluster",
-			name: "cluster",
-			placeholder: "Cluster",
-			displayKey: "cluster", // the magic is here 😅...
-			options: clusters.map((cluster) => {
-				return { label: cluster.name || "", value: cluster.shortName };
-			}),
-			// onChange: (value) => setProviderShortName(providers.find((provider) => provider._id === value)?.shortName || ""),
-			wrapperStyle: {
-				float: responsive?.md ? "left" : "none",
-				width: responsive?.md ? "100%" : "50%",
-				clear: "both",
-				marginRight: responsive?.md ? 15 : 0,
-			},
-		},
 		{
 			type: "select",
 			label: "Container Registry",
@@ -85,8 +84,44 @@ const DeployEnvironment = () => {
 				return { label: reg.name || "", value: reg.slug };
 			}),
 			// onChange: (value) => setProviderShortName(providers.find((provider) => provider._id === value)?.shortName || ""),
-			// wrapperStyle: { float: responsive?.md ? "left" : "none", marginRight: responsive?.md ? 15 : 0 },
+			wrapperStyle: {
+				float: responsive?.md ? "left" : "none",
+				clear: "both",
+				marginRight: responsive?.md ? 15 : 0,
+				width: responsive?.md ? "48%" : "100%",
+			},
 		},
+		{
+			type: "input",
+			label: "Cluster",
+			name: "cluster",
+			placeholder: "Cluster",
+			disabled: true,
+			displayValue: cluster ? `${cluster.name} (${cluster.slug})` : "",
+			wrapperStyle: {
+				float: responsive?.md ? "right" : "none",
+				width: responsive?.md ? "50%" : "100%",
+				// marginRight: responsive?.md ? 15 : 0,
+				// clear: "right",
+			},
+		},
+		// {
+		// 	type: "select",
+		// 	label: "Cluster",
+		// 	name: "cluster",
+		// 	placeholder: "Cluster",
+		// 	displayKey: "cluster", // the magic is here 😅...
+		// 	options: clusters.map((cluster) => {
+		// 		return { label: cluster.name || "", value: cluster.shortName };
+		// 	}),
+		// 	// onChange: (value) => setProviderShortName(providers.find((provider) => provider._id === value)?.shortName || ""),
+		// 	wrapperStyle: {
+		// 		float: responsive?.md ? "left" : "none",
+		// 		width: responsive?.md ? "100%" : "50%",
+		// 		clear: "both",
+		// 		marginRight: responsive?.md ? 15 : 0,
+		// 	},
+		// },
 		{
 			type: "select",
 			label: "SSL Issuer",
@@ -99,8 +134,8 @@ const DeployEnvironment = () => {
 			wrapperStyle: {
 				float: responsive?.md ? "left" : "none",
 				marginRight: responsive?.md ? 15 : 0,
-				width: responsive?.md ? "100%" : "50%",
-				clear: "both",
+				width: responsive?.md ? "48%" : "100%",
+				// clear: "both",
 			},
 			onChange: (value) => {
 				setSSLIssuer(value);

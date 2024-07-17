@@ -12,6 +12,7 @@ export type SmartFormElementProps<T = any> = {
 	value?: T;
 	defaultValue?: T;
 	initialValue?: T;
+	displayValue?: string;
 	label?: string | ReactNode;
 	postLabel?: any;
 	requiredMessage?: string;
