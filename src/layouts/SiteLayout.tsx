@@ -6,6 +6,7 @@ import { MenuSider } from "@/commons/MenuSider";
 import NewEditPage from "@/commons/NewEditPage";
 import { PageFooter } from "@/commons/PageFooter";
 import { SiteHeader } from "@/commons/SiteHeader";
+import { DatabaseBackupList } from "@/components/databases/DatabaseBackupList";
 import { AppLogs } from "@/components/deployments/AppLogs";
 import { BuildList } from "@/components/deployments/BuildList";
 import { BuildLogs } from "@/components/deployments/BuildLogs";
@@ -38,7 +39,14 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 	} = theme.useToken();
 
 	const openBuildList = (level = 1) => {
-		if (showDrawer) showDrawer({ title: "Builds", content: <BuildList /> }, { level });
+		if (showDrawer)
+			showDrawer(
+				{
+					title: "Builds",
+					content: <BuildList />,
+				},
+				{ level }
+			);
 	};
 
 	const openReleaseList = (level = 1) => {
@@ -46,7 +54,18 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 	};
 
 	const openBuildLogs = (level = 1) => {
-		if (showDrawer) showDrawer({ title: "Build Logs", content: <BuildLogs /> }, { level });
+		if (showDrawer)
+			showDrawer(
+				{
+					title: "Build Logs",
+					content: (
+						// <div className="p-4 pt-6">
+						<BuildLogs />
+						// </div>
+					),
+				},
+				{ level }
+			);
 	};
 
 	const openEnvVarsPage = (level = 1) => {
@@ -65,6 +84,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 		if (showDrawer) showDrawer({ title: `Deploy Environment: ${env.toUpperCase()}`, content: <DeployEnvironment /> }, { level });
 	};
 
+	const openDbBackupList = (level = 1) => {
+		if (showDrawer) showDrawer({ title: `Cloud Database Backups`, content: <DatabaseBackupList /> }, { level });
+	};
+
 	const openEditPage = (level = 1) => {
 		if (showDrawer) showDrawer({ title: "Edit", content: <NewEditPage /> }, { level });
 	};
@@ -75,9 +98,18 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 
 	useEffect(() => {
 		// console.log("lv1 :>> ", lv1);
+
+		/**
+		 * NOTE: Find in: <NewEditPage />
+		 */
+
 		switch (lv1) {
 			case "build":
 				openBuildList();
+				break;
+
+			case "build_logs":
+				openBuildLogs(1);
 				break;
 
 			case "release":
@@ -100,8 +132,16 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 				openEnvVarsPage();
 				break;
 
+			case "deployment_yaml":
+				openDeploymentYamlPage(1);
+				break;
+
 			case "app_logs":
 				openAppDeployEnvLogsPage();
+				break;
+
+			case "db_backups":
+				openDbBackupList();
 				break;
 
 			default:
@@ -111,6 +151,9 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 				break;
 		}
 
+		/**
+		 * NOTE: Find in: <NewEditPage />
+		 */
 		switch (lv2) {
 			case "build":
 				openBuildList(2);
@@ -136,6 +179,10 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 				openDeploymentYamlPage(2);
 				break;
 
+			case "db_backups":
+				openDbBackupList(2);
+				break;
+
 			default:
 				// close drawer lv2
 				deleteQuery(["lv2"]);
@@ -157,12 +204,12 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 
 			{/* Sidebar here */}
 			<div className="full-height fixed z-[102] overflow-visible md:relative md:overflow-y-auto md:overflow-x-hidden">
-				{useSidebar && <MenuSider />}
+				{useSidebar && typeof window !== "undefined" ? <MenuSider /> : null}
 			</div>
 
 			<Layout className="full-height overflow-auto transition-all">
 				{/* Site Header */}
-				{useSidebar && <SiteHeader />}
+				{useSidebar && typeof window !== "undefined" ? <SiteHeader /> : null}
 
 				{/* Page content here */}
 				<div className="flex flex-auto flex-col overflow-auto">{props.children}</div>

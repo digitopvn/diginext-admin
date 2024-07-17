@@ -19,7 +19,7 @@
 		"allowUnreachableCode": false,
 		"noFallthroughCasesInSwitch": true,
 
-		"target": "es5",
+		"target": "ES2015",
 		"outDir": "out",
 		"declaration": true,
 		"sourceMap": true,

@@ -177,7 +177,7 @@ export const FrameworkList = () => {
 					loading={status === "loading"}
 					columns={columns}
 					dataSource={displayedData}
-					scroll={{ x: 1200, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+					scroll={{ x: 1200, y: typeof size?.height !== "undefined" ? size.height - 140 : undefined }}
 					sticky
 					pagination={{ pageSize, total: total_items, position: ["bottomCenter"] }}
 					onChange={onTableChange}

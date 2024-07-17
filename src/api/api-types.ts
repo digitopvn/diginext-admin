@@ -10,6 +10,36 @@ export type ApiOptions = AxiosRequestConfig & {
 	sort?: string;
 	staleTime?: number;
 	enabled?: boolean;
+	isDebugging?: boolean;
+};
+
+export type ApiMonitorFilter = {
+	/**
+	 * Cluster's ID or SLUG
+	 */
+	cluster?: string;
+	/**
+	 * Resource's name
+	 */
+	name?: string;
+	/**
+	 * Namespace's name
+	 */
+	namespace?: string;
+	/**
+	 * Filter by labels
+	 */
+	labels?: Record<string, string>;
+};
+
+export type ApiMonitorOptions = AxiosRequestConfig & {
+	// pagination?: IPaginationOptions;
+	filter?: ApiMonitorFilter;
+	sort?: string;
+	output?: "json" | "yaml";
+	staleTime?: number;
+	enabled?: boolean;
+	isDebugging?: boolean;
 };
 
 export type ApiStatus = "error" | "loading" | "success" | "idle";
@@ -25,6 +55,7 @@ export type ApiPagination = {
 
 export interface AccessTokenInfo {
 	access_token: string;
+	refresh_token: string;
 	expiredTimestamp: number;
 	expiredDate: Date;
 	expiredDateGTM7: string;
@@ -68,6 +99,23 @@ export type RegistryProviderType = (typeof registryProviderList)[number];
 export const cloudProviderList = ["gcloud", "digitalocean", "custom"] as const;
 export type CloudProviderType = (typeof cloudProviderList)[number];
 
+// cloud storage providers
+export const storageProviderList = ["gcloud", "do_space", "aws_s3"] as const;
+export type StorageProvider = { name: string; slug: (typeof storageProviderList)[number] };
+export const storageProviders = storageProviderList.map((provider) => {
+	switch (provider) {
+		case "aws_s3":
+			return { name: "Amazon S3 Storage", slug: "aws_s3" } as StorageProvider;
+		case "gcloud":
+			return { name: "Google Cloud Storage", slug: "gcloud" } as StorageProvider;
+		case "do_space":
+			return { name: "DigitalOcean Space Storage", slug: "do_space" } as StorageProvider;
+		default:
+			return undefined;
+	}
+});
+export type StorageProviderType = (typeof storageProviderList)[number];
+
 // database providers
 export const cloudDatabaseList = [
 	"mongodb",
@@ -96,6 +144,21 @@ export type GitProviderType = (typeof availableGitProviders)[number];
 
 // resource types
 export const availableResourceSizes = ["none", "1x", "2x", "3x", "4x", "5x", "6x", "7x", "8x", "9x", "10x"] as const;
+/**
+ * Container quota resources
+ * @example
+ * "none" - {}
+ * "1x" - { requests: { cpu: "20m", memory: "128Mi" }, limits: { cpu: "20m", memory: 128Mi" } }
+ * "2x" - { requests: { cpu: "40m", memory: "256Mi" }, limits: { cpu: "40m", memory: "256Mi" } }
+ * "3x" - { requests: { cpu: "80m", memory: "512Mi" }, limits: { cpu: "80m", memory: "512Mi" } }
+ * "4x" - { requests: { cpu: "160m", memory: "1024Mi" }, limits: { cpu: "160m", memory: "1024Mi" } }
+ * "5x" - { requests: { cpu: "320m", memory: "2048Mi" }, limits: { cpu: "320m", memory: "2048Mi" } }
+ * "6x" - { requests: { cpu: "640m", memory: "4058Mi" }, limits: { cpu: "640m", memory: "4058Mi" } }
+ * "7x" - { requests: { cpu: "1280m", memory: "2048Mi" }, limits: { cpu: "1280m", memory: "2048Mi" } }
+ * "8x" - { requests: { cpu: "2560m", memory: "8116Mi" }, limits: { cpu: "2560m", memory: "8116Mi" } }
+ * "9x" - { requests: { cpu: "5120m", memory: "16232Mi" }, limits: { cpu: "5120m", memory: "16232Mi" } }
+ * "10x" - { requests: { cpu: "10024m", memory: "32464Mi" }, limits: { cpu: "10024m", memory: "32464Mi" } }
+ */
 export type ResourceQuotaSize = (typeof availableResourceSizes)[number];
 
 // git provider domains
@@ -109,8 +172,17 @@ export const gitProviderDomain = {
 export const buildStatusList = ["start", "building", "failed", "success"] as const;
 export type BuildStatus = (typeof buildStatusList)[number];
 
+// deploy status
+export const deployStatusList = ["pending", "in_progress", "failed", "success", "cancelled"] as const;
+export type DeployStatus = (typeof deployStatusList)[number];
+
+// backup status
+export const backupStatusList = ["start", "in_progress", "failed", "success", "cancelled"] as const;
+export type BackupStatus = (typeof backupStatusList)[number];
+
 /**
  * App status:
+ * - `deploying`: App is being deployed.
  * - `healthy`: App's containers are running well.
  * - `partial_healthy`: Some of the app's containers are unhealthy.
  * - `undeployed`: App has not been deployed yet.
@@ -118,7 +190,7 @@ export type BuildStatus = (typeof buildStatusList)[number];
  * - `crashed`: App's containers are facing some unexpected errors.
  * - `unknown`: Other unknown errors.
  */
-export const appStatusList = ["healthy", "partial_healthy", "undeployed", "failed", "crashed", "unknown"] as const;
+export const appStatusList = ["deploying", "healthy", "partial_healthy", "undeployed", "failed", "crashed", "unknown"] as const;
 export type AppStatus = (typeof appStatusList)[number];
 
 // ssl
@@ -140,6 +212,7 @@ export interface IGeneral {
 	slug?: string;
 	createdAt?: string;
 	updatedAt?: string;
+	deletedAt?: string;
 	createdBy?: string;
 	metadata?: any;
 	active?: boolean;
@@ -317,6 +390,23 @@ export interface IProviderInfo {
 	access_token?: string;
 }
 
+/**
+ * ### User access permission settings:
+ * - `undefined`: all
+ * - `[]`: none
+ * - `[ ...project_id... ]`: some
+ */
+export type UserAccessPermissions = {
+	projects?: string[];
+	apps?: string[];
+	clusters?: string[];
+	databases?: string[];
+	database_backups?: string[];
+	gits?: string[];
+	frameworks?: string[];
+	container_registries?: string[];
+};
+
 export interface IUser extends IGeneral {
 	/**
 	 * User name
@@ -388,6 +478,11 @@ export interface IUser extends IGeneral {
 	 * Active role ID in current workspace
 	 */
 	activeRole?: IRole;
+
+	/**
+	 * User access permission settings
+	 */
+	allowAccess?: UserAccessPermissions;
 }
 
 export interface IServiceAccount extends IUser {}
@@ -517,6 +612,11 @@ export interface GitRepositoryDto {
 	private: boolean;
 }
 
+export interface GitRepoBranch {
+	name: string;
+	url: string;
+}
+
 export interface IGitProvider extends IBase {
 	/**
 	 * The name of the Git provider.
@@ -535,10 +635,16 @@ export interface IGitProvider extends IBase {
 	host?: string;
 
 	/**
-	 * The Git workspace of the Git provider.
+	 * The Git workspace (ORG) of the Git provider.
 	 *
 	 * @type {string}
 	 * @memberof IGitProvider
+	 */
+	org?: string;
+
+	/**
+	 * Alias of `org` field, will be remove soon.
+	 * @deprecated
 	 */
 	gitWorkspace?: string;
 
@@ -726,7 +832,7 @@ export interface DiginextEnvironmentVariable {
 	type?: "string" | "secret";
 }
 
-export interface IAppEnvironment {
+export interface IDeployEnvironment {
 	/**
 	 * Container registry slug
 	 */
@@ -826,9 +932,24 @@ export interface IAppEnvironment {
 	creator?: any;
 
 	/**
-	 * Update time
+	 * Date when it's updated
 	 */
 	updatedAt?: Date;
+
+	/**
+	 * Date when it's put to sleep
+	 */
+	sleepAt?: Date;
+
+	/**
+	 * Date when it's awaken
+	 */
+	awakeAt?: Date;
+
+	/**
+	 * Date when it's taken down
+	 */
+	tookDownAt?: Date;
 
 	/**
 	 * Deployment's status
@@ -844,6 +965,11 @@ export interface IAppEnvironment {
 	 * A screenshot URL from build success
 	 */
 	screenshot?: string;
+
+	/**
+	 * List of persistent volumes that attached to this deploy environment
+	 */
+	volumes: DeployEnvironmentVolume[];
 }
 
 export interface ICloudProvider extends IGeneral {
@@ -983,32 +1109,144 @@ export interface ICluster extends IGeneral {
 	workspace?: IWorkspace | string;
 }
 
+export interface AppGitInfo {
+	/**
+	 * `REQUIRES`
+	 * ---
+	 * A SSH URI of the source code repository
+	 * @example git@bitbucket.org:digitopvn/example-repo.git
+	 */
+	repoSSH: string;
+	/**
+	 * OPTIONAL
+	 * ---
+	 * A SSH URI of the source code repository
+	 * @example https://bitbucket.org/digitopvn/example-repo
+	 */
+	repoURL?: string;
+	/**
+	 * OPTIONAL
+	 * ---
+	 * Git provider's type: `github`, `bitbucket`, `gitlab`
+	 */
+	provider?: GitProviderType;
+}
+
 export interface IApp extends IGeneral {
 	/**
-	 * @deprecated
+	 * The name of the app.
+	 *
+	 * @type {string}
+	 * @memberof IApp
 	 */
-	environment?: { [key: string]: IAppEnvironment };
-	deployEnvironment?: { [key: string]: IAppEnvironment };
-
-	git?: string;
-	latestBuild?: string;
 	name?: string;
 
-	project?: IProject | string;
+	/**
+	 * OPTIONAL: The image URI of this app on the Container Registry (without `TAG`).
+	 *
+	 * Combined from: `<registry-image-base-url>/<project-slug>/<app-name-slug>`
+	 *
+	 * **Don't** specify `tag` at the end! (e.g., `latest`, `beta`,...)
+	 *
+	 * @type {string}
+	 * @memberof IApp
+	 * @default <registry-image-base-url>/<project-slug>/<app-name-slug>
+	 * @example "asia.gcr.io/my-workspace/my-project/my-app"
+	 */
+	image?: string;
 
 	/**
-	 * User ID of the owner
+	 * The slug of the app.
 	 *
-	 * @remarks This can be populated to {User} data
+	 * @type {string}
+	 * @memberof IApp
 	 */
-	owner?: IUser | string;
+	slug?: string;
 
 	/**
-	 * ID of the workspace
+	 * The user who created the app.
 	 *
-	 * @remarks This can be populated to {Workspace} data
+	 * @type {string}
+	 * @memberof IApp
 	 */
-	workspace?: IWorkspace | string;
+	createdBy?: string;
+
+	/**
+	 * The user who last updated the app.
+	 *
+	 * @type {string}
+	 * @memberof IApp
+	 */
+	lastUpdatedBy?: string;
+
+	/**
+	 * The Git information of the app.
+	 *
+	 * @type {AppGitInfo}
+	 * @memberof IApp
+	 */
+	git?: AppGitInfo;
+
+	/**
+	 * The framework information of the app.
+	 *
+	 * @memberof IApp
+	 */
+	framework?: {
+		name?: string;
+		slug?: string;
+		version?: string;
+		repoURL?: string;
+		repoSSH?: string;
+	};
+
+	/**
+	 * The environment information of the app.
+	 *
+	 * @type {{ [key: string]: IDeployEnvironment | string }}
+	 * @memberof IApp
+	 * @deprecated
+	 */
+	environment?: { [key: string]: IDeployEnvironment | string };
+
+	/**
+	 * The deploy environment information of the app.
+	 *
+	 * @type {{ [key: string]: IDeployEnvironment }}
+	 * @memberof IApp
+	 */
+	deployEnvironment?: { [key: string]: IDeployEnvironment };
+
+	/**
+	 * The latest build of the app.
+	 *
+	 * @type {string}
+	 * @memberof IApp
+	 */
+	latestBuild?: string;
+
+	/**
+	 * Project of this app
+	 */
+	project?: string | IProject;
+
+	/**
+	 * The project slug of the app.
+	 *
+	 * @type {string}
+	 * @memberof IApp
+	 */
+	projectSlug?: string;
+
+	/**
+	 * Git Provider of this app
+	 */
+	gitProvider?: string | IGitProvider | string;
+
+	/**
+	 * Date when the application was archived (take down all deploy environments)
+	 */
+	archivedAt?: Date;
 }
 
 export interface IProject extends IGeneral {
@@ -1039,7 +1277,8 @@ export interface IBuild extends IGeneral {
 	branch?: string;
 	logs?: string;
 	createdBy?: string;
-	status?: "start" | "building" | "failed" | "success";
+	status?: BuildStatus;
+	deployStatus?: DeployStatus;
 	projectSlug?: string;
 	appSlug?: string;
 
@@ -1047,6 +1286,14 @@ export interface IBuild extends IGeneral {
 	 * CLI Version
 	 */
 	cliVersion?: string;
+	/**
+	 * Server version
+	 */
+	serverVersion?: string;
+	/**
+	 * Server location
+	 */
+	serverLocation?: string;
 	/**
 	 * Image tag is also "buildNumber"
 	 */
@@ -1114,8 +1361,22 @@ export interface IRelease extends IGeneral {
 	projectSlug?: string;
 	appSlug?: string;
 	providerProjectId?: string;
-	buildStatus?: "start" | "building" | "failed" | "success";
+	buildStatus?: BuildStatus;
+	status?: DeployStatus;
 	active?: boolean;
+	message?: string;
+	/**
+	 * Deploy start time
+	 */
+	startTime?: Date;
+	/**
+	 * Deploy end time
+	 */
+	endTime?: Date;
+	/**
+	 * Deploy duration in miliseconds
+	 */
+	duration?: number;
 
 	/**
 	 * ID of the app
@@ -1236,3 +1497,92 @@ export interface ICloudDatabase extends IBase {
 	autoBackup?: string | ICronjob;
 }
 export type CloudDatabaseDto = Omit<ICloudDatabase, keyof HiddenBodyKeys>;
+
+export interface ICloudDatabaseBackup extends IBase {
+	name?: string;
+	status?: BackupStatus;
+	/**
+	 * Backup file path
+	 */
+	path?: string;
+	/**
+	 * Backup file URL
+	 */
+	url?: string;
+	type?: CloudDatabaseType;
+	dbSlug?: string;
+	database?: string | ICloudDatabase;
+}
+export type CloudDatabaseBackupDto = Omit<ICloudDatabaseBackup, keyof HiddenBodyKeys>;
+
+export interface ICloudStorage extends IBase {
+	name?: string;
+	verified?: boolean;
+	provider?: CloudProviderType;
+	/**
+	 * The host (domain) of your cloud storage.
+	 * @example "cdn.example.com"
+	 */
+	host?: string;
+	/**
+	 * Storage origin URL
+	 * @example "https://storage.googleapis.com/<project-id>"
+	 */
+	origin?: string;
+	/**
+	 * Bucket name
+	 */
+	bucket?: string;
+	/**
+	 * Storage region
+	 */
+	region?: string;
+	/**
+	 * Authentication
+	 */
+	auth?: {
+		/**
+		 * ### NOTE: For Google Cloud Storage
+		 * JSON string containing "client_email" and "private_key" properties, or the external account client options.
+		 */
+		service_account?: string;
+		/**
+		 * ### NOTE: For AWS S3 & DigitalOcean Space Storage
+		 * Your AWS access key ID
+		 */
+		key_id?: string;
+		/**
+		 * ### NOTE: For AWS S3 & DigitalOcean Space Storage
+		 * Your AWS secret access key
+		 */
+		key_secret?: string;
+	};
+}
+
+export type DeployEnvironmentVolume = {
+	/**
+	 * Volume name
+	 */
+	name: string;
+	/**
+	 * Kubernetes node name
+	 */
+	node: string;
+	/**
+	 * Volume size
+	 * @example "5Gi", "500Mi"
+	 */
+	size: string;
+	/**
+	 * Kubernetes Storage Class
+	 */
+	storageClass: string;
+	/**
+	 * Map directory on the host server to this volume
+	 */
+	// hostPath: string;
+	/**
+	 * Location of mapped directory inside the container into this volume
+	 */
+	mountPath: string;
+};

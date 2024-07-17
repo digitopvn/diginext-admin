@@ -7,17 +7,18 @@ import {
 	GlobalOutlined,
 	PauseCircleOutlined,
 } from "@ant-design/icons";
+import { useSize } from "ahooks";
 import { Button, Space, Table, Tag } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
-import { isEmpty } from "lodash";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useRef } from "react";
 
 import { useAppListApi } from "@/api/api-app";
-import { useProjectListApi } from "@/api/api-project";
-import type { IApp, IProject, IUser } from "@/api/api-types";
+import type { IApp, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
+import { PageTitle } from "@/commons/PageTitle";
+import { useRouterQuery } from "@/plugins/useRouterQuery";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
@@ -34,148 +35,146 @@ interface DataType extends IApp {
 	children?: DataType[];
 }
 
-const columns: ColumnsType<DataType> = [
-	{
-		title: "App name",
-		width: 70,
-		dataIndex: "name",
-		key: "name",
-		fixed: "left",
-		filterSearch: true,
-		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
-	},
-	{
-		title: "Cluster",
-		width: 60,
-		dataIndex: "cluster",
-		key: "cluster",
-		render: (value) => (
-			<Button type="link" style={{ padding: 0 }}>
-				{value}
-			</Button>
-		),
-		filterSearch: true,
-		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.cluster ? record.cluster.indexOf(value.toString()) > -1 : true),
-	},
-	{
-		title: "Last updated by",
-		dataIndex: "owner",
-		key: "owner",
-		width: 50,
-		filterSearch: true,
-		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.owner ? ((record.owner as IUser).slug || "").indexOf(value.toString()) > -1 : true),
-		render: (value) => <>{value?.slug}</>,
-	},
-	{
-		title: "Last updated",
-		dataIndex: "updatedAt",
-		key: "updatedAt",
-		width: 50,
-		render: (value) => <DateDisplay date={value} />,
-		sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
-	},
-	{
-		title: "Created at",
-		dataIndex: "createdAt",
-		key: "createdAt",
-		width: 50,
-		render: (value) => <DateDisplay date={value} />,
-		sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
-	},
-	{
-		title: "Status",
-		dataIndex: "status",
-		fixed: "right",
-		key: "status",
-		width: 30,
-		filters: [{ text: "live", value: "live" }],
-		render: (value) => (
-			<Tag color="success" icon={<CheckCircleOutlined className="align-middle" />}>
-				{value}
-			</Tag>
-		),
-	},
-	{
-		title: "Action",
-		key: "action",
-		fixed: "right",
-		width: 50,
-		dataIndex: "action",
-		render: (value, record) => {
-			switch (value) {
-				case "app":
-					return (
-						<Space.Compact>
-							<Button icon={<EditOutlined />} />
-							<Button icon={<PauseCircleOutlined />} />
-						</Space.Compact>
-					);
-
-				case "env":
-					return (
-						<Space.Compact>
-							<Button icon={<EyeOutlined />} href={record.url} target="_blank" />
-							<Button icon={<PauseCircleOutlined />} />
-							<Button icon={<BuildOutlined />} />
-							<Button icon={<EditOutlined />} />
-						</Space.Compact>
-					);
-
-				case "env-prod":
-					return (
-						<Space.Compact>
-							<Button icon={<EyeOutlined />} />
-							<Button icon={<GlobalOutlined />} />
-							<Button icon={<PauseCircleOutlined />} />
-							<Button icon={<AppstoreAddOutlined />} />
-							<Button icon={<EditOutlined />} />
-						</Space.Compact>
-					);
-
-				case "project":
-					return (
-						<Space.Compact>
-							<Button icon={<EditOutlined />} />
-							<Button icon={<PauseCircleOutlined />} />
-						</Space.Compact>
-					);
-
-				default:
-					return <></>;
-			}
-		},
-	},
-];
+const pageSize = 200;
 
 export const AppList = () => {
 	const router = useRouter();
-	const { slugs } = router.query;
+	const [query, { setQuery }] = useRouterQuery();
+	const { project: projectSlug } = query;
 
-	const [projectSlug] = (slugs as string[]) || [];
-	// console.log("projectSlug :>> ", projectSlug);
+	// Config
+	const columns: ColumnsType<DataType> = [
+		{
+			title: "App name",
+			width: 70,
+			dataIndex: "name",
+			key: "name",
+			fixed: "left",
+			filterSearch: true,
+			filters: [{ text: "goon", value: "goon" }],
+			onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
+		},
+		{
+			title: "Project",
+			width: 60,
+			dataIndex: "project",
+			key: "project",
+			render: (value, record) => (
+				<Button type="link" style={{ padding: 0 }}>
+					{record.projectSlug}
+				</Button>
+			),
+			// filterSearch: true,
+			// filters: [{ text: "goon", value: "goon" }],
+			// onFilter: (value, record) => (record.cluster ? record.cluster.indexOf(value.toString()) > -1 : true),
+		},
+		{
+			title: "Last updated by",
+			dataIndex: "owner",
+			key: "owner",
+			width: 50,
+			filterSearch: true,
+			filters: [{ text: "goon", value: "goon" }],
+			onFilter: (value, record) => (record.owner ? ((record.owner as IUser).slug || "").indexOf(value.toString()) > -1 : true),
+			render: (value) => <>{value?.slug}</>,
+		},
+		{
+			title: "Last updated",
+			dataIndex: "updatedAt",
+			key: "updatedAt",
+			width: 50,
+			render: (value) => <DateDisplay date={value} />,
+			sorter: (a, b) => dayjs(a.updatedAt).diff(dayjs(b.updatedAt)),
+		},
+		{
+			title: "Created at",
+			dataIndex: "createdAt",
+			key: "createdAt",
+			width: 50,
+			render: (value) => <DateDisplay date={value} />,
+			sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
+		},
+		{
+			title: "Status",
+			dataIndex: "status",
+			fixed: "right",
+			key: "status",
+			width: 30,
+			filters: [{ text: "live", value: "live" }],
+			render: (value) =>
+				value ? (
+					<Tag color="success" icon={<CheckCircleOutlined className="align-middle" />}>
+						{value}
+					</Tag>
+				) : (
+					"-"
+				),
+		},
+		{
+			title: "Action",
+			key: "action",
+			fixed: "right",
+			width: 60,
+			dataIndex: "action",
+			render: (value, record) => {
+				switch (value) {
+					case "app":
+						return (
+							<Space.Compact>
+								<Button icon={<EditOutlined />} />
+								<Button icon={<PauseCircleOutlined />} />
+							</Space.Compact>
+						);
 
-	const { data, status } = useProjectListApi({ filter: { slug: projectSlug || "undefined" } });
-	const { list: projects } = data || {};
-	// console.log("projects :>> ", projects);
+					case "env":
+						return (
+							<Space.Compact>
+								<Button icon={<EyeOutlined />} href={record.url} target="_blank" />
+								<Button icon={<PauseCircleOutlined />} />
+								<Button icon={<BuildOutlined />} />
+								<Button icon={<EditOutlined />} />
+							</Space.Compact>
+						);
 
-	const [project] = projects || [];
+					case "env-prod":
+						return (
+							<Space.Compact>
+								<Button icon={<EyeOutlined />} />
+								<Button icon={<GlobalOutlined />} />
+								<Button icon={<PauseCircleOutlined />} />
+								<Button icon={<AppstoreAddOutlined />} />
+								<Button icon={<EditOutlined />} />
+							</Space.Compact>
+						);
 
-	const { data: appResponse } = useAppListApi({
-		filter: { project: project ? (project as IProject)._id : "undefined" },
-		populate: "owner,project",
-	});
+					case "project":
+						return (
+							<Space.Compact>
+								<Button icon={<EditOutlined />} />
+								<Button icon={<PauseCircleOutlined />} />
+							</Space.Compact>
+						);
+
+					default:
+						return <></>;
+				}
+			},
+		},
+	];
+
+	// APIs
+	let filter: any = {};
+	if (projectSlug) filter = { projectSlug };
+	const { data: appResponse, status } = useAppListApi({ filter, populate: "owner,project" });
 	const { list: apps } = appResponse || {};
 
 	const displayedApps: DataType[] = (apps || []).map((app) => {
-		const envList = Object.keys(app.deployEnvironment ?? {});
+		const envList = Object.keys(app.deployEnvironment ?? ({} as any));
 		const environments: DataType[] = envList.map((envName) => {
-			const deployEnvironment = (app.deployEnvironment || {})[envName] || {};
+			const deployEnvironment = (app.deployEnvironment || ({} as any))[envName] || {};
 			return {
 				name: envName.toUpperCase(),
-				key: `${project?.slug}-${app.slug}-${envName}`,
+				key: `${app.slug}-${envName}`,
 				id: envName,
 				slug: envName,
 				action: envName !== "prod" ? "env" : "env-prod",
@@ -187,21 +186,35 @@ export const AppList = () => {
 		return { ...app, children: environments };
 	});
 
-	if (isEmpty(slugs)) return <>Project not found.</>;
+	const ref = useRef(null);
+	const size = useSize(ref);
+
+	const onTableChange = (_pagination: TablePaginationConfig) => {
+		const { current } = _pagination;
+		setQuery({ page: current ?? 1 });
+	};
 
 	return (
-		<div>
-			<Table
-				loading={status === "loading"}
-				columns={columns}
-				dataSource={displayedApps}
-				scroll={{ x: 1200 }}
-				sticky={{ offsetHeader: 48 }}
-				pagination={{ pageSize: 20 }}
-				expandable={{
-					defaultExpandAllRows: true,
-				}}
-			/>
-		</div>
+		<>
+			{/* Page title & desc here */}
+			<PageTitle title="Apps" breadcrumbs={[{ name: "Workspace" }]} />
+
+			<div className="h-full flex-auto overflow-hidden" ref={ref}>
+				<Table
+					loading={status === "loading"}
+					columns={columns}
+					dataSource={displayedApps}
+					scroll={{ x: 1000, y: typeof size?.height !== "undefined" ? size.height - 140 : undefined }}
+					pagination={{
+						pageSize,
+						position: ["bottomCenter"],
+					}}
+					expandable={{
+						defaultExpandAllRows: true,
+					}}
+					onChange={onTableChange}
+				/>
+			</div>
+		</>
 	);
 };

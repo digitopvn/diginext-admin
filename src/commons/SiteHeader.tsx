@@ -1,6 +1,6 @@
-import { DownOutlined, MenuFoldOutlined, MenuUnfoldOutlined, QuestionCircleOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
-import { Avatar, Button, Layout, Popover, Space, theme } from "antd";
-import React, { useEffect } from "react";
+import { DownOutlined, GithubOutlined, MenuFoldOutlined, MenuUnfoldOutlined, QuestionCircleOutlined, UserOutlined } from "@ant-design/icons";
+import { Avatar, Button, Layout, Popover, Space, Tag, theme } from "antd";
+import React, { useEffect, useState } from "react";
 import { useDarkMode } from "usehooks-ts";
 
 import { useAuth } from "@/api/api-auth";
@@ -23,7 +23,13 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 
 	useEffect(() => onSidebarChange && onSidebarChange(sidebarCollapsed), [sidebarCollapsed]);
 
-	return (
+	// mount
+	const [mounted, setMounted] = useState(false);
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	return mounted ? (
 		<Header
 			className="w-full"
 			style={{ position: "sticky", top: 0, paddingInline: 24, lineHeight: "48px", height: 48, zIndex: 100, background: colorBgContainer }}
@@ -41,8 +47,12 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 
 				{/* User & notification */}
 				<Space size={4}>
-					<Button type="text" icon={<SearchOutlined />} />
-					<Button type="text" icon={<QuestionCircleOutlined />} />
+					{/* <Button type="text" icon={<SearchOutlined />} /> */}
+
+					<Button type="text" icon={<QuestionCircleOutlined />} href="https://zii.vn/dx-docs" target="_blank" />
+
+					<Button type="text" icon={<GithubOutlined />} href="https://github.com/digitopvn/diginext/" target="_blank" />
+
 					{/* eslint-disable-next-line tailwindcss/no-custom-classname */}
 					<Button
 						type="text"
@@ -50,6 +60,7 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 						onClick={toggle}
 						icon={isDarkMode ? <i className="ri-sun-line inline-block" /> : <i className="ri-moon-line inline-block" />}
 					/>
+
 					<Popover
 						placement="bottomRight"
 						trigger="click"
@@ -77,11 +88,14 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 								size={24}
 							/>
 							<span className="ml-2 hidden md:inline-block">{user?.name}</span>
+							<Tag color="green" className="ml-2">
+								{user?.activeRole?.name}
+							</Tag>
 							<DownOutlined className="ml-2" />
 						</div>
 					</Popover>
 				</Space>
 			</div>
 		</Header>
-	);
+	) : null;
 };

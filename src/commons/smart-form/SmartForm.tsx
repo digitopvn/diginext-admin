@@ -64,10 +64,10 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 	}, [status]);
 
 	const onFinish = async (values: any) => {
-		console.log(isNew ? "[NEW]" : "[UPDATE]", "Submit:", values);
+		// console.log(isNew ? "[NEW]" : "[UPDATE]", "Submit:", values);
 		const postData = { ...values };
 
-		let result: ApiResponse<T> | undefined;
+		let result: ApiResponse<T | T[]> | undefined;
 		if (isNew) {
 			if (!createApi) return;
 
@@ -77,6 +77,8 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 					_.set(postData, field, value);
 				}
 			});
+
+			console.log("[NEW] Submit:", postData);
 
 			result = await createApi(postData);
 			console.log("[NEW] result :>> ", result);
@@ -90,14 +92,16 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 			if (!updateApi) return;
 			if (!ready) return;
 			const statuses: Record<string, "error" | "idle" | "loading" | "success" | undefined> = {};
+
 			Object.entries(postData).forEach(([field, value]) => {
 				if (item && value !== (item as any)[field]) {
 					statuses[field] = "loading";
 				} else {
 					delete statuses[field];
-					delete postData[field];
+					if (!configs.find((fieldConfig) => fieldConfig.name === field)?.alwaysSend) delete postData[field];
 				}
 			});
+			console.log("[UPDATE] Submit:", postData);
 
 			if (!isEmpty(statuses)) {
 				result = await updateApi(postData);
@@ -123,7 +127,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 	};
 
 	return (
-		<div className="overflow-x-hidden p-6 pb-16">
+		<div className={`overflow-x-hidden p-6 pb-16 ${className}`}>
 			{/* LOADING */}
 			{status === "loading" && isNew === false && <Skeleton active />}
 			{createStatus === "loading" && isNew === true && <Skeleton active />}
@@ -192,6 +196,8 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 								);
 
 							case "code-editor":
+								console.log("field.value :>> ", field.value);
+								console.log("_.get(item, field.name) :>> ", _.get(item, field.name));
 								return (
 									<SmartCodeEditor
 										key={`${name}-${field.name}`}
@@ -200,14 +206,21 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 										status={fieldsStatus}
 										isNew={isNew}
 									/>
+									// <SmartTextArea
+									// 	key={`${name}-${field.name}`}
+									// 	{...field}
+									// 	value={field.value ?? (item ? _.get(item, field.name) : "")}
+									// 	status={fieldsStatus}
+									// 	isNew={isNew}
+									// />
 								);
 
 							case "select": {
-								let { displayKey } = field;
-								if (typeof displayKey === "undefined") displayKey = "name";
+								// let { displayKey } = field;
+								// if (typeof displayKey === "undefined") displayKey = "name";
 
-								const selectedValue = _.get(item, displayKey ? `${displayKey}` : field.name);
-								// console.log("selectedValue :>> ", selectedValue);
+								const selectedValue = _.get(item, field.name);
+
 								return (
 									<SmartSelect
 										key={`${name}-${field.name}`}
@@ -223,14 +236,10 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 							case "list_string":
 								// console.log("field.name :>> ", field.name);
 								// console.log("field.value :>> ", field.value);
+								// eslint-disable-next-line no-case-declarations
+								const strArr = field.value ?? (item ? _.get(item, field.name) : []) ?? [];
 								return (
-									<SmartStringList
-										key={`${name}-${field.name}`}
-										{...field}
-										value={field.value ?? (item ? _.get(item, field.name) : [])}
-										status={fieldsStatus}
-										isNew={isNew}
-									/>
+									<SmartStringList key={`${name}-${field.name}`} {...field} value={strArr} status={fieldsStatus} isNew={isNew} />
 								);
 
 							default:

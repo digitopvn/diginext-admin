@@ -29,7 +29,8 @@ const ContainerRegistryNewEdit = (props: ContainerRegistryNewEditProps = {}) => 
 		{ type: "input", label: "Name", name: "name", placeholder: "My Container Registry", required: true },
 		{
 			type: "select",
-			label: "Cloud Provider",
+			alwaysSend: true,
+			label: "Provider",
 			name: "provider",
 			displayKey: "name", // the magic is here 😅...
 			// value: providerShortName,

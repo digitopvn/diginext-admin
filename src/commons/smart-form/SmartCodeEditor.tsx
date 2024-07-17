@@ -1,7 +1,6 @@
 import { CheckOutlined, CloseOutlined, LoadingOutlined } from "@ant-design/icons";
-import { basicSetup } from "@uiw/codemirror-extensions-basic-setup";
 import { langs } from "@uiw/codemirror-extensions-langs";
-import CodeMirror from "@uiw/react-codemirror";
+import CodeMirror, { minimalSetup } from "@uiw/react-codemirror";
 import { Form, Space } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDarkMode, useDebounce } from "usehooks-ts";
@@ -23,9 +22,10 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 		autoSave = false,
 		isNew,
 		lang = [],
-		height = "350px",
+		height,
 		disabled = false,
 		visible = true,
+		wrapperStyle,
 	} = props;
 
 	const form = Form.useFormInstance();
@@ -70,6 +70,7 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 
 	return (
 		<Form.Item
+			// noStyle
 			label={
 				<Space size="small">
 					{label}
@@ -78,24 +79,29 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 			}
 			name={name}
 			rules={[{ required, message: requiredMessage }]}
-			style={{ display: visible ? "block" : "none" }}
+			style={{ display: visible ? "block" : "none", ...wrapperStyle }}
 		>
-			{/* <Input suffix={icon} onChange={onChange} /> */}
-			<Space direction="vertical" className="w-full">
-				<CodeMirror
-					height={height}
-					theme={isDarkMode ? "dark" : "light"}
-					extensions={[...lang.map((_lang) => langs[_lang]()), basicSetup({})]}
-					onChange={onChange}
-					value={_value}
-					editable={!disabled}
-				/>
+			<CodeMirror
+				className="w-full"
+				height={height}
+				theme={isDarkMode ? "dark" : "light"}
+				extensions={[
+					//
+					...lang.map((_lang) => langs[_lang]()),
+					// basicSetup({}),
+					minimalSetup({ syntaxHighlighting: true }),
+				]}
+				onChange={onChange}
+				value={_value}
+				editable={!disabled}
+			/>
 
-				{postLabel}
+			{postLabel}
 
-				{/* Display manual save controller if auto save is off */}
-				{!disabled && !autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
-			</Space>
+			{/* Display manual save controller if auto save is off */}
+			{!disabled && !autoSave && !isNew && <ManualSaveController initialValue={initialValue} name={name} setValue={setValue} />}
+			{/* </Space> */}
+			<div className="h-4" />
 		</Form.Item>
 	);
 };

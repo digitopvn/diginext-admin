@@ -21,6 +21,7 @@ const LoginForm = () => {
 				setErrMsg(msg);
 			} else {
 				setCookie("x-auth-cookie", res.data.access_token);
+				setCookie("refresh_token", res.data.refresh_token);
 				router.push("/workspace/select");
 			}
 		} catch (e) {

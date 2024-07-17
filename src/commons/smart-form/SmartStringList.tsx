@@ -36,7 +36,7 @@ const SmartStringList = (props: SmartStringListProps) => {
 
 	const [valueToBeAdded, setValueToBeAdded] = useState("");
 
-	const [_value, setValue] = useState(value ?? defaultValue);
+	const [_value, setValue] = useState(value ?? defaultValue ?? []);
 	const debouncedValue = useDebounce(_value, 500);
 
 	// callbacks

@@ -44,11 +44,11 @@ const DatabaseNewEdit = (props: DatabaseNewEditProps = {}) => {
 		},
 
 		// Alternative way
-		{ type: "input", label: "Host", name: "host", placeholder: "10.10.10.10", visible: typeof db?.url === "undefined" },
-		{ type: "input", label: "Port", name: "port", placeholder: "27017", visible: typeof db?.url === "undefined" },
-		{ type: "input", label: "User", name: "user", placeholder: "root", visible: typeof db?.url === "undefined" },
-		{ type: "password", label: "Pass", name: "pass", visible: typeof db?.url === "undefined" },
-		{ type: "input", label: "Auth database", name: "authDb", placeholder: "admin", visible: typeof db?.url === "undefined" },
+		{ type: "input", label: "Host", name: "host", placeholder: "10.10.10.10", visible: !db?.url },
+		{ type: "input", label: "Port", name: "port", placeholder: "27017", visible: !db?.url },
+		{ type: "input", label: "User", name: "user", placeholder: "root", visible: !db?.url },
+		{ type: "password", label: "Pass", name: "pass", visible: !db?.url },
+		{ type: "input", label: "Auth database", name: "authDb", placeholder: "admin", visible: !db?.url },
 	];
 
 	return <SmartForm name="database" api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />;

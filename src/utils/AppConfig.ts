@@ -11,9 +11,9 @@ export const EnvName = {
 };
 
 export const AppConfig = {
-	site_name: "Diginext Admin",
-	title: "Diginext Admin",
-	description: "Welcome to an Admin Panel of Diginext.",
+	site_name: "DXUP",
+	title: "DXUP",
+	description: "Welcome to the Dashboard of DXUP.",
 	locale: "en",
 	tableConfig: {
 		defaultPageSize: 50,
@@ -65,11 +65,7 @@ export class Config {
 	}
 
 	static get NEXT_PUBLIC_BASE_URL() {
-		if (typeof window !== "undefined") {
-			if (window.location.origin.indexOf("localhost") > -1) return "http://localhost:3000";
-			if (window.location.origin.indexOf("192.168.50.74") > -1) return "http://192.168.50.74:3000";
-		}
-		return trimEnd(process.env.NEXT_PUBLIC_BASE_URL || "", "/") || "/";
+		return typeof window !== "undefined" ? window.location.origin : trimEnd(process.env.NEXT_PUBLIC_BASE_URL || "", "/") || "/";
 	}
 
 	static get DISABLE_INPECT_MEMORY() {

@@ -71,7 +71,7 @@ const InviteMember = () => {
 	return (
 		<div>
 			<Typography.Title level={4}>Emails</Typography.Title>
-			<Form name="invite" form={form} onFinish={onSubmit} onFinishFailed={onFailed}>
+			<Form name="invite" form={form} onFinish={onSubmit} onFinishFailed={onFailed} layout="vertical">
 				<Form.Item name="emails">
 					<Select
 						style={{ width: 300 }}
@@ -83,6 +83,15 @@ const InviteMember = () => {
 						// maxTagCount="responsive"
 						tagRender={(props) => renderTag(props as CustomTagProps)}
 						dropdownRender={(menu) => <></>}
+					/>
+				</Form.Item>
+				<Form.Item name="role">
+					<Select
+						style={{ width: 300 }}
+						options={[
+							{ value: "member", label: "Member" },
+							{ value: "guest", label: "Guest" },
+						]}
 					/>
 				</Form.Item>
 				<Form.Item>

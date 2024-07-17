@@ -8,11 +8,11 @@ import { isEmpty } from "lodash";
 import React, { useRef, useState } from "react";
 
 import {
-	useCloudDatabaseAutoBackupApi,
-	useCloudDatabaseBackupApi,
+	useCloudDatabaseActionAutoBackupApi,
+	useCloudDatabaseActionBackupApi,
+	useCloudDatabaseActionRestoreApi,
 	useCloudDatabaseDeleteApi,
 	useCloudDatabaseListApi,
-	useCloudDatabaseRestoreApi,
 } from "@/api/api-cloud-database";
 import type { ICloudDatabase } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
@@ -44,9 +44,9 @@ export const DatabaseList = () => {
 	const { total_items } = pagination || {};
 
 	const [deleteApi] = useCloudDatabaseDeleteApi();
-	const [backupApi] = useCloudDatabaseBackupApi();
-	const [restoreApi] = useCloudDatabaseRestoreApi();
-	const [autoBackupApi] = useCloudDatabaseAutoBackupApi();
+	const [backupApi] = useCloudDatabaseActionBackupApi();
+	const [restoreApi] = useCloudDatabaseActionRestoreApi();
+	const [autoBackupApi] = useCloudDatabaseActionAutoBackupApi();
 	const [query, { setQuery }] = useRouterQuery();
 
 	const columns: ColumnsType<DataType> = [
@@ -135,7 +135,7 @@ export const DatabaseList = () => {
 	const backupDatabase = async (id?: string) => {
 		if (!id) notification.error({ message: `Unable to backup.` });
 		const res = await backupApi({ _id: id });
-		if (res?.status) notification.success({ message: `Database has been backed up successfully.` });
+		if (res?.status) notification.success({ message: `Starting database back up process in the background, we will notify you when it's done.` });
 	};
 
 	const restoreDatabase = async (id?: string) => {
@@ -147,7 +147,7 @@ export const DatabaseList = () => {
 	const autoBackupDatabase = async (id?: string) => {
 		if (!id) notification.error({ message: `Unable to auto backup.` });
 		const res = await autoBackupApi({ _id: id });
-		if (res?.status) notification.success({ message: `Database has been enabled auto-backup.` });
+		if (res?.status) notification.success({ message: `This database has been enabled daily auto-backup.` });
 	};
 
 	const deleteItem = async (id?: string) => {
@@ -174,10 +174,7 @@ export const DatabaseList = () => {
 							<Button icon={<FieldTimeOutlined />} onClick={() => autoBackupDatabase(item?._id)} />
 						</Tooltip>
 						<Tooltip overlay="Backup history">
-							<Button
-								icon={<HistoryOutlined />}
-								onClick={() => notification.warning({ message: `This feature is under development` })}
-							/>
+							<Button icon={<HistoryOutlined />} onClick={() => setQuery({ lv1: "db_backups", database: item?.slug })} />
 						</Tooltip>
 						<Popconfirm
 							title="Are you sure to delete this item?"
@@ -220,7 +217,7 @@ export const DatabaseList = () => {
 					loading={status === "loading"}
 					columns={columns}
 					dataSource={displayedList}
-					scroll={{ x: 1000, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+					scroll={{ x: 1000, y: typeof size?.height !== "undefined" ? size.height - 140 : undefined }}
 					pagination={{ pageSize, total: total_items, position: ["bottomCenter"] }}
 					onChange={onTableChange}
 				/>

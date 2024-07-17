@@ -27,7 +27,7 @@ export const useReleaseDeleteApi = (options?: ApiOptions) => {
 
 // Roll out release
 export const useReleaseRollOutApi = (options?: ApiOptions) => {
-	return useUpdateApi<IRelease>(["releases", "rollout"], `/api/v1/release/rollout`, options);
+	return useUpdateApi<IRelease>(["releases", "rollout"], `/api/v1/release/rollout-v2`, options);
 };
 
 // Create new release from a build

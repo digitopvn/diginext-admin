@@ -1,9 +1,9 @@
 import { LoadingOutlined } from "@ant-design/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Alert } from "antd";
+import { Button } from "antd";
 import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
-import { isEmpty } from "lodash";
+import { endsWith, isEmpty } from "lodash";
 import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
@@ -23,86 +23,106 @@ export const login = (params: { redirectURL?: string } = {}) => {
 };
 
 export const useAuthApi = (props: { access_token?: string } = {}) => {
-	const [routerQuery] = useRouterQuery();
-
-	const { access_token = getCookie("x-auth-cookie") || routerQuery.access_token } = props;
 	const router = useRouter();
+	const [urlQuery] = useRouterQuery();
+
+	let access_token = (urlQuery.access_token?.toString() || getCookie("x-auth-cookie")) as string | undefined;
+	let refresh_token = (urlQuery.refresh_token?.toString() || getCookie("refresh_token")) as string | undefined;
+	// console.log("useAuthApi > access_token :>> ", access_token);
+	// console.log("refresh_token :>> ", refresh_token);
 
 	return useQuery({
-		staleTime: 5 * 60 * 1000, // 5 minutes
+		// staleTime: 5 * 60 * 1000, // 5 minutes
 		// cacheTime: 60 * 1000,
 		queryKey: ["auth"],
-		// enabled: typeof access_token !== "undefined",
+		enabled: typeof access_token !== "undefined" && typeof refresh_token !== "undefined",
 		queryFn: async () => {
-			const urlParams = new URLSearchParams(router.asPath.split("?")[1]);
-			const query = Object.fromEntries(urlParams);
-			const { access_token: queryToken } = query;
-			const token = access_token ?? getCookie("x-auth-cookie") ?? queryToken;
-			const headers = token ? { Authorization: `Bearer ${token}` } : {};
+			const query = Object.fromEntries(new URLSearchParams(router.asPath.indexOf("?") > -1 ? router.asPath.split("?")[1] : {}));
+
+			// try the best to get "access_token"...
+			access_token = access_token && endsWith(access_token, "%23") ? access_token.substring(0, access_token.length - 3) : access_token;
+			const headers = access_token ? { Authorization: `Bearer ${access_token}` } : {};
+			// console.log("useAuthApi() > queryFn > headers :>> ", headers);
+
+			// console.log("query :>> ", query);
+			refresh_token = query.refresh_token?.toString() || getCookie("refresh_token")?.toString();
+			// console.log("useAuthApi() > refresh_token :>> ", refresh_token);
+
 			try {
-				const { data } = await axios.get(`${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile`, { headers });
-				return data;
+				const url = `${Config.NEXT_PUBLIC_API_BASE_URL}/auth/profile`;
+				// console.log("useAuthApi() > queryFn > url :>> ", url);
+				const { data: response } = await axios.get(url, { headers, params: { access_token, refresh_token } });
+				// console.log("useAuthApi() > queryFn > profile :>> ", JSON.stringify(response, null, 2));
+
+				if (response?.data?.token?.access_token) setCookie("x-auth-cookie", response?.data?.token?.access_token);
+				if (response?.data?.token?.refresh_token) setCookie("refresh_token", response?.data?.token?.refresh_token);
+				return response;
 			} catch (e) {
-				console.error("useAuthApi >", e);
+				console.error("[HOOK] useAuthApi >", e);
 				return undefined;
 			}
 		},
 	});
 };
 
-export const useAuth = (props: { redirectUrl?: string } = {}) => {
-	const { redirectUrl } = props;
-
+export const useAuth = () => {
 	const router = useRouter();
-	const [query] = useRouterQuery();
+	const [urlQuery] = useRouterQuery();
 
-	const { access_token = getCookie("x-auth-cookie") } = query;
-	if (access_token) setCookie("x-auth-cookie", access_token);
-
-	// const [user, setUser] = useState<IUser>();
-
-	const authActions = useAuthApi({ access_token: access_token as string });
-	const { data: response, status: apiStatus, isError, isFetched, isLoading, isSuccess, refetch } = authActions;
-	const { status: responseStatus, data } = response || {};
+	const authActions = useAuthApi();
+	const { data: response, status: apiStatus, refetch, isStale, isRefetching } = authActions;
+	const { status: responseStatus } = response || {};
 	const user = response?.data as IUser | undefined;
 	const queryClient = useQueryClient();
 
 	const reload = async () => {
 		await queryClient.invalidateQueries({ queryKey: ["auth"] });
+		await refetch();
 	};
 
+	const access_token = (urlQuery.access_token || getCookie("x-auth-cookie")) as string;
+	const refresh_token = (urlQuery.refresh_token || getCookie("refresh_token")) as string;
+	// console.log("url query > tokens :>> ", urlQuery);
+
 	useEffect(() => {
-		if (!router.isReady) return;
-
-		const cookieToken = getCookie("x-auth-cookie") || query.access_token;
-
-		// console.log(`----------------------------------`);
+		// console.log(`[1] ----------------------------------`);
 		// console.log("apiStatus :>> ", apiStatus);
 		// console.log("responseStatus :>> ", responseStatus);
 		// console.log("user :>> ", user);
-		// console.log("cookieToken :>> ", cookieToken);
 
+		// const access_token = (router.query.access_token || getCookie("x-auth-cookie")) as string;
+		// console.log("access_token :>> ", access_token);
+		// console.log("refresh_token :>> ", refresh_token);
+		// console.log("isStale :>> ", isStale);
+		// console.log("isRefetching :>> ", isRefetching);
+		// console.log(`---------------------------------- [1]`);
+
+		const redirectUrl = window?.location.href;
+
+		if (!access_token) {
+			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
+			return;
+		}
+		if (!refresh_token) {
+			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
+			return;
+		}
+
+		if (isRefetching) return;
 		if (typeof responseStatus === "undefined") return;
 		if (apiStatus === "loading") return;
 
-		if (!cookieToken || !responseStatus) {
+		if (!responseStatus && !user) {
+			console.log(`Redirect to "Login" page :>>`, { access_token, refresh_token });
 			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
-		} else if (isEmpty(user?.activeWorkspace) || isEmpty(user?.activeRole)) {
-			router.push(`/workspace/select`);
+			return;
 		}
 
-		// setTimeout(() => {
-		// 	if (!user?.activeWorkspace) return router.push(`/workspace/select`);
-
-		// 	if (!cookieToken || !responseStatus) {
-		// 		// return router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
-		// 		if (typeof window !== "undefined") window.location.href = redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`;
-		// 		return null;
-		// 	}
-
-		// 	return reload();
-		// }, 400);
-	}, [apiStatus, responseStatus]);
+		if (isEmpty(user?.activeWorkspace) || isEmpty(user?.activeRole)) {
+			console.log(`Redirect to "Select Workspace" page :>>`, { access_token, refresh_token });
+			router.push(`/workspace/select`, { query: { access_token, refresh_token } });
+		}
+	}, [apiStatus, access_token, refresh_token]);
 
 	return [user, authActions] as [IUser, typeof authActions];
 };
@@ -112,12 +132,8 @@ export const AuthPage = (props: { children?: ReactNode } = {}) => {
 
 	const router = useRouter();
 
+	const access_token = router.query.access_token || getCookie("x-auth-cookie");
 	const [user, { status, isLoading, isFetched }] = useAuth();
-
-	// useEffect(() => {
-	// 	if (!router.isReady) return;
-	// 	if (status === "success" && !user) router.push("/login");
-	// }, [status, router.isReady]);
 
 	if (isLoading)
 		return (
@@ -127,21 +143,27 @@ export const AuthPage = (props: { children?: ReactNode } = {}) => {
 			</CenterContainer>
 		);
 
-	if (isFetched && isEmpty(user))
+	if (isFetched && !access_token && isEmpty(user))
 		return (
-			<>
-				Login required:
-				<br />
-				{JSON.stringify(user || {}, null, 2)}
-				<br />
-				Origin: {window?.location?.origin}
-			</>
+			<CenterContainer>
+				<p className="ml-2">Unauthenticated.</p>
+				<Button href="/login">Login</Button>
+			</CenterContainer>
 		);
 
-	if (!user?.activeWorkspace)
+	if (isFetched && access_token && isEmpty(user))
+		return (
+			<CenterContainer>
+				<LoadingOutlined />
+				<span className="ml-2">Loading...</span>
+			</CenterContainer>
+		);
+
+	if (isFetched && (isEmpty(user?.activeWorkspace) || isEmpty(user?.activeRole)))
 		return (
 			<CenterContainer className="text-center">
-				<Alert message="Error" description={`This workspace does not exists.`} type="error" />
+				<LoadingOutlined />
+				<span className="ml-2">Loading...</span>
 			</CenterContainer>
 		);
 

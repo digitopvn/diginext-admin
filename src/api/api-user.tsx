@@ -37,9 +37,14 @@ type UserJoinWorkspaceParams = {
 	workspace: string;
 };
 export const useUserJoinWorkspaceApi = (options?: ApiOptions) => {
-	return useUpdateApi<UserJoinWorkspaceParams, IUser>(["users"], `/api/v1/user/join-workspace`, options);
+	return useUpdateApi<IUser, UserJoinWorkspaceParams>(["users"], `/api/v1/user/join-workspace`, options);
 };
 
 export const useUserAssignRoleApi = (options?: ApiOptions) => {
-	return useUpdateApi<{ roleId: string }, IUser>(["users"], `/api/v1/user/assign-role`, options);
+	return useUpdateApi<IUser, { roleId: string }>(["users"], `/api/v1/user/assign-role`, options);
+};
+
+// Update user's permissions
+export const useUserUpdatePermissionsApi = (options?: ApiOptions) => {
+	return useUpdateApi<IUser, { userSlug: string; resource: { [name: string]: string } }>(["users"], `/api/v1/user/permissions`, options);
 };

@@ -1,3 +1,5 @@
+import { InfoCircleOutlined } from "@ant-design/icons";
+import { Tooltip } from "antd";
 import { useState } from "react";
 
 import { useCloudProviderListApi } from "@/api/api-cloud-provider";
@@ -27,7 +29,20 @@ const ClusterNewEdit = (props: ClusterNewEditProps = {}) => {
 
 	const smartFormConfigs: SmartFormElementProps[] = [
 		{ type: "input", label: "Name", name: "name", placeholder: "Cluster name" },
-		{ type: "input", label: "Short name", name: "shortName", placeholder: "Short name" },
+		{
+			type: "input",
+			label: (
+				<>
+					Short name{" "}
+					<Tooltip title="Get this from your cloud provider console panel.">
+						<InfoCircleOutlined />
+					</Tooltip>
+				</>
+			),
+			name: "shortName",
+			placeholder: "Short name",
+			visible: providerShortName !== "custom",
+		},
 		{
 			type: "select",
 			label: "Cloud Provider",
@@ -50,8 +65,22 @@ const ClusterNewEdit = (props: ClusterNewEditProps = {}) => {
 			visible: providerShortName === "gcloud",
 		},
 		{ type: "input", label: "Zone (Google)", name: "zone", placeholder: "asia-southeast1-a", visible: providerShortName === "gcloud" },
-		{ type: "code-editor", lang: ["json"], label: "Service Account (JSON)", name: "serviceAccount", visible: providerShortName === "gcloud" },
-		{ type: "code-editor", lang: ["yaml"], label: "KubeConfig (YAML)", name: "kubeConfig", visible: providerShortName === "custom" },
+		{
+			type: "code-editor",
+			lang: ["json"],
+			label: "Service Account (JSON)",
+			name: "serviceAccount",
+			visible: providerShortName === "gcloud",
+			height: "350px",
+		},
+		{
+			type: "code-editor",
+			lang: ["yaml"],
+			label: "KubeConfig (YAML)",
+			name: "kubeConfig",
+			visible: providerShortName === "custom",
+			height: "350px",
+		},
 		{ type: "textarea", label: "API Access Token", name: "apiAccessToken", visible: providerShortName === "digitalocean" },
 	];
 

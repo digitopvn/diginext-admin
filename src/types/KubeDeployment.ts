@@ -58,7 +58,7 @@ export interface KubeDeployment {
 		updatedReplicas?: number;
 	};
 	// extras
-	clusterShortName?: string;
+	clusterSlug?: string;
 	/**
 	 * Cluster ID
 	 */

@@ -15,7 +15,7 @@ import { Config } from "@/utils/AppConfig";
  */
 const LoginPage = () => {
 	const [{ redirect_url }] = useRouterQuery();
-	const redirectURL = (redirect_url ?? Config.NEXT_PUBLIC_BASE_URL) as string;
+	const redirectURL = (redirect_url ?? global?.window?.location?.origin ?? Config.NEXT_PUBLIC_BASE_URL) as string;
 
 	return (
 		<Main useSidebar={false} meta={<Meta title="Dashboard" description="Your workspace overview." />}>

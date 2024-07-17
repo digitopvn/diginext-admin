@@ -139,7 +139,6 @@ export const GitProviderList = () => {
 
 	return (
 		<>
-			{/* Page title & desc here */}
 			<div className="h-full flex-auto overflow-hidden" ref={ref}>
 				<Table
 					sticky
@@ -147,7 +146,7 @@ export const GitProviderList = () => {
 					loading={status === "loading"}
 					columns={columns}
 					dataSource={displayedData}
-					scroll={{ x: 1200, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+					scroll={{ x: 1200, y: typeof size?.height !== "undefined" ? size.height - 140 : undefined }}
 					pagination={{ pageSize, total: total_items, position: ["bottomCenter"] }}
 					onChange={onTableChange}
 				/>

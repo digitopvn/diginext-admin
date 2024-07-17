@@ -2,7 +2,6 @@ import { HomeOutlined } from "@ant-design/icons";
 import { Alert, Button } from "antd";
 import { isEmpty } from "lodash";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { useEffect } from "react";
 
 import { useAuth } from "@/api/api-auth";
@@ -13,13 +12,9 @@ import DiginextLogo from "@/commons/DiginextLogo";
 import { useWorkspace } from "@/providers/useWorkspace";
 import { Main } from "@/templates/Main";
 import { Meta } from "@/templates/Meta";
-import { Config } from "@/utils/AppConfig";
 
 const CliPage = () => {
-	const router = useRouter();
-	const currentOrigin = typeof window !== "undefined" ? window?.location?.origin : Config.NEXT_PUBLIC_BASE_URL;
-	const redirectUrl = `${currentOrigin}/cli`;
-	const [user, { isFetched }] = useAuth({ redirectUrl });
+	const [user, { isFetched }] = useAuth();
 
 	// console.log("user :>> ", user);
 	const [joinApi] = useUserJoinWorkspaceApi();

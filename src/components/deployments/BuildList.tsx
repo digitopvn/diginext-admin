@@ -21,6 +21,7 @@ import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
 
 import { useBuildListApi, useBuildStopApi } from "@/api/api-build";
+import { useDeployFromAppApi, useDeployFromGitApi } from "@/api/api-deploy";
 import { useCreateReleaseFromBuildApi } from "@/api/api-release";
 import type { IBuild, IRelease, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
@@ -44,112 +45,6 @@ interface DataType {
 	children?: DataType[];
 }
 
-const columns: ColumnsType<IBuild & DataType> = [
-	{
-		title: "Name",
-		width: 70,
-		dataIndex: "name",
-		key: "name",
-		// fixed: "left",
-		filterSearch: true,
-		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
-		render: (value, record) => (
-			<>
-				<p>
-					<Link href={`/build/logs?build_slug=${record.slug}`}>
-						<strong>{value}</strong>
-					</Link>
-				</p>
-				<ul className="ml-4 list-disc">
-					<li>
-						Project: <Tag color="blue">{record.projectSlug}</Tag>
-					</li>
-					<li>
-						App: <Tag color="cyan">{record.appSlug}</Tag>
-					</li>
-					{record.duration ? (
-						<li>
-							Duration:{" "}
-							<Tag key="duration" color="gold" icon={<ClockCircleOutlined />}>
-								{humanrizer.humanize(record.duration || 0, { round: true })}
-							</Tag>
-						</li>
-					) : (
-						<></>
-					)}
-					<li>
-						Created{" "}
-						<strong>
-							<DateDisplay date={record.createdAt} />
-						</strong>
-					</li>
-				</ul>
-			</>
-		),
-	},
-	{
-		title: "Created by",
-		dataIndex: "owner",
-		key: "owner",
-		width: 40,
-		filterSearch: true,
-		filters: [{ text: "goon", value: "goon" }],
-		onFilter: (value, record) => (record.owner && ((record.owner as IUser).slug || "").indexOf(value.toString()) > -1) || true,
-		render: (value) => <>{value?.name}</>,
-	},
-	// {
-	// 	title: "Created at",
-	// 	dataIndex: "createdAt",
-	// 	key: "createdAt",
-	// 	width: 50,
-	// 	render: (value) => <DateDisplay date={value} />,
-	// 	sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
-	// },
-	{
-		title: "Status",
-		dataIndex: "status",
-		// fixed: "right",
-		key: "status",
-		width: 30,
-		filters: [{ text: "live", value: "live" }],
-		render: (value) => {
-			let color = "warning";
-			let icon = <InfoCircleOutlined />;
-			switch (value) {
-				case "building":
-					color = "processing";
-					icon = <LoadingOutlined className="align-middle" />;
-					break;
-				case "failed":
-					color = "error";
-					icon = <CloseCircleOutlined className="align-middle" />;
-					break;
-				case "success":
-					color = "success";
-					icon = <CheckCircleOutlined className="align-middle" />;
-					break;
-				case "start":
-				default:
-					color = "default";
-					icon = <InfoCircleOutlined />;
-					break;
-			}
-			return (
-				<Tag color={color} icon={icon}>
-					{value}
-				</Tag>
-			);
-		},
-	},
-	{
-		title: "Action",
-		key: "action",
-		width: 30,
-		dataIndex: "action",
-	},
-];
-
 const pageSize = 100;
 
 type IBuildListProps = {
@@ -158,29 +53,216 @@ type IBuildListProps = {
 	env: string;
 };
 
+const humanize = require("humanize-number");
+
 export const BuildList = () => {
+	// query params
 	const router = useRouter();
 	const root = useApp();
-
 	const [query, { setQuery }] = useRouterQuery();
 	const { project, app, env } = query;
+
+	// configuration
+	const columns: ColumnsType<IBuild & DataType> = [
+		{
+			title: "Name",
+			width: 80,
+			dataIndex: "name",
+			key: "name",
+			// filterSearch: true,
+			// filters: [{ text: "goon", value: "goon" }],
+			// onFilter: (value, record) => (record.name && record.name.indexOf(value.toString()) > -1) || true,
+			render: (value, record) => (
+				<>
+					<p>
+						<Link href={`/build/logs?build_slug=${record.slug}${record.env ? `&env=${record.env}` : ""}`}>
+							<strong>{value}</strong>
+						</Link>
+					</p>
+					<ul className="ml-4 list-disc">
+						<li>
+							Project: <Tag>{record.projectSlug}</Tag>
+						</li>
+						<li>
+							App: <Tag>{record.appSlug}</Tag>
+						</li>
+						<li>
+							Author: <Tag>{(record.owner as IUser)?.name || "-"}</Tag>
+						</li>
+						<li>
+							CLI: <Tag>{record.cliVersion || "-"}</Tag>
+						</li>
+						<li>
+							Server: <Tag>{record.serverVersion || "-"}</Tag>
+						</li>
+						<li>
+							Location: <Tag>{record.serverLocation || "-"}</Tag>
+						</li>
+
+						{typeof record.duration !== "undefined" ? (
+							<li>
+								Duration:{" "}
+								<Tag key="duration" color="gold" icon={<ClockCircleOutlined />}>
+									{humanrizer.humanize(record.duration, { round: true })}
+								</Tag>
+							</li>
+						) : (
+							<></>
+						)}
+					</ul>
+				</>
+			),
+		},
+		// {
+		// 	title: "Created by",
+		// 	dataIndex: "owner",
+		// 	key: "owner",
+		// 	width: 40,
+		// 	filterSearch: true,
+		// 	filters: [{ text: "goon", value: "goon" }],
+		// 	onFilter: (value, record) => (record.owner && ((record.owner as IUser).slug || "").indexOf(value.toString()) > -1) || true,
+		// 	render: (value) => <>{value?.name}</>,
+		// },
+		{
+			title: "Created at",
+			dataIndex: "createdAt",
+			key: "createdAt",
+			width: 30,
+			render: (value) => <DateDisplay date={value} />,
+			sorter: (a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)),
+		},
+		{
+			title: "Deploy Environment",
+			dataIndex: "env",
+			key: "env",
+			width: 35,
+			filters: [
+				{ text: "dev", value: "dev" },
+				{ text: "demo", value: "demo" },
+				{ text: "beta", value: "beta" },
+				{ text: "alpha", value: "alpha" },
+				{ text: "staging", value: "staging" },
+				{ text: "prod", value: "prod" },
+			],
+			onFilter: (value, record) => (record.env ? record.env === value : false),
+			render: (value) => <Tag color="pink">{value || "-"}</Tag>,
+		},
+		{
+			title: "Build Status",
+			dataIndex: "status",
+			// fixed: "right",
+			key: "status",
+			width: 30,
+			filters: [
+				{ text: "building", value: "building" },
+				{ text: "error", value: "error" },
+				{ text: "success", value: "success" },
+			],
+			onFilter: (value, record) => (record.status ? record.status === value : false),
+			render: (value) => {
+				let color = "warning";
+				let icon = <InfoCircleOutlined />;
+				switch (value) {
+					case "building":
+						color = "processing";
+						icon = <LoadingOutlined className="align-middle" />;
+						break;
+					case "failed":
+						color = "error";
+						icon = <CloseCircleOutlined className="align-middle" />;
+						break;
+					case "success":
+						color = "success";
+						icon = <CheckCircleOutlined className="align-middle" />;
+						break;
+					case "start":
+					default:
+						color = "default";
+						icon = <InfoCircleOutlined />;
+						break;
+				}
+				return (
+					<Tag color={color} icon={icon}>
+						{value}
+					</Tag>
+				);
+			},
+		},
+		{
+			title: "Deploy Status",
+			dataIndex: "deployStatus",
+			key: "deployStatus",
+			width: 30,
+			// ["pending", "in_progress", "failed", "success", "cancelled"]
+			filters: [
+				{ text: "pending", value: "pending" },
+				{ text: "in_progress", value: "in_progress" },
+				{ text: "failed", value: "failed" },
+				{ text: "success", value: "success" },
+				{ text: "cancelled", value: "cancelled" },
+			],
+			onFilter: (value, record) => (record.deployStatus ? record.deployStatus === value : false),
+			render: (value) => {
+				let color = "warning";
+				let icon = <InfoCircleOutlined />;
+				switch (value) {
+					case "in_progress":
+						color = "processing";
+						icon = <LoadingOutlined className="align-middle" />;
+						break;
+					case "failed":
+						color = "error";
+						icon = <CloseCircleOutlined className="align-middle" />;
+						break;
+					case "success":
+						color = "success";
+						icon = <CheckCircleOutlined className="align-middle" />;
+						break;
+					case "cancelled":
+						color = "yellow";
+						icon = <CloseCircleOutlined className="align-middle" />;
+						break;
+					case "pending":
+					default:
+						color = "default";
+						icon = <InfoCircleOutlined />;
+						break;
+				}
+				return (
+					<Tag color={color} icon={icon}>
+						{value}
+					</Tag>
+				);
+			},
+		},
+		{
+			title: "Action",
+			key: "action",
+			width: 30,
+			dataIndex: "action",
+		},
+	];
 
 	const filter: any = {};
 	if (project) filter.projectSlug = project;
 	if (app) filter.appSlug = app;
 	// if (env) filter.env = env;
 
-	// const [page, setPage] = useState(query.page ? parseInt(query.page as string, 10) : 1);
 	const [page, setPage] = useState(1);
 
+	// APIs
+	const [buildAndDeployFromAppApi, buildAndDeployFromAppStatus] = useDeployFromAppApi();
+	const [buildAndDeployFromGitApi, buildAndDeployFromGitStatus] = useDeployFromGitApi();
 	const [stopBuildApi, stopBuildStatus] = useBuildStopApi();
 
+	// API: List builds
 	const { data, status } = useBuildListApi({ sort: "-createdAt", populate: "owner", pagination: { page, size: pageSize }, filter });
 	const { list: builds, pagination } = data || {};
 	const { total_items } = pagination || {};
 
-	const openBuildLogs = (slug?: string) => {
+	const openBuildLogs = (slug?: string, envStr?: string) => {
 		const _query: any = { build_slug: slug };
+		if (envStr) _query.env = envStr;
 
 		if (!query.lv1) _query.lv1 = "build_logs";
 		else _query.lv2 = "build_logs";
@@ -190,7 +272,7 @@ export const BuildList = () => {
 
 	// release
 	const [releaseCreateFromBuildApi] = useCreateReleaseFromBuildApi();
-	const releaseBuild = async (buildId?: string) => {
+	const releaseBuild = async (buildId?: string, targetEnv?: string) => {
 		if (isEmpty(buildId)) {
 			root.notification.error({
 				message: `Failed to release the build.`,
@@ -201,7 +283,7 @@ export const BuildList = () => {
 		}
 
 		try {
-			const createRes = await releaseCreateFromBuildApi({ build: buildId, env } as IRelease);
+			const createRes = await releaseCreateFromBuildApi({ build: buildId, env: env ?? targetEnv } as IRelease);
 
 			if (createRes?.status) {
 				const release = createRes?.data;
@@ -227,6 +309,19 @@ export const BuildList = () => {
 		}
 	};
 
+	/**
+	 * Re-run the build process.
+	 * @param build - Build's slug
+	 * @param deployEnv - Deploy environment: dev, prod,...
+	 */
+	const buildAndDeployAgain = async (build: string, deployEnv: string) => {
+		// ...
+	};
+
+	/**
+	 * Stop the current build.
+	 * @param slug - Build's slug
+	 */
 	const stopBuild = async (slug?: string) => {
 		const result = await stopBuildApi({ slug });
 		console.log("[BuildList] stopBuild :>> ", result);
@@ -252,16 +347,18 @@ export const BuildList = () => {
 						</Tooltip>
 					)}
 					<Tooltip title="View logs">
-						<Button icon={<CodeOutlined />} onClick={() => openBuildLogs(build.slug)} />
+						<Button icon={<CodeOutlined />} onClick={() => openBuildLogs(build.slug, build.env)} />
 					</Tooltip>
 					<Tooltip title="Open image URL">
 						<Button icon={<EyeOutlined />} href={`https://${build.image}`} target="_blank" />
 					</Tooltip>
-					{build.env === "prod" && (
-						<Tooltip title="Create a release from this build">
-							<Button icon={<RocketOutlined />} onClick={() => releaseBuild(build._id?.toString())} />
-						</Tooltip>
-					)}
+					<Tooltip title="Create a release from this build">
+						<Button
+							disabled={build.status !== "success"}
+							icon={<RocketOutlined />}
+							onClick={() => releaseBuild(build._id?.toString(), build.env)}
+						/>
+					</Tooltip>
 				</Space.Compact>
 			),
 		} as IBuild & DataType;
@@ -281,7 +378,7 @@ export const BuildList = () => {
 	return (
 		<>
 			{/* Page title & desc here */}
-			<PageTitle title={`Builds (${total_items ?? "-"})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
+			<PageTitle title={`Builds (${total_items ? humanize(total_items) : "-"})`} breadcrumbs={[{ name: "Workspace" }]} actions={[]} />
 			{/* Page Content */}
 			<div className="h-full flex-auto overflow-hidden" ref={ref}>
 				<Table
@@ -289,7 +386,7 @@ export const BuildList = () => {
 					loading={status === "loading"}
 					columns={columns}
 					dataSource={displayedBuilds}
-					scroll={{ x: 550, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+					scroll={{ x: 550, y: typeof size?.height !== "undefined" ? size.height - 140 : undefined }}
 					sticky={{ offsetHeader: 0 }}
 					pagination={{ current: page, pageSize, total: total_items, position: ["bottomCenter"] }}
 					onChange={onTableChange}

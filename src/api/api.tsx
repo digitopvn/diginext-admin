@@ -1,3 +1,4 @@
+import type { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { App } from "antd";
 // import { notification } from "antd";
@@ -21,6 +22,7 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const refresh_token = router.query.refresh_token ?? getCookie("refresh_token");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
@@ -44,7 +46,7 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 		queryFn: async () => {
 			const { data } = await axios.get<ApiResponse<T[]>>(
 				`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${sortParams}&${populateParams}&${paginationParams}`,
-				{ ...options, headers }
+				{ ...options, headers, params: { refresh_token } }
 			);
 
 			if (!data.status && !isEmpty(data.messages)) {
@@ -61,7 +63,7 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 			// console.log("data :>> ", data);
 			return {
 				list:
-					data.data.map((d: any) => {
+					data?.data?.map((d: any) => {
 						queryClient.setQueryData([keys[0], d._id], d);
 						queryClient.setQueryData([keys[0], d.slug], d);
 						queryClient.setQueryData([keys[0], { slug: d.slug }], d);
@@ -75,13 +77,14 @@ export const useListApi = <T,>(keys: any[], apiPath: string, options: ApiOptions
 	});
 };
 
-export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, options: ApiOptions = {}) => {
+export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string | undefined, options: ApiOptions = {}) => {
 	// const [noti] = notification.useNotification();
 	const app = useApp();
 	const { notification } = app;
 
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const refresh_token = router.query.refresh_token ?? getCookie("refresh_token");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
@@ -97,7 +100,7 @@ export const useItemSlugApi = <T,>(keys: any[], apiPath: string, slug: string, o
 		staleTime: options?.staleTime,
 		queryFn: async () => {
 			const url = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}&${populateParams}`;
-			const { data } = await axios.get<ApiResponse<T[]>>(url, { ...options, headers });
+			const { data } = await axios.get<ApiResponse<T[]>>(url, { ...options, headers, params: { refresh_token } });
 
 			if (!data.status && !isEmpty(data.messages)) {
 				data.messages.forEach((message) => {
@@ -129,14 +132,21 @@ export const useApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {
 
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const refresh_token = router.query.refresh_token ?? getCookie("refresh_token");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 	// console.log(apiPath, "> headers :>> ", headers);
 
-	return useQuery<ApiResponse<T>, Error>({
+	return useQuery<ApiResponse<T>, Error, ApiResponse<T>>({
 		queryKey: keys,
+		staleTime: options?.staleTime,
+		enabled: options?.enabled,
 		queryFn: async () => {
-			const { data } = await axios.get<ApiResponse<T>>(`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}`, { ...options, headers });
+			const { data } = await axios.get<ApiResponse<T>>(`${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}`, {
+				...options,
+				headers,
+				params: { refresh_token },
+			});
 			if (!data.status && !isEmpty(data.messages)) {
 				data.messages.forEach((message) => {
 					if (message) notification.error({ message: "Failed.", description: message });
@@ -159,13 +169,14 @@ export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options
 
 	const router = useRouter();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const refresh_token = router.query.refresh_token ?? getCookie("refresh_token");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
 	return useQuery<ApiResponse<T>, Error>({
 		queryKey: keys,
 		queryFn: async () => {
-			const data = await getById<T>(apiPath, id, { ...options, headers });
+			const data = await getById<T>(apiPath, id, { ...options, headers, params: { refresh_token } });
 			if (!data.status && !isEmpty(data.messages)) {
 				data.messages.forEach((message) => {
 					if (message) notification.error({ message: "Failed.", description: message });
@@ -178,9 +189,9 @@ export const useItemApi = <T,>(keys: any[], apiPath: string, id: string, options
 	});
 };
 
-export type UseCreateApi<T> = [(data: T) => Promise<ApiResponse<T>> | undefined, "error" | "idle" | "loading" | "success"];
+export type UseCreateApi<R, T = R> = [UseMutateAsyncFunction<ApiResponse<R>, Error, T, unknown>, "error" | "idle" | "loading" | "success"];
 
-export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptions = {}): UseCreateApi<T> => {
+export const useCreateApi = <R = any, E = Error, T = R>(keys: any[], apiPath: string, options: ApiOptions = {}): UseCreateApi<R, T> => {
 	// const [noti] = notification.useNotification();
 	const app = useApp();
 	const { notification } = app;
@@ -188,11 +199,12 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptio
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const refresh_token = router.query.refresh_token ?? getCookie("refresh_token");
 	// console.log("useCreateApi > access_token :>> ", access_token);
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
-	const mutation = useMutation<ApiResponse<T>, Error, T>({
+	const mutation = useMutation<ApiResponse<R>, Error, T>({
 		mutationFn: async (newData) => {
 			const { populate, sort, pagination, filter = (newData as any)._id ? { _id: (newData as any)._id } : undefined } = options;
 			if ((newData as any)._id) {
@@ -203,8 +215,13 @@ export const useCreateApi = <T,>(keys: any[], apiPath: string, options: ApiOptio
 			const populateParams = populate ? `populate=${populate}` : "";
 			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}${populateParams}`;
 
-			const { data, status } = await axios.post<ApiResponse<T>>(apiURL, newData, { ...options, headers });
-			if (status === 429) throw new Error("Too many requests.");
+			console.log("options :>> ", options);
+			const { data, status: httpStatus } = await axios.post<ApiResponse<R>>(apiURL, newData, {
+				...options,
+				headers,
+				params: { refresh_token },
+			});
+			if (httpStatus === 429) throw new Error("Too many requests.");
 
 			if (!data.status) {
 				if (!isEmpty(data.messages)) {
@@ -255,9 +272,9 @@ const updateById = async (apiPath: string, id: string, updateData: any, options:
 	return data;
 };
 
-export type UseUpdateApi<T> = [(data: T) => Promise<ApiResponse<T>> | undefined, "error" | "idle" | "loading" | "success"];
+export type UseUpdateApi<R, T = R> = [(data: T) => Promise<ApiResponse<R | R[]>> | undefined, "error" | "idle" | "loading" | "success"];
 
-export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, options: ApiOptions = {}): UseUpdateApi<T | R> => {
+export const useUpdateApi = <R = any, T = R>(keys: any[], apiPath: string, options: ApiOptions = {}): UseUpdateApi<R, T> => {
 	// const [noti] = notification.useNotification();
 	const app = useApp();
 	const { notification } = app;
@@ -265,6 +282,7 @@ export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, opt
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const refresh_token = router.query.refresh_token ?? getCookie("refresh_token");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
@@ -276,13 +294,14 @@ export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, opt
 	const sortParams = `sort=${sort}&`;
 	const populateParams = populate ? `populate=${populate}&` : "";
 	const paginationParams = new URLSearchParams(pagination as any).toString();
+	const originUrl = global?.window?.location?.origin ?? Config.NEXT_PUBLIC_BASE_URL;
 	const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}${sortParams}${populateParams}${paginationParams}`;
 
-	const mutation = useMutation<ApiResponse<T>, Error, T | R, { id?: string; previousData?: any }>({
+	const mutation = useMutation<ApiResponse<R | R[]>, Error, T, { id?: string; previousData?: any }>({
 		// [1] START
 		mutationFn: async (updateData) => {
 			// console.log("UPDATE > start > filter :>> ", filter);
-			const { data } = await axios.patch<ApiResponse<T>>(apiURL, updateData, { ...options, headers });
+			const { data } = await axios.patch<ApiResponse<R>>(apiURL, updateData, { ...options, headers, params: { refresh_token } });
 
 			// show error message ONLY if status is failure
 			if (!data.status) {
@@ -311,9 +330,9 @@ export const useUpdateApi = <T = any, R = any>(keys: any[], apiPath: string, opt
 	return [mutation.mutateAsync, mutation.status];
 };
 
-export type UseDeleteApi<T> = [(data: T) => Promise<ApiResponse<T>> | undefined, "error" | "idle" | "loading" | "success"];
+export type UseDeleteApi<T, R> = [(data: T) => Promise<ApiResponse<R>> | undefined, "error" | "idle" | "loading" | "success"];
 
-export const useDeleteApi = <T = any,>(keys: any[], apiPath: string, options: ApiOptions = {}): UseDeleteApi<T> => {
+export const useDeleteApi = <R = any, T = any>(keys: any[], apiPath: string, options: ApiOptions = {}): UseDeleteApi<T, R> => {
 	// const [noti] = notification.useNotification();
 	const app = useApp();
 	const { notification } = app;
@@ -321,16 +340,17 @@ export const useDeleteApi = <T = any,>(keys: any[], apiPath: string, options: Ap
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const access_token = router.query.access_token ?? getCookie("x-auth-cookie");
+	const refresh_token = router.query.refresh_token ?? getCookie("refresh_token");
 	const headers: any = access_token ? { Authorization: `Bearer ${access_token}` } : {};
 	headers["Cache-Control"] = "no-cache";
 
 	// const { filter } = options;
 
-	const mutation = useMutation<ApiResponse<T>, Error, T>({
+	const mutation = useMutation<ApiResponse<R>, Error, T>({
 		mutationFn: async (filter) => {
 			const filterParams = filter ? `${new URLSearchParams(filter).toString()}` : "";
 			const apiURL = `${Config.NEXT_PUBLIC_API_BASE_URL}${apiPath}?${filterParams}`;
-			const { data } = await axios.delete<ApiResponse<T>>(apiURL, { ...options, headers });
+			const { data } = await axios.delete<ApiResponse<R>>(apiURL, { ...options, headers, params: { refresh_token } });
 
 			if (!data.status) {
 				if (!isEmpty(data.messages)) {

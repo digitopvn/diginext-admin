@@ -69,8 +69,8 @@ export const NodeList = () => {
 		},
 		{
 			title: "Cluster",
-			dataIndex: "clusterShortName",
-			key: "clusterShortName",
+			dataIndex: "clusterSlug",
+			key: "clusterSlug",
 			width: 30,
 			render: (value) => (
 				<Button type="link" style={{ padding: 0 }}>
@@ -79,9 +79,9 @@ export const NodeList = () => {
 			),
 			filterSearch: true,
 			filters: clusters.map((cluster) => {
-				return { text: cluster.shortName || "", value: cluster.shortName || "" };
+				return { text: cluster.slug || "", value: cluster.slug || "" };
 			}),
-			onFilter: (value, record) => (record.clusterShortName ? record.clusterShortName.indexOf(value.toString()) > -1 : true),
+			onFilter: (value, record) => (record.clusterSlug ? record.clusterSlug.indexOf(value.toString()) > -1 : true),
 		},
 		{
 			title: "Capacity",
@@ -134,11 +134,11 @@ export const NodeList = () => {
 		},
 	];
 
-	const clusterShortName: string = "";
+	const clusterSlug: string = "";
 
 	const [amountFiltered, setAmountFiltered] = useState(0);
 	const [page, setPage] = useState(1);
-	const { data, status } = useMonitorNodeApi({ filter: { clusterShortName } });
+	const { data, status } = useMonitorNodeApi({ filter: { cluster: clusterSlug } });
 	const { list, pagination } = data || {};
 	const { total_items } = pagination || {};
 
@@ -193,7 +193,7 @@ export const NodeList = () => {
 					loading={status === "loading"}
 					columns={columns}
 					dataSource={displayedList}
-					scroll={{ x: 1000, y: typeof size?.height !== "undefined" ? size.height - 100 : undefined }}
+					scroll={{ x: 1000, y: typeof size?.height !== "undefined" ? size.height - 140 : undefined }}
 					pagination={{
 						pageSize,
 						position: ["bottomCenter"],
