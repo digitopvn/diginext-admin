@@ -9,45 +9,45 @@ import RoleNewEdit from "@/components/workspaces/RoleNewEdit";
 import UserNewEdit from "@/components/workspaces/UserNewEdit";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 
-const NewEditPage = () => {
+const NewEditPage = (props: { formType: "new" | "edit" } = { formType: "new" }) => {
 	const [{ type }] = useRouterQuery();
 
 	let children;
 	switch (type) {
 		case "app":
-			children = <AppNewEdit />;
+			children = <AppNewEdit isNew={props.formType === "new"} />;
 			break;
 
 		case "cluster":
-			children = <ClusterNewEdit />;
+			children = <ClusterNewEdit isNew={props.formType === "new"} />;
 			break;
 
 		case "framework":
-			children = <FrameworkNewEdit />;
+			children = <FrameworkNewEdit isNew={props.formType === "new"} />;
 			break;
 
 		case "git-provider":
-			children = <GitProviderNewEdit />;
+			children = <GitProviderNewEdit isNew={props.formType === "new"} />;
 			break;
 
 		case "registry":
-			children = <ContainerRegistryNewEdit />;
+			children = <ContainerRegistryNewEdit isNew={props.formType === "new"} />;
 			break;
 
 		case "storage":
-			children = <CloudStorageNewEdit />;
+			children = <CloudStorageNewEdit isNew={props.formType === "new"} />;
 			break;
 
 		case "database":
-			children = <DatabaseNewEdit />;
+			children = <DatabaseNewEdit isNew={props.formType === "new"} />;
 			break;
 
 		case "user":
-			children = <UserNewEdit />;
+			children = <UserNewEdit isNew={props.formType === "new"} />;
 			break;
 
 		case "role":
-			children = <RoleNewEdit />;
+			children = <RoleNewEdit isNew={props.formType === "new"} />;
 			break;
 
 		default:

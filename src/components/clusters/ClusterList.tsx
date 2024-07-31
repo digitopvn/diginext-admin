@@ -3,6 +3,7 @@ import { useSize } from "ahooks";
 import { Button, Popconfirm, Space, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
+import { isEmpty } from "lodash";
 import React, { useRef, useState } from "react";
 
 import { useClusterDeleteApi, useClusterListApi } from "@/api/api-cluster";
@@ -74,10 +75,10 @@ export const ClusterList = () => {
 			dataIndex: "owner",
 			key: "owner",
 			width: 50,
-			filterSearch: true,
-			filters: [{ text: "goon", value: "goon" }],
-			onFilter: (value, record) => (record.owner ? ((record.owner as IUser).name || "").toLowerCase().indexOf(value.toString()) > -1 : true),
-			render: (value, record) => <>{record.owner && (record.owner as IUser).name}</>,
+			// filterSearch: true,
+			// filters: [{ text: "goon", value: "goon" }],
+			// onFilter: (value, record) => (record.owner ? ((record.owner as IUser).name || "").toLowerCase().indexOf(value.toString()) > -1 : true),
+			render: (value, record) => <>{!isEmpty(record.owner) ? (record.owner as IUser).name : "DXUP System"}</>,
 		},
 		{
 			title: "Created at",
@@ -123,7 +124,7 @@ export const ClusterList = () => {
 		clusters?.map((cluster) => {
 			return {
 				...cluster,
-				actions: (
+				actions: !isEmpty(cluster.owner) ? (
 					<Space.Compact>
 						<Button
 							icon={<EditOutlined />}
@@ -139,7 +140,7 @@ export const ClusterList = () => {
 							<Button icon={<DeleteOutlined />}></Button>
 						</Popconfirm>
 					</Space.Compact>
-				),
+				) : null,
 			} as DataType;
 		}) || [];
 

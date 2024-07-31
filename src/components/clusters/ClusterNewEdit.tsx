@@ -84,7 +84,14 @@ const ClusterNewEdit = (props: ClusterNewEditProps = {}) => {
 		{ type: "textarea", label: "API Access Token", name: "apiAccessToken", visible: providerShortName === "digitalocean" },
 	];
 
-	return <SmartForm name="cluster" api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />;
+	return (
+		<SmartForm
+			name="cluster"
+			formType={props.isNew ? "new" : "edit"}
+			api={{ useSlugApi, useUpdateApi, useCreateApi }}
+			configs={smartFormConfigs}
+		/>
+	);
 };
 
 export default ClusterNewEdit;

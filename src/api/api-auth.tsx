@@ -113,13 +113,13 @@ export const useAuth = () => {
 		if (apiStatus === "loading") return;
 
 		if (!responseStatus && !user) {
-			console.log(`Redirect to "Login" page :>>`, { access_token, refresh_token });
+			// console.log(`Redirect to "Login" page :>>`, { access_token, refresh_token });
 			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
 			return;
 		}
 
 		if (isEmpty(user?.activeWorkspace) || isEmpty(user?.activeRole)) {
-			console.log(`Redirect to "Select Workspace" page :>>`, { access_token, refresh_token });
+			// console.log(`Redirect to "Select Workspace" page :>>`, { access_token, refresh_token });
 			router.push(`/workspace/select`, { query: { access_token, refresh_token } });
 		}
 	}, [apiStatus, access_token, refresh_token]);

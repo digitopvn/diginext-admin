@@ -30,7 +30,9 @@ const RoleNewEdit = (props: RoleNewEditProps = {}) => {
 		},
 	];
 
-	return <SmartForm name="roles" api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />;
+	return (
+		<SmartForm name="roles" formType={props.isNew ? "new" : "edit"} api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />
+	);
 };
 
 export default RoleNewEdit;

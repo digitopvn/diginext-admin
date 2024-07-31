@@ -23,6 +23,7 @@ export type SmartFormProps<T> = {
 	children?: ReactNode;
 	className?: string;
 	name: string;
+	formType: "new" | "edit";
 	slugKey?: string;
 	api?: {
 		useSlugApi?: UseQueryResult<T, Error>;
@@ -35,7 +36,7 @@ export type SmartFormProps<T> = {
 const { useApp } = App;
 
 const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
-	const { children, className = "", name, configs = [] } = props;
+	const { children, className = "", formType, name, configs = [] } = props;
 
 	const root = useApp();
 
@@ -50,7 +51,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 	const [form] = Form.useForm<T>();
 	const [fieldsStatus, setFieldsStatus] = useState<Record<string, "error" | "idle" | "loading" | "success" | undefined>>();
 
-	const isNew = typeof item === "undefined";
+	const isNew = formType === "new";
 
 	const {
 		token: { colorBgContainer },
@@ -132,10 +133,12 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 			{status === "loading" && isNew === false && <Skeleton active />}
 			{createStatus === "loading" && isNew === true && <Skeleton active />}
 			{/* ERROR */}
-			{status === "error" && isNew === false && <Alert message="Unable to get data at the moment." type="error" showIcon />}
+			{((status === "error" && isNew === false) || (status === "success" && isNew === false && (!item || isEmpty((item as any).owner)))) && (
+				<Alert message="Unable to get data at the moment." type="error" showIcon />
+			)}
 			{createStatus === "error" && isNew === true && <Alert message="Unable to submit data at the moment." type="error" showIcon />}
 			{/* INITIAL */}
-			{(status === "success" || (isNew === true && createStatus !== "loading")) && (
+			{((status === "success" && !isEmpty((item as any).owner)) || (isNew === true && createStatus !== "loading")) && (
 				<Form
 					className={["h-full", "overflow-x-hidden", className].join(" ")}
 					layout="vertical"

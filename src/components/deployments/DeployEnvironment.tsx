@@ -171,7 +171,7 @@ const DeployEnvironment = () => {
 				</Card>
 			</div>
 			{/* FORM */}
-			<SmartForm name="deploy_environment" api={{ useSlugApi, useUpdateApi }} configs={smartFormConfigs} className="h-auto">
+			<SmartForm name="deploy_environment" formType="edit" api={{ useSlugApi, useUpdateApi }} configs={smartFormConfigs} className="h-auto">
 				<div className="clear-both mb-4 w-full">
 					<DeployEnvironmentVolumeManager values={useSlugApi.data?.volumes} />
 				</div>
