@@ -133,12 +133,14 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 			{status === "loading" && isNew === false && <Skeleton active />}
 			{createStatus === "loading" && isNew === true && <Skeleton active />}
 			{/* ERROR */}
-			{((status === "error" && isNew === false) || (status === "success" && isNew === false && (!item || isEmpty((item as any).owner)))) && (
+			{((status === "error" && isNew === false) ||
+				(status === "success" && isNew === false && (!item || (isEmpty((item as any).owner) && isEmpty((item as any).lastUpdatedBy))))) && (
 				<Alert message="Unable to get data at the moment." type="error" showIcon />
 			)}
 			{createStatus === "error" && isNew === true && <Alert message="Unable to submit data at the moment." type="error" showIcon />}
 			{/* INITIAL */}
-			{((status === "success" && !isEmpty((item as any).owner)) || (isNew === true && createStatus !== "loading")) && (
+			{((status === "success" && (!isEmpty((item as any).owner) || !isEmpty((item as any).lastUpdatedBy))) ||
+				(isNew === true && createStatus !== "loading")) && (
 				<Form
 					className={["h-full", "overflow-x-hidden", className].join(" ")}
 					layout="vertical"

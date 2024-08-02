@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import { isEmpty } from "lodash";
 import React, { useRef, useState } from "react";
 
-import { useClusterDeleteApi, useClusterListApi } from "@/api/api-cluster";
+import { useClusterDeleteApi, useClusterListAllApi } from "@/api/api-cluster";
 import type { ICluster, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -106,7 +106,7 @@ export const ClusterList = () => {
 	];
 	//
 	const [page, setPage] = useState(1);
-	const { data, status } = useClusterListApi({ populate: "owner", pagination: { page, size: pageSize } });
+	const { data, status } = useClusterListAllApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: clusters, pagination } = data || {};
 	const { total_items } = pagination || {};
 	console.log("clusters :>> ", clusters);

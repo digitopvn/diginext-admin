@@ -1324,6 +1324,7 @@ export interface IBuild extends IGeneral {
 	 * @remarks This can be populated to {User} data
 	 */
 	owner?: IUser | string;
+	ownerSlug?: string;
 
 	/**
 	 * ID of the project

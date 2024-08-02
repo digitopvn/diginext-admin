@@ -20,10 +20,11 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
 
+import { useAuth } from "@/api/api-auth";
 import { useBuildListApi, useBuildStopApi } from "@/api/api-build";
 import { useDeployFromAppApi, useDeployFromGitApi } from "@/api/api-deploy";
 import { useCreateReleaseFromBuildApi } from "@/api/api-release";
-import type { IBuild, IRelease, IUser } from "@/api/api-types";
+import type { IBuild, IRelease } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -59,6 +60,7 @@ export const BuildList = () => {
 	// query params
 	const router = useRouter();
 	const root = useApp();
+	const [user] = useAuth();
 	const [query, { setQuery }] = useRouterQuery();
 	const { project, app, env } = query;
 
@@ -87,7 +89,7 @@ export const BuildList = () => {
 							App: <Tag>{record.appSlug}</Tag>
 						</li>
 						<li>
-							Author: <Tag>{(record.owner as IUser)?.name || "-"}</Tag>
+							Author: <Tag>{record.ownerSlug || "-"}</Tag>
 						</li>
 						<li>
 							CLI: <Tag>{record.cliVersion || "-"}</Tag>
@@ -243,7 +245,7 @@ export const BuildList = () => {
 		},
 	];
 
-	const filter: any = {};
+	const filter: any = { workspace: user.activeWorkspace?._id };
 	if (project) filter.projectSlug = project;
 	if (app) filter.appSlug = app;
 	// if (env) filter.env = env;
@@ -256,7 +258,7 @@ export const BuildList = () => {
 	const [stopBuildApi, stopBuildStatus] = useBuildStopApi();
 
 	// API: List builds
-	const { data, status } = useBuildListApi({ sort: "-createdAt", populate: "owner", pagination: { page, size: pageSize }, filter });
+	const { data, status } = useBuildListApi({ sort: "-createdAt", pagination: { page, size: pageSize }, filter });
 	const { list: builds, pagination } = data || {};
 	const { total_items } = pagination || {};
 

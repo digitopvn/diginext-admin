@@ -74,6 +74,11 @@ const WorkspaceSetupPage = () => {
 		const result = await createWorkspaceApi(wsData);
 		if (result?.status) {
 			const workspace = result?.data;
+			if (!workspace.name) {
+				setErr("Unable to create new workspace.");
+				return;
+			}
+			setWsName(workspace.name);
 
 			await queryClient.invalidateQueries({ queryKey: ["auth"] });
 			await refetch();
@@ -131,7 +136,7 @@ const WorkspaceSetupPage = () => {
 						)}
 
 						{createStatus === "loading" && <LoadingOutlined />}
-						{createStatus !== "loading" && (
+						{createStatus !== "loading" && wsName === "" && (
 							<div>
 								<Title level={3}>Create a new workspace:</Title>
 								<Form name="create" onFinish={createWorkspace} onFinishFailed={onFinishFailed} autoComplete="off">
