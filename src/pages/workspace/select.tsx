@@ -136,7 +136,7 @@ const WorkspaceSetupPage = () => {
 						)}
 
 						{createStatus === "loading" && <LoadingOutlined />}
-						{createStatus !== "loading" && wsName === "" && (
+						{(createStatus === "idle" || createStatus === "error") && (
 							<div>
 								<Title level={3}>Create a new workspace:</Title>
 								<Form name="create" onFinish={createWorkspace} onFinishFailed={onFinishFailed} autoComplete="off">

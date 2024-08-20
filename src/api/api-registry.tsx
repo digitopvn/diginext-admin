@@ -5,6 +5,10 @@ export const useContainerRegistryListApi = (options?: ApiOptions) => {
 	return useListApi<IContainerRegistry>(["registries", "list"], `/api/v1/registry`, options);
 };
 
+export const useContainerRegistryListAllApi = (options?: ApiOptions) => {
+	return useListApi<IContainerRegistry>(["registries", "list-all"], `/api/v1/registry/all`, options);
+};
+
 export const useContainerRegistryApi = (id: string, options?: ApiOptions) => {
 	return useItemApi<IContainerRegistry>(["registries", id], `/api/v1/registry`, id, options);
 };

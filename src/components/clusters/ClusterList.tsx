@@ -124,7 +124,7 @@ export const ClusterList = () => {
 		clusters?.map((cluster) => {
 			return {
 				...cluster,
-				actions: !isEmpty(cluster.owner) ? (
+				actions: !isEmpty(cluster.workspace) ? (
 					<Space.Compact>
 						<Button
 							icon={<EditOutlined />}

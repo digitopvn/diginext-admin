@@ -13,7 +13,7 @@ const ContainerRegistryNewEdit = (props: ContainerRegistryNewEditProps = {}) => 
 	const [{ lv1, registry_slug }] = useRouterQuery();
 
 	// API
-	const useSlugApi = useContainerRegistrySlugApi(registry_slug, { populate: "owner" });
+	const useSlugApi = useContainerRegistrySlugApi(registry_slug, { populate: "owner", enabled: typeof registry_slug !== "undefined" });
 	const { data: registry } = useSlugApi;
 	const useUpdateApi = useContainerRegistryUpdateApi({ filter: { id: registry?._id } });
 	const useCreateApi = useContainerRegistryCreateApi();
