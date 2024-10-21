@@ -7,6 +7,7 @@ import {
 	CloudServerOutlined,
 	ClusterOutlined,
 	CodepenOutlined,
+	CodeSandboxOutlined,
 	DashboardOutlined,
 	DatabaseOutlined,
 	DeploymentUnitOutlined,
@@ -41,6 +42,11 @@ const items: MenuProps["items"] = [
 		key: `menu/project`,
 		icon: <ProjectOutlined />,
 		label: <Link href="/project">Projects & apps</Link>,
+	},
+	{
+		key: `menu/deploy-environment`,
+		icon: <CodeSandboxOutlined />,
+		label: <Link href="/deploy-environment">Deploy environments</Link>,
 	},
 	{
 		key: `menu/build`,

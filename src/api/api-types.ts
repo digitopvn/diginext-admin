@@ -895,6 +895,7 @@ export interface IDeployEnvironment {
 	ssl?: "letsencrypt" | "custom" | "none";
 	tlsSecret?: string;
 	cliVersion?: string;
+	deploymentName?: string;
 	/**
 	 * Content of namespace YAML file
 	 */

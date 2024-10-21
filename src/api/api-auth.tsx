@@ -16,6 +16,7 @@ import type { IUser } from "./api-types";
 
 export const login = (params: { redirectURL?: string } = {}) => {
 	const redirectURL = params.redirectURL ?? Config.NEXT_PUBLIC_API_BASE_URL;
+	// console.log("login() > Config.NEXT_PUBLIC_API_BASE_URL :>> ", Config.NEXT_PUBLIC_API_BASE_URL);
 	const finalURL = `${Config.NEXT_PUBLIC_API_BASE_URL}/auth/google?redirect_url=${redirectURL}`;
 	// console.log("login() > redirectURL :>> ", redirectURL);
 	// console.log("login() > finalURL :>> ", finalURL);

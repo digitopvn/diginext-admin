@@ -53,8 +53,7 @@ export class Config {
 
 	static get NEXT_PUBLIC_API_BASE_URL() {
 		if (typeof window !== "undefined") {
-			if (window.location.origin.indexOf("localhost") > -1) return "http://localhost:6969";
-			if (window.location.origin.indexOf("192.168.50.74") > -1) return "http://192.168.50.74:6969";
+			if (window.location.origin.indexOf("localhost") > -1 && process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
 			return window.location.origin;
 		}
 		return "/";
