@@ -182,57 +182,25 @@ export const DeployEnvironmentList = () => {
 					{value}
 				</Button>
 			),
-			// filterSearch: true,
-			// filters: [{ text: "goon", value: "goon" }],
-			// onFilter: (value, record) => (record.cluster && record.cluster.indexOf(value.toString()) > -1) || true,
+			filters: filterUniqueItems(clusters?.map((item) => ({ text: item.name, value: item.name })) || []).filter(
+				(item): item is { text: string; value: string } => item.text !== "" && item.value !== ""
+			),
+			onFilter: (value, record) => {
+				return record.cluster === value;
+			},
 		},
 		{
 			title: "Size",
 			dataIndex: "size",
 			width: 15,
-			// fixed: responsive?.md ? "right" : undefined,
 			key: "size",
 			render: (value) => <Tag color={value === "none" ? "default" : "success"}>{value}</Tag>,
 		},
 		{
 			title: "Replicas",
 			dataIndex: "replicas",
-			// fixed: responsive?.md ? "right" : undefined,
 			key: "replicas",
 			width: 15,
-			// filters: [
-			// 	{ text: "archived", value: "archived" },
-			// 	{ text: "healthy", value: "healthy" },
-			// 	{ text: "undeployed", value: "undeployed" },
-			// 	{ text: "partial_healthy", value: "partial_healthy" },
-			// 	{ text: "failed", value: "failed" },
-			// 	{ text: "crashed", value: "crashed" },
-			// 	{ text: "unknown", value: "unknown" },
-			// ],
-			// filterSearch: true,
-			// onFilter: (value, record) => {
-			// 	if (value === "archived") return typeof record.archivedAt !== "undefined";
-			// 	if (record.type === "project" || record.type === "app") return true;
-			// 	console.log("record.status === value :>> ", record.status, value);
-			// 	if (record.status) return record.status === value;
-			// 	return false;
-			// },
-			// render: (value, record) => {
-			// 	let status = value;
-			// 	if (record.type === "app") {
-			// 		// check for "undeployed" status?
-			// 	}
-			// 	if (record?.archivedAt) status = "archived";
-			// 	return (
-			// 		<Tag
-			// 			// eslint-disable-next-line no-nested-ternary
-			// 			color={value === "healthy" ? "success" : value === "undeployed" ? "pink" : "default"}
-			// 			icon={<InfoCircleOutlined className="align-middle" />}
-			// 		>
-			// 			{status}
-			// 		</Tag>
-			// 	);
-			// },
 		},
 		{
 			title: "Last updated by",
