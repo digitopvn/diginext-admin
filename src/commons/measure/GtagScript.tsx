@@ -19,7 +19,6 @@ const GtagScript = (props: GtagScriptProps) => {
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){window.dataLayer.push(arguments);}
                 gtag('js', new Date());
-                
                 ${gaIds.map((gaId) => `gtag('config', '${gaId}');\n`)}
                 `}
 			</Script>

@@ -89,11 +89,11 @@ export const SiteLayout = (props: ISiteLayoutProps) => {
 	};
 
 	const openEditPage = (level = 1) => {
-		if (showDrawer) showDrawer({ title: "Edit", content: <NewEditPage /> }, { level });
+		if (showDrawer) showDrawer({ title: "Edit", content: <NewEditPage formType="edit" /> }, { level });
 	};
 
 	const openCreatePage = (level = 1) => {
-		if (showDrawer) showDrawer({ title: "Create", content: <NewEditPage /> }, { level });
+		if (showDrawer) showDrawer({ title: "Create", content: <NewEditPage formType="new" /> }, { level });
 	};
 
 	useEffect(() => {

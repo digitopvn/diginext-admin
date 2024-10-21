@@ -1,6 +1,8 @@
 /* eslint-disable prettier/prettier */
 import type { AxiosRequestConfig } from "axios";
 
+import type { CloudStorageProvider } from "@/components/workspaces/WorkspaceStorageForm";
+
 export type ApiFilter = any;
 
 export type ApiOptions = AxiosRequestConfig & {
@@ -94,6 +96,10 @@ export const registryProviders = registryProviderList.map((provider) => {
 	}
 });
 export type RegistryProviderType = (typeof registryProviderList)[number];
+
+// data retention
+export const retentionTypes = ["limit", "duration"] as const;
+export type RetentionType = (typeof retentionTypes)[number];
 
 // cloud providers
 export const cloudProviderList = ["gcloud", "digitalocean", "custom"] as const;
@@ -301,9 +307,63 @@ export interface IWorkspace extends IGeneral {
 	apiAccessTokens?: WorkspaceApiAccessToken[];
 
 	/**
-	 * `DX_KEY` that obtained from https://diginext.vn
+	 * DXSITE API Key
 	 */
 	dx_key?: string;
+	/**
+	 * DXSITE Workspace ID
+	 */
+	dx_id?: string;
+
+	/**
+	 * Workspace Settings
+	 */
+	settings?: {
+		database?: any;
+		activity?: {
+			/**
+			 * Data retention information
+			 * - `type` is "duration", value is "miliseconds"
+			 * - `type` is "limit", value is "MAX AMOUNT OF BACKUPS"
+			 */
+			retention?: {
+				type: RetentionType;
+				value: number;
+			};
+		};
+		database_backup?: {
+			/**
+			 * Data retention information
+			 * - `type` is "duration", value is "miliseconds"
+			 * - `type` is "limit", value is "MAX AMOUNT OF BACKUPS"
+			 */
+			retention?: {
+				type: RetentionType;
+				value: number;
+			};
+		};
+		system_log?: {
+			/**
+			 * Data retention information
+			 * - `type` is "duration", value is "miliseconds"
+			 * - `type` is "limit", value is "MAX AMOUNT OF BACKUPS"
+			 */
+			retention?: {
+				type: RetentionType;
+				value: number;
+			};
+		};
+		cloud_storage?: {
+			provider: CloudStorageProvider;
+			region: string;
+			bucket: string;
+			accessKey: string;
+			secretKey: string;
+			endpoint: string;
+			baseUrl: string;
+			basePath: string;
+		};
+	};
 }
 
 export type IRouteScope = "all" | "workspace" | "team" | "project" | "app";
@@ -895,6 +955,7 @@ export interface IDeployEnvironment {
 	ssl?: "letsencrypt" | "custom" | "none";
 	tlsSecret?: string;
 	cliVersion?: string;
+	deploymentName?: string;
 	/**
 	 * Content of namespace YAML file
 	 */
@@ -1324,6 +1385,7 @@ export interface IBuild extends IGeneral {
 	 * @remarks This can be populated to {User} data
 	 */
 	owner?: IUser | string;
+	ownerSlug?: string;
 
 	/**
 	 * ID of the project

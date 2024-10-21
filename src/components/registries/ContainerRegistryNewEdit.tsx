@@ -13,7 +13,7 @@ const ContainerRegistryNewEdit = (props: ContainerRegistryNewEditProps = {}) => 
 	const [{ lv1, registry_slug }] = useRouterQuery();
 
 	// API
-	const useSlugApi = useContainerRegistrySlugApi(registry_slug, { populate: "owner" });
+	const useSlugApi = useContainerRegistrySlugApi(registry_slug, { populate: "owner", enabled: typeof registry_slug !== "undefined" });
 	const { data: registry } = useSlugApi;
 	const useUpdateApi = useContainerRegistryUpdateApi({ filter: { id: registry?._id } });
 	const useCreateApi = useContainerRegistryCreateApi();
@@ -115,7 +115,14 @@ const ContainerRegistryNewEdit = (props: ContainerRegistryNewEditProps = {}) => 
 		// },
 	];
 
-	return <SmartForm name="registry" api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />;
+	return (
+		<SmartForm
+			name="registry"
+			formType={props.isNew ? "new" : "edit"}
+			api={{ useSlugApi, useUpdateApi, useCreateApi }}
+			configs={smartFormConfigs}
+		/>
+	);
 };
 
 export default ContainerRegistryNewEdit;

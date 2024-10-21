@@ -3,9 +3,10 @@ import { useSize } from "ahooks";
 import { Button, notification, Popconfirm, Space, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
+import { isEmpty } from "lodash";
 import React, { useRef, useState } from "react";
 
-import { useContainerRegistryDeleteApi, useContainerRegistryListApi } from "@/api/api-registry";
+import { useContainerRegistryDeleteApi, useContainerRegistryListAllApi } from "@/api/api-registry";
 import type { IContainerRegistry, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -94,7 +95,7 @@ const pageSize = AppConfig.tableConfig.defaultPageSize ?? 20;
 
 export const ContainerRegistryList = () => {
 	const [page, setPage] = useState(1);
-	const { data, status } = useContainerRegistryListApi({ populate: "owner", pagination: { page, size: pageSize } });
+	const { data, status } = useContainerRegistryListAllApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: containerRegistries, pagination } = data || {};
 	const { total_items } = pagination || {};
 	// console.log("containerRegistries :>> ", containerRegistries);
@@ -112,7 +113,7 @@ export const ContainerRegistryList = () => {
 		containerRegistries?.map((item) => {
 			return {
 				...item,
-				actions: (
+				actions: !isEmpty(item.workspace) ? (
 					<Space.Compact>
 						<Button
 							icon={<EditOutlined />}
@@ -128,7 +129,7 @@ export const ContainerRegistryList = () => {
 							<Button icon={<DeleteOutlined />}></Button>
 						</Popconfirm>
 					</Space.Compact>
-				),
+				) : null,
 			} as DataType;
 		}) || [];
 

@@ -51,7 +51,13 @@ const UserNewEdit = (props: UserNewEditProps = {}) => {
 
 	return (
 		<>
-			<SmartForm name="user" className="pb-2" api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />
+			<SmartForm
+				name="user"
+				formType={props.isNew ? "new" : "edit"}
+				className="pb-2"
+				api={{ useSlugApi, useUpdateApi, useCreateApi }}
+				configs={smartFormConfigs}
+			/>
 			<UserPermissionSettings user={user} />
 		</>
 	);

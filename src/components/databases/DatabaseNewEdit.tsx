@@ -51,7 +51,14 @@ const DatabaseNewEdit = (props: DatabaseNewEditProps = {}) => {
 		{ type: "input", label: "Auth database", name: "authDb", placeholder: "admin", visible: !db?.url },
 	];
 
-	return <SmartForm name="database" api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />;
+	return (
+		<SmartForm
+			name="database"
+			formType={props.isNew ? "new" : "edit"}
+			api={{ useSlugApi, useUpdateApi, useCreateApi }}
+			configs={smartFormConfigs}
+		/>
+	);
 };
 
 export default DatabaseNewEdit;

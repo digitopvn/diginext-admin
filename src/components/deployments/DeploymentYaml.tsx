@@ -35,6 +35,7 @@ const DeploymentYaml = () => {
 			<div className="flex h-full w-full flex-col">
 				<SmartForm
 					name="deployment_yaml"
+					formType="edit"
 					api={{ useSlugApi, useUpdateApi }}
 					configs={smartFormConfigs}
 					className="flex w-full !overflow-x-auto pb-4"

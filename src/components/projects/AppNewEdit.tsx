@@ -41,7 +41,7 @@ const AppNewEdit = (props: AppNewEditProps = {}) => {
 		{ type: "input", label: "Repo SSH", name: "git.repoSSH", placeholder: "git@github.com:organization-name/example-repo.git" },
 	];
 
-	return <SmartForm name="app" api={{ useSlugApi, useUpdateApi }} configs={smartFormConfigs} />;
+	return <SmartForm name="app" formType={props.isNew ? "new" : "edit"} api={{ useSlugApi, useUpdateApi }} configs={smartFormConfigs} />;
 };
 
 export default AppNewEdit;

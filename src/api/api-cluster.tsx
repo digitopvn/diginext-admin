@@ -5,6 +5,10 @@ export const useClusterListApi = (options?: ApiOptions) => {
 	return useListApi<ICluster>(["clusters", "list"], `/api/v1/cluster`, options);
 };
 
+export const useClusterListAllApi = (options?: ApiOptions) => {
+	return useListApi<ICluster>(["clusters", "list-all"], `/api/v1/cluster/all`, options);
+};
+
 export const useClusterApi = (id: string, options?: ApiOptions) => {
 	return useItemApi<ICluster>(["cluster", "id"], `/api/v1/cluster`, id, options);
 };

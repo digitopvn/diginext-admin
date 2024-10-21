@@ -24,7 +24,14 @@ const GitProviderNewEdit = (props: GitProviderNewEditProps = {}) => {
 		{ type: "input", label: "Workspace SSH Prefix", name: "repo.sshPrefix", placeholder: "git@github.com:my-organization" },
 	];
 
-	return <SmartForm name="gitProvider" api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />;
+	return (
+		<SmartForm
+			name="gitProvider"
+			formType={props.isNew ? "new" : "edit"}
+			api={{ useSlugApi, useUpdateApi, useCreateApi }}
+			configs={smartFormConfigs}
+		/>
+	);
 };
 
 export default GitProviderNewEdit;

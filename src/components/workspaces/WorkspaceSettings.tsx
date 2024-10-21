@@ -6,6 +6,8 @@ import { useApiKeyListApi } from "@/api/api-key";
 import CopyCode from "@/commons/CopyCode";
 import { useWorkspace } from "@/providers/useWorkspace";
 
+import { WorkspaceStorageForm } from "./WorkspaceStorageForm";
+
 const localizedFormat = require("dayjs/plugin/localizedFormat");
 const relativeTime = require("dayjs/plugin/relativeTime");
 
@@ -51,9 +53,16 @@ export const WorkspaceSettings = () => {
 			<Divider dashed />
 
 			{/* SSH PUBLIC KEY */}
-			<Card title="PUBLIC KEY">
+			{/* <Card title="PUBLIC KEY">
 				<div key={`ssh-public-key`}>
 					<CopyCode mode="inline" value={publicKeyRes?.data?.publicKey || ""} />
+				</div>
+			</Card> */}
+
+			{/* CLOUD STORAGE */}
+			<Card title="CLOUD STORAGE">
+				<div key={`cloud-storage`}>
+					<WorkspaceStorageForm />
 				</div>
 			</Card>
 		</div>

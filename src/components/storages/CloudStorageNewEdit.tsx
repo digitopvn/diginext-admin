@@ -75,7 +75,14 @@ const CloudStorageNewEdit = (props: ContainerRegistryNewEditProps = {}) => {
 		},
 	];
 
-	return <SmartForm name="registry" api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />;
+	return (
+		<SmartForm
+			name="registry"
+			formType={props.isNew ? "new" : "edit"}
+			api={{ useSlugApi, useUpdateApi, useCreateApi }}
+			configs={smartFormConfigs}
+		/>
+	);
 };
 
 export default CloudStorageNewEdit;

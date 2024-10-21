@@ -3,9 +3,10 @@ import { useSize } from "ahooks";
 import { Button, Popconfirm, Space, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
+import { isEmpty } from "lodash";
 import React, { useRef, useState } from "react";
 
-import { useClusterDeleteApi, useClusterListApi } from "@/api/api-cluster";
+import { useClusterDeleteApi, useClusterListAllApi } from "@/api/api-cluster";
 import type { ICluster, IUser } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
@@ -74,10 +75,10 @@ export const ClusterList = () => {
 			dataIndex: "owner",
 			key: "owner",
 			width: 50,
-			filterSearch: true,
-			filters: [{ text: "goon", value: "goon" }],
-			onFilter: (value, record) => (record.owner ? ((record.owner as IUser).name || "").toLowerCase().indexOf(value.toString()) > -1 : true),
-			render: (value, record) => <>{record.owner && (record.owner as IUser).name}</>,
+			// filterSearch: true,
+			// filters: [{ text: "goon", value: "goon" }],
+			// onFilter: (value, record) => (record.owner ? ((record.owner as IUser).name || "").toLowerCase().indexOf(value.toString()) > -1 : true),
+			render: (value, record) => <>{!isEmpty(record.owner) ? (record.owner as IUser).name : "DXUP System"}</>,
 		},
 		{
 			title: "Created at",
@@ -105,7 +106,7 @@ export const ClusterList = () => {
 	];
 	//
 	const [page, setPage] = useState(1);
-	const { data, status } = useClusterListApi({ populate: "owner", pagination: { page, size: pageSize } });
+	const { data, status } = useClusterListAllApi({ populate: "owner", pagination: { page, size: pageSize } });
 	const { list: clusters, pagination } = data || {};
 	const { total_items } = pagination || {};
 	console.log("clusters :>> ", clusters);
@@ -123,7 +124,7 @@ export const ClusterList = () => {
 		clusters?.map((cluster) => {
 			return {
 				...cluster,
-				actions: (
+				actions: !isEmpty(cluster.workspace) ? (
 					<Space.Compact>
 						<Button
 							icon={<EditOutlined />}
@@ -139,7 +140,7 @@ export const ClusterList = () => {
 							<Button icon={<DeleteOutlined />}></Button>
 						</Popconfirm>
 					</Space.Compact>
-				),
+				) : null,
 			} as DataType;
 		}) || [];
 

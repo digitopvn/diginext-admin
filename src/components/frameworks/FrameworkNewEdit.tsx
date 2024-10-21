@@ -38,7 +38,14 @@ const FrameworkNewEdit = (props: FrameworkNewEditProps = {}) => {
 		{ type: "input", label: "Main branch", name: "mainBranch", placeholder: "main" },
 	];
 
-	return <SmartForm name="framework" api={{ useSlugApi, useUpdateApi, useCreateApi }} configs={smartFormConfigs} />;
+	return (
+		<SmartForm
+			name="framework"
+			formType={props.isNew ? "new" : "edit"}
+			api={{ useSlugApi, useUpdateApi, useCreateApi }}
+			configs={smartFormConfigs}
+		/>
+	);
 };
 
 export default FrameworkNewEdit;
