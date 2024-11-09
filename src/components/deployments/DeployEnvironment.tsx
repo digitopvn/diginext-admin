@@ -61,7 +61,12 @@ const DeployEnvironment = () => {
 			defaultValue: "none",
 			options: availableResourceSizes.map((size) => {
 				const resource = getContainerResourceBySize(size || "none");
-				return { label: `${size} ${resource.limits ? `(cpu: ${resource.limits?.cpu}, mem: ${resource.limits?.memory})` : ""}`, value: size };
+				return {
+					label: `${size} ${
+						resource.limits.cpu && resource.limits.memory ? `(cpu: ${resource.limits.cpu}, mem: ${resource.limits.memory})` : ""
+					}`,
+					value: size,
+				};
 			}),
 			wrapperStyle: { float: responsive?.md ? "left" : "none", marginRight: responsive?.md ? 15 : 0, width: responsive?.md ? 260 : "100%" },
 		},
