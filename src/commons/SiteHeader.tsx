@@ -1,4 +1,12 @@
-import { DownOutlined, GithubOutlined, MenuFoldOutlined, MenuUnfoldOutlined, QuestionCircleOutlined, UserOutlined } from "@ant-design/icons";
+import {
+	DownOutlined,
+	GithubOutlined,
+	MenuFoldOutlined,
+	MenuUnfoldOutlined,
+	QuestionCircleOutlined,
+	StarOutlined,
+	UserOutlined,
+} from "@ant-design/icons";
 import { Avatar, Button, Layout, Popover, Space, Tag, theme } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDarkMode } from "usehooks-ts";
@@ -14,6 +22,7 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 	const { onSidebarChange } = props;
 	const { isDarkMode, toggle } = useDarkMode();
 	const [user] = useAuth();
+	const workspace = user?.activeWorkspace;
 
 	const {
 		token: { colorBgContainer },
@@ -49,7 +58,13 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 				<Space size={4}>
 					{/* <Button type="text" icon={<SearchOutlined />} /> */}
 
-					<Button type="text" icon={<QuestionCircleOutlined />} href="https://zii.vn/dx-docs" target="_blank" />
+					{workspace?.slug === "topgroup" && (
+						<Tag color="red" icon={<StarOutlined />}>
+							VIP
+						</Tag>
+					)}
+
+					<Button type="text" icon={<QuestionCircleOutlined />} href="https://docs.dxup.dev" target="_blank" />
 
 					<Button type="text" icon={<GithubOutlined />} href="https://github.com/digitopvn/diginext/" target="_blank" />
 
