@@ -58,12 +58,6 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 				<Space size={4}>
 					{/* <Button type="text" icon={<SearchOutlined />} /> */}
 
-					{workspace?.slug === "topgroup" && (
-						<Tag color="red" icon={<StarOutlined />}>
-							VIP
-						</Tag>
-					)}
-
 					<Button type="text" icon={<QuestionCircleOutlined />} href="https://docs.dxup.dev" target="_blank" />
 
 					<Button type="text" icon={<GithubOutlined />} href="https://github.com/digitopvn/diginext/" target="_blank" />
@@ -106,6 +100,11 @@ export const SiteHeader = (props: ISiteHeaderProps = {}) => {
 							<Tag color="green" className="ml-2">
 								{user?.activeRole?.name}
 							</Tag>
+							{workspace?.slug === "topgroup" && (
+								<Tag color="red" icon={<StarOutlined />}>
+									VIP
+								</Tag>
+							)}
 							<DownOutlined className="ml-2" />
 						</div>
 					</Popover>
