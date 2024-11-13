@@ -88,8 +88,8 @@ export const useAuth = () => {
 
 	useEffect(() => {
 		// console.log(`[1] ----------------------------------`);
-		console.log("apiStatus :>> ", apiStatus);
-		console.log("response :>> ", response);
+		// console.log("apiStatus :>> ", apiStatus);
+		// console.log("response :>> ", response);
 		// console.log("user :>> ", user);
 
 		// const access_token = (router.query.access_token || getCookie("x-auth-cookie")) as string;

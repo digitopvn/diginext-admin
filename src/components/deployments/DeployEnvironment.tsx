@@ -110,6 +110,33 @@ const DeployEnvironment = () => {
 		},
 		{ type: "input", label: "PORT", name: "port", placeholder: "3000" },
 		{
+			type: "input",
+			label: "Health Check Path",
+			name: "healthz",
+			placeholder: "/",
+			wrapperStyle: {
+				float: responsive?.md ? "left" : "none",
+				clear: "both",
+				marginRight: responsive?.md ? 15 : 0,
+				width: responsive?.md ? "48%" : "100%",
+			},
+		},
+		{
+			type: "select",
+			label: "Redirect to first domain",
+			name: "redirect",
+			defaultValue: false,
+			// value: false,
+			options: [
+				{ label: "Yes", value: true },
+				{ label: "No", value: false },
+			],
+			wrapperStyle: {
+				float: responsive?.md ? "right" : "none",
+				width: responsive?.md ? "50%" : "100%",
+			},
+		},
+		{
 			type: "select",
 			label: "Container Registry",
 			name: "registry",
