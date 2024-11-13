@@ -27,6 +27,7 @@ import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
 import SearchBox from "@/commons/SearchBox";
 import { filterUniqueItems } from "@/plugins/array-utils";
+import { containerCpus, containerMemories } from "@/plugins/container-utils";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
 import { useModalProvider } from "@/providers/ModalProvider";
@@ -182,19 +183,35 @@ export const DeployEnvironmentList = () => {
 					{value}
 				</Button>
 			),
-			filters: filterUniqueItems(clusters?.map((item) => ({ text: item.name, value: item.name })) || []).filter(
+			filters: filterUniqueItems(clusters?.map((item) => ({ text: item.name, value: item.slug })) || []).filter(
 				(item): item is { text: string; value: string } => item.text !== "" && item.value !== ""
 			),
 			onFilter: (value, record) => {
 				return record.cluster === value;
 			},
 		},
+		// {
+		// 	title: "Size",
+		// 	dataIndex: "size",
+		// 	width: 15,
+		// 	key: "size",
+		// 	render: (value) => <Tag color={value === "none" ? "default" : "success"}>{value}</Tag>,
+		// },
 		{
-			title: "Size",
-			dataIndex: "size",
+			title: "CPU",
+			dataIndex: "cpu",
 			width: 15,
-			key: "size",
-			render: (value) => <Tag color={value === "none" ? "default" : "success"}>{value}</Tag>,
+			key: "cpu",
+			render: (value) => (value ? <Tag>{value}</Tag> : "-"),
+			sorter: (a, b) => containerCpus.indexOf(a.cpu || "") - containerCpus.indexOf(b.cpu || ""),
+		},
+		{
+			title: "Memory",
+			dataIndex: "memory",
+			key: "memory",
+			width: 15,
+			render: (value) => (value ? <Tag>{value}</Tag> : "-"),
+			sorter: (a, b) => containerMemories.indexOf(a.memory || "") - containerMemories.indexOf(b.memory || ""),
 		},
 		{
 			title: "Replicas",

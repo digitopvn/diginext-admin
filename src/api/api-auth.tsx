@@ -58,8 +58,9 @@ export const useAuthApi = (props: { access_token?: string } = {}) => {
 				if (response?.data?.token?.access_token) setCookie("x-auth-cookie", response?.data?.token?.access_token);
 				if (response?.data?.token?.refresh_token) setCookie("refresh_token", response?.data?.token?.refresh_token);
 				return response;
-			} catch (e) {
+			} catch (e: any) {
 				console.error("[HOOK] useAuthApi >", e);
+				// return e.response;
 				return undefined;
 			}
 		},
@@ -87,8 +88,8 @@ export const useAuth = () => {
 
 	useEffect(() => {
 		// console.log(`[1] ----------------------------------`);
-		// console.log("apiStatus :>> ", apiStatus);
-		// console.log("responseStatus :>> ", responseStatus);
+		console.log("apiStatus :>> ", apiStatus);
+		console.log("response :>> ", response);
 		// console.log("user :>> ", user);
 
 		// const access_token = (router.query.access_token || getCookie("x-auth-cookie")) as string;
@@ -112,6 +113,12 @@ export const useAuth = () => {
 		if (isRefetching) return;
 		if (typeof responseStatus === "undefined") return;
 		if (apiStatus === "loading") return;
+
+		// if (responseStatus === 401) {
+		// 	// console.log(`Redirect to "Login" page :>>`, { access_token, refresh_token });
+		// 	router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
+		// 	return;
+		// }
 
 		if (!responseStatus && !user) {
 			// console.log(`Redirect to "Login" page :>>`, { access_token, refresh_token });
