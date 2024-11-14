@@ -298,7 +298,6 @@ export const BuildList = () => {
 					),
 					placement: "top",
 				});
-				return;
 			}
 		} catch (e) {
 			console.error(`Could not process releasing this build:`, e);

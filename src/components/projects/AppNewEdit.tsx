@@ -2,8 +2,7 @@ import { useState } from "react";
 
 import { useAppSlugApi, useAppUpdateApi } from "@/api/api-app";
 import { useGitProviderListApi } from "@/api/api-git-provider";
-import type { IGitProvider } from "@/api/api-types";
-import { type ICluster } from "@/api/api-types";
+import type { ICluster, IGitProvider } from "@/api/api-types";
 import SmartForm from "@/commons/smart-form/SmartForm";
 import type { SmartFormElementProps } from "@/commons/smart-form/SmartFormTypes";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
