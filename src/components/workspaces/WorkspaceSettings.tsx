@@ -6,6 +6,7 @@ import { useApiKeyListApi } from "@/api/api-key";
 import CopyCode from "@/commons/CopyCode";
 import { useWorkspace } from "@/providers/useWorkspace";
 
+import { WorkspaceAiApiForm } from "./WorkspaceAiApiForm";
 import { WorkspaceStorageForm } from "./WorkspaceStorageForm";
 
 const localizedFormat = require("dayjs/plugin/localizedFormat");
@@ -65,6 +66,22 @@ export const WorkspaceSettings = () => {
 					<WorkspaceStorageForm />
 				</div>
 			</Card>
+
+			<Divider dashed />
+
+			{/* AI API */}
+			<Card title="AI API">
+				<div key={`ai-api`}>
+					<WorkspaceAiApiForm />
+				</div>
+			</Card>
+
+			{/* NOTIFICATION: Jojo AI API */}
+			{/* <Card title="NOTIFICATION">
+				<div key={`notification`}>
+					<WorkspaceNotificationForm />
+				</div>
+			</Card> */}
 		</div>
 	);
 };

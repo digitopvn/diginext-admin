@@ -30,7 +30,9 @@ const DeployEnvironment = () => {
 	// clusters
 	// const { data } = useClusterListApi({ populate: "owner", pagination: { page: 0, size: 100 } });
 	// const { list: clusters = [], pagination } = data || {};
-	const { data: cluster } = useClusterSlugApi(useSlugApi.data?.cluster || "", { enabled: typeof useSlugApi.data?.cluster !== "undefined" });
+	const { data: cluster } = useClusterSlugApi(useSlugApi.data?.cluster || "", {
+		enabled: !!useSlugApi.data?.cluster,
+	});
 
 	const smartFormConfigs: SmartFormElementProps[] = [
 		// { type: "input", label: "Name", name: "name", placeholder: "Deploy environment name" },

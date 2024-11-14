@@ -86,6 +86,7 @@ export const DeployEnvironmentList = () => {
 	// flatten apps & deploy environments
 	const displayedDeployEnvironments = apps?.flatMap((app: IApp) => {
 		return Object.entries(app.deployEnvironment || {}).map(([envName, envData]) => ({
+			key: `${app.id}-${envName}`,
 			name: envData.deploymentName,
 			deployEnvironment: envName,
 			app: {

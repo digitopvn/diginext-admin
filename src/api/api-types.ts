@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import type { AxiosRequestConfig } from "axios";
 
 import type { CloudStorageProvider } from "@/components/workspaces/WorkspaceStorageForm";
@@ -320,6 +319,12 @@ export interface IWorkspace extends IGeneral {
 	 */
 	settings?: {
 		database?: any;
+		ai?: {
+			enabled?: boolean;
+			apiBaseUrl?: string;
+			model?: string;
+			apiKey?: string;
+		};
 		activity?: {
 			/**
 			 * Data retention information
@@ -362,6 +367,18 @@ export interface IWorkspace extends IGeneral {
 			endpoint: string;
 			baseUrl: string;
 			basePath: string;
+		};
+		notification?: {
+			jojo?: {
+				enabled?: boolean;
+				apiKey?: string;
+				events?: string[];
+			};
+			elasticEmail?: {
+				enabled?: boolean;
+				apiKey?: string;
+				events?: string[];
+			};
 		};
 	};
 }

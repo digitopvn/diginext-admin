@@ -1,6 +1,5 @@
 import { CheckOutlined, CloseOutlined, LoadingOutlined } from "@ant-design/icons";
-import { langs } from "@uiw/codemirror-extensions-langs";
-import CodeMirror, { minimalSetup } from "@uiw/react-codemirror";
+import Editor from "@monaco-editor/react";
 import { Form, Space } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDarkMode, useDebounce } from "usehooks-ts";
@@ -37,9 +36,11 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 
 	// callbacks
 
-	const onChange = (editorValue: string) => {
-		form.setFieldValue(name, editorValue);
-		setValue(editorValue);
+	const onChange = (editorValue: string | undefined) => {
+		if (editorValue) {
+			form.setFieldValue(name, editorValue);
+			setValue(editorValue);
+		}
 	};
 
 	const submit = () => form.submit();
@@ -81,19 +82,18 @@ const SmartCodeEditor = (props: SmartFormElementProps & SmartCodeEditorProps) =>
 			rules={[{ required, message: requiredMessage }]}
 			style={{ display: visible ? "block" : "none", ...wrapperStyle }}
 		>
-			<CodeMirror
-				className="w-full"
-				height={height}
-				theme={isDarkMode ? "dark" : "light"}
-				extensions={[
-					//
-					...lang.map((_lang) => langs[_lang]()),
-					// basicSetup({}),
-					minimalSetup({ syntaxHighlighting: true }),
-				]}
-				onChange={onChange}
+			<Editor
+				className="w-full overflow-hidden rounded-md border border-gray-400"
+				height={height || 300}
+				theme={isDarkMode ? "vs-dark" : "vs-light"}
+				language={lang[0] || "javascript"}
 				value={_value}
-				editable={!disabled}
+				onChange={onChange}
+				options={{
+					minimap: { enabled: false },
+					readOnly: disabled,
+					scrollBeyondLastLine: false,
+				}}
 			/>
 
 			{postLabel}
