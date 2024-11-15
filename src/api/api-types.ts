@@ -910,6 +910,11 @@ export interface DiginextEnvironmentVariable {
 }
 
 export interface IDeployEnvironment {
+	env?: string;
+	appSlug?: string;
+	appName?: string;
+	projectSlug?: string;
+	projectName?: string;
 	/**
 	 * Container registry slug
 	 */
@@ -959,7 +964,24 @@ export interface IDeployEnvironment {
 	size?: "none" | "1x" | "2x" | "3x" | "4x" | "5x" | "6x" | "7x" | "8x" | "9x" | "10x";
 	cpu?: string;
 	memory?: string;
+	resources?: {
+		usage?: {
+			cpu?: string;
+			memory?: string;
+		};
+		limits?: {
+			cpu?: string;
+			memory?: string;
+		};
+	};
+
+	/**
+	 * Inherit configuration from the last deployment
+	 */
 	shouldInherit?: boolean;
+	/**
+	 * Redirect to first domain
+	 */
 	redirect?: boolean;
 	/**
 	 * Container's scaling replicas
