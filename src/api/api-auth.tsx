@@ -72,7 +72,7 @@ export const useAuth = () => {
 	const [urlQuery] = useRouterQuery();
 
 	const authActions = useAuthApi();
-	const { data: response, status: apiStatus, refetch, isStale, isRefetching } = authActions;
+	const { data: response, status: apiStatus, error, refetch, isStale, isRefetching } = authActions;
 	const { status: responseStatus } = response || {};
 	const user = response?.data as IUser | undefined;
 	const queryClient = useQueryClient();
@@ -87,6 +87,7 @@ export const useAuth = () => {
 	// console.log("url query > tokens :>> ", urlQuery);
 
 	useEffect(() => {
+		console.log("error :>> ", error);
 		// console.log(`[1] ----------------------------------`);
 		// console.log("apiStatus :>> ", apiStatus);
 		// console.log("response :>> ", response);
@@ -100,6 +101,11 @@ export const useAuth = () => {
 		// console.log(`---------------------------------- [1]`);
 
 		const redirectUrl = window?.location.href;
+
+		if (error) {
+			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
+			return;
+		}
 
 		if (!access_token) {
 			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
