@@ -1,8 +1,9 @@
-import { DeploymentUnitOutlined, ImportOutlined, PlusCircleFilled, PlusOutlined } from "@ant-design/icons";
+import { ImportOutlined, PlusCircleFilled, PlusOutlined } from "@ant-design/icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSize } from "ahooks";
 import { Button, notification, Table, Tag, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
+import type { FilterValue } from "antd/es/table/interface";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -15,18 +16,19 @@ import {
 	useAppDeployEnvironmentDeleteApi,
 	useAppDeployEnvironmentDownApi,
 	useAppDeployEnvironmentSleepApi,
-	useAppListApi,
 	useAppUnarchiveApi,
 } from "@/api/api-app";
 import { useBuildStartApi, useBuildStopApi } from "@/api/api-build";
 import { useClusterListApi } from "@/api/api-cluster";
 import { usePromoteDeployEnvironmentApi } from "@/api/api-deploy";
+import { useDeployEnvironmentListApi } from "@/api/api-deploy-environment";
 import { useProjectDeleteApi } from "@/api/api-project";
 import type { IApp, IDeployEnvironment, IProject } from "@/api/api-types";
 import { DateDisplay } from "@/commons/DateDisplay";
 import { PageTitle } from "@/commons/PageTitle";
 import SearchBox from "@/commons/SearchBox";
 import { filterUniqueItems } from "@/plugins/array-utils";
+import { containerCpus, containerMemories } from "@/plugins/container-utils";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useLayoutProvider } from "@/providers/LayoutProvider";
 import { useModalProvider } from "@/providers/ModalProvider";
@@ -45,7 +47,6 @@ dayjs.extend(localizedFormat);
 interface DataType extends Omit<IDeployEnvironment, "project"> {
 	id?: string;
 	key?: React.Key;
-	deployEnvironment: string;
 	app?: {
 		id: string;
 		name: string;
@@ -71,37 +72,28 @@ export const DeployEnvironmentList = () => {
 	const {
 		data,
 		status: apiStatus,
-		refetch: refetchApps,
-	} = useAppListApi({
-		populate: "owner,project",
+		refetch: refetchDeployEnvironments,
+	} = useDeployEnvironmentListApi({
+		// populate: "owner,project",
 		pagination: { page, size: pageSize },
-		// filter: {
-		// 	status: true,
-		// },
+		filter: {
+			status: true,
+			cluster: query.cluster,
+		},
 	});
-	const { list: apps, pagination } = data || {};
+	const { list: deployEnvironments, pagination } = data || {};
 	const { total_pages, total_items } = pagination || {};
 
 	// flatten apps & deploy environments
-	const displayedDeployEnvironments = apps?.flatMap((app: IApp) => {
-		return Object.entries(app.deployEnvironment || {}).map(([envName, envData]) => ({
-			name: envData.deploymentName,
-			deployEnvironment: envName,
-			app: {
-				id: app.id,
-				name: app.name,
-				slug: app.slug,
-				// Add other relevant app properties here
-			},
-			project: app.project,
-			...envData,
-		}));
-	}) as DataType[];
+	const displayedDeployEnvironments = deployEnvironments?.map((deployEnvironment, index) => ({
+		...deployEnvironment,
+		key: `${deployEnvironment.projectSlug}-${deployEnvironment.appSlug}-${deployEnvironment.env}-${index}`,
+	})) as DataType[];
+
 	console.log({ displayedDeployEnvironments });
 
-	// FIXME: page size -> all or pagination?
-	// fetch clusters
-	const { data: dataCluster, status: listClusterApiStatus } = useClusterListApi({ pagination: { page, size: 50 } });
+	// fetch all clusters (for filter)
+	const { data: dataCluster, status: listClusterApiStatus } = useClusterListApi();
 	const { list: clusters } = dataCluster || {};
 	// const { total_items } = pagination || {};
 
@@ -110,65 +102,62 @@ export const DeployEnvironmentList = () => {
 		{
 			title: "Deployment",
 			width: 30,
-			dataIndex: "name",
-			key: "name",
+			dataIndex: "deploymentName",
+			key: "deploymentName",
 			fixed: responsive?.md ? "left" : undefined,
 			filterSearch: true,
 			render: (value, record) => {
-				return (
-					<Link href={`?lv1=deploy_environment&project=${record.project?.slug}&app=${record.app?.slug}&env=${record.deployEnvironment}`}>
-						{value}
-					</Link>
-				);
+				return <Link href={`?lv1=deploy_environment&project=${record.projectSlug}&app=${record.appSlug}&env=${record.env}`}>{value}</Link>;
 			},
 		},
 		{
 			title: "ENV",
 			width: 15,
-			dataIndex: "deployEnvironment",
-			key: "deployEnvironment",
+			dataIndex: "env",
+			key: "env",
 			render: (value) => <Tag color={value === "prod" ? "success" : "default"}>{value}</Tag>,
 			filters: filterUniqueItems(
 				displayedDeployEnvironments?.map((item) => ({
-					text: item.deployEnvironment,
-					value: item.deployEnvironment,
+					text: item.env ?? "",
+					value: item.env ?? "",
 				})) || []
 			).filter((item, index, self) => index === self.findIndex((t) => t.value === item.value)),
 			onFilter: (value, record) => {
 				// setQuery({ env: value });
-				return record.deployEnvironment === value;
+				return record.env === value;
 			},
 		},
 		{
 			title: "Project",
 			width: 30,
-			dataIndex: "project",
-			key: "project",
-			render: (project) => (
+			dataIndex: "projectSlug",
+			key: "projectSlug",
+			render: (projectSlug) => (
 				<>
-					<span>{project.name}</span> <Tag>{project.slug}</Tag>
+					<Tag>{projectSlug}</Tag>
 				</>
 			),
 			filters: filterUniqueItems(
 				(
 					displayedDeployEnvironments?.map((item) => ({
-						text: (item.project as IProject)?.name ?? "",
-						value: (item.project as IProject)?.slug ?? "",
+						text: item.projectName ?? "",
+						value: item.projectSlug ?? "",
 					})) || []
 				).filter((item): item is { text: string; value: string } => item.text !== "" && item.value !== "")
 			).filter((item, index, self) => index === self.findIndex((t) => t.value === item.value)),
 			onFilter: (value, record) => {
-				return (record.project as IProject)?.slug === value;
+				// setQuery({ project: value });
+				return record.projectSlug === value;
 			},
 		},
 		{
 			title: "App",
 			width: 30,
-			dataIndex: "app",
-			key: "app",
-			render: (app) => (
+			dataIndex: "appSlug",
+			key: "appSlug",
+			render: (appSlug) => (
 				<>
-					<span>{app.name}</span> <Tag>{app.slug}</Tag>
+					<Tag>{appSlug}</Tag>
 				</>
 			),
 		},
@@ -182,19 +171,52 @@ export const DeployEnvironmentList = () => {
 					{value}
 				</Button>
 			),
-			filters: filterUniqueItems(clusters?.map((item) => ({ text: item.name, value: item.name })) || []).filter(
+			filters: filterUniqueItems(clusters?.map((item) => ({ text: item.name, value: item.slug })) || []).filter(
 				(item): item is { text: string; value: string } => item.text !== "" && item.value !== ""
 			),
+			filterMultiple: false,
 			onFilter: (value, record) => {
+				// console.log("value :>> ", value);
+				// if (query.cluster === value) return true;
+				// setQuery({ cluster: value });
+				// return true;
 				return record.cluster === value;
 			},
 		},
+		// {
+		// 	title: "Size",
+		// 	dataIndex: "size",
+		// 	width: 15,
+		// 	key: "size",
+		// 	render: (value) => <Tag color={value === "none" ? "default" : "success"}>{value}</Tag>,
+		// },
 		{
-			title: "Size",
-			dataIndex: "size",
+			title: "CPU",
+			dataIndex: "cpu",
 			width: 15,
-			key: "size",
-			render: (value) => <Tag color={value === "none" ? "default" : "success"}>{value}</Tag>,
+			key: "cpu",
+			render: (value, record) => (
+				<Tag color={record.resources?.limits?.cpu ? "success" : "default"}>
+					{record.resources?.usage?.cpu || value || "-"}
+					{" / "}
+					{record.resources?.limits?.cpu ? `${record.resources?.limits?.cpu}` : "-"}
+				</Tag>
+			),
+			sorter: (a, b) => containerCpus.indexOf(a.cpu || "") - containerCpus.indexOf(b.cpu || ""),
+		},
+		{
+			title: "Memory",
+			dataIndex: "memory",
+			key: "memory",
+			width: 15,
+			render: (value, record) => (
+				<Tag color={record.resources?.limits?.memory ? "success" : "default"}>
+					{record.resources?.usage?.memory || value || "-"}
+					{" / "}
+					{record.resources?.limits?.memory ? `${record.resources?.limits?.memory}` : "-"}
+				</Tag>
+			),
+			sorter: (a, b) => containerMemories.indexOf(a.memory || "") - containerMemories.indexOf(b.memory || ""),
 		},
 		{
 			title: "Replicas",
@@ -300,7 +322,7 @@ export const DeployEnvironmentList = () => {
 					next={() => {
 						instance?.destroy();
 						// reload project & app list
-						refetchApps();
+						refetchDeployEnvironments();
 					}}
 				/>
 			),
@@ -333,7 +355,7 @@ export const DeployEnvironmentList = () => {
 
 	const deleteApp = async (id: string) => {
 		const result = await deleteAppApi({ _id: id });
-		refetchApps();
+		refetchDeployEnvironments();
 		console.log("[deleteApp] result :>> ", result);
 	};
 
@@ -353,10 +375,10 @@ export const DeployEnvironmentList = () => {
 		setPage(newPage);
 	}, [query.page]);
 
-	const onTableChange = (_pagination: TablePaginationConfig) => {
-		console.log("Table changed!");
+	const onTableChange = (_pagination: TablePaginationConfig, _filters: Record<string, FilterValue | null>) => {
+		console.log("Table changed: ", _pagination, _filters);
 		const { current } = _pagination;
-		setQuery({ page: current ?? 1 });
+		setQuery({ page: current ?? 1, ..._filters });
 	};
 
 	const ref = useRef(null);
@@ -366,31 +388,9 @@ export const DeployEnvironmentList = () => {
 		<>
 			{/* Search */}
 			<SearchBox
-				commands={apps?.map((app) => ({
-					label: `${app.name} (${app.slug})`,
-					value: app,
-					children: Object.keys(app.deployEnvironment || {}).map((env) => {
-						return {
-							value: app,
-							label: (
-								<>
-									<Tag>{app.slug}</Tag>≫<Tag>{env}</Tag>
-								</>
-							),
-							children: Object.keys(app.deployEnvironment || {}).map((_env) => {
-								return {
-									label: (
-										<>
-											<DeploymentUnitOutlined />
-											{`Deploy environment ≫ ${_env.toUpperCase()}`}
-										</>
-									),
-									value: (app.deployEnvironment || {})[_env],
-									onSelect: (val) => setQuery({ lv1: "deploy_environment", project: app.slug, app: app.slug, env: _env }),
-								};
-							}),
-						};
-					}),
+				commands={displayedDeployEnvironments?.map((deployEnvironment) => ({
+					label: `${deployEnvironment.app?.name} (${deployEnvironment.app?.slug})`,
+					value: deployEnvironment.deploymentName,
 				}))}
 			/>
 

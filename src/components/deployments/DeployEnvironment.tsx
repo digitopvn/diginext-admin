@@ -5,10 +5,10 @@ import { useState } from "react";
 import { useAppDeployEnvironmentSlugApi, useAppDeployEnvironmentUpdateApi } from "@/api/api-app";
 import { useClusterSlugApi } from "@/api/api-cluster";
 import { useContainerRegistryListApi } from "@/api/api-registry";
-import { availableResourceSizes, sslIssuers } from "@/api/api-types";
+import { sslIssuers } from "@/api/api-types";
 import SmartForm from "@/commons/smart-form/SmartForm";
 import type { SmartFormElementProps } from "@/commons/smart-form/SmartFormTypes";
-import { getContainerResourceBySize } from "@/plugins/container-utils";
+import { containerCpus, containerMemories } from "@/plugins/container-utils";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 
 import DeployEnvironmentVolumeManager from "./DeployEnvironmentVolume";
@@ -30,7 +30,9 @@ const DeployEnvironment = () => {
 	// clusters
 	// const { data } = useClusterListApi({ populate: "owner", pagination: { page: 0, size: 100 } });
 	// const { list: clusters = [], pagination } = data || {};
-	const { data: cluster } = useClusterSlugApi(useSlugApi.data?.cluster || "", { enabled: typeof useSlugApi.data?.cluster !== "undefined" });
+	const { data: cluster } = useClusterSlugApi(useSlugApi.data?.cluster || "", {
+		enabled: !!useSlugApi.data?.cluster,
+	});
 
 	const smartFormConfigs: SmartFormElementProps[] = [
 		// { type: "input", label: "Name", name: "name", placeholder: "Deploy environment name" },
@@ -52,20 +54,50 @@ const DeployEnvironment = () => {
 			// 	marginRight: responsive?.md ? 15 : 0,
 			// },
 		},
+		// {
+		// 	type: "select",
+		// 	label: "Container size",
+		// 	name: "size",
+		// 	placeholder: "Container size",
+		// 	displayKey: "size", // the magic is here 😅...
+		// 	defaultValue: "none",
+		// 	options: availableResourceSizes.map((size) => {
+		// 		const resource = getContainerResourceBySize(size || "none");
+		// 		return {
+		// 			label: `${size} ${
+		// 				resource.limits.cpu && resource.limits.memory ? `(cpu: ${resource.limits.cpu}, mem: ${resource.limits.memory})` : ""
+		// 			}`,
+		// 			value: size,
+		// 		};
+		// 	}),
+		// 	wrapperStyle: { float: responsive?.md ? "left" : "none", marginRight: responsive?.md ? 15 : 0, width: responsive?.md ? 260 : "100%" },
+		// },
 		{
 			type: "select",
-			label: "Container size",
-			name: "size",
-			placeholder: "Container size",
-			displayKey: "size", // the magic is here 😅...
-			defaultValue: "none",
-			options: availableResourceSizes.map((size) => {
-				const resource = getContainerResourceBySize(size || "none");
+			label: "CPU",
+			name: "cpu",
+			placeholder: "CPU",
+			displayKey: "cpu",
+			// defaultValue: "",
+			options: containerCpus.map((cpu) => {
 				return {
-					label: `${size} ${
-						resource.limits.cpu && resource.limits.memory ? `(cpu: ${resource.limits.cpu}, mem: ${resource.limits.memory})` : ""
-					}`,
-					value: size,
+					label: `${cpu}`,
+					value: cpu,
+				};
+			}),
+			wrapperStyle: { float: responsive?.md ? "left" : "none", marginRight: responsive?.md ? 15 : 0, width: responsive?.md ? 260 : "100%" },
+		},
+		{
+			type: "select",
+			label: "Memory",
+			name: "memory",
+			placeholder: "Memory",
+			displayKey: "memory",
+			// defaultValue: "",
+			options: containerMemories.map((memory) => {
+				return {
+					label: `${memory}`,
+					value: memory,
 				};
 			}),
 			wrapperStyle: { float: responsive?.md ? "left" : "none", marginRight: responsive?.md ? 15 : 0, width: responsive?.md ? 260 : "100%" },
@@ -79,6 +111,33 @@ const DeployEnvironment = () => {
 			wrapperStyle: { float: responsive?.md ? "left" : "none", marginRight: responsive?.md ? 15 : 0 },
 		},
 		{ type: "input", label: "PORT", name: "port", placeholder: "3000" },
+		{
+			type: "input",
+			label: "Health Check Path",
+			name: "healthz",
+			placeholder: "/",
+			wrapperStyle: {
+				float: responsive?.md ? "left" : "none",
+				clear: "both",
+				marginRight: responsive?.md ? 15 : 0,
+				width: responsive?.md ? "48%" : "100%",
+			},
+		},
+		{
+			type: "select",
+			label: "Redirect to first domain",
+			name: "redirect",
+			defaultValue: false,
+			// value: false,
+			options: [
+				{ label: "Yes", value: true },
+				{ label: "No", value: false },
+			],
+			wrapperStyle: {
+				float: responsive?.md ? "right" : "none",
+				width: responsive?.md ? "50%" : "100%",
+			},
+		},
 		{
 			type: "select",
 			label: "Container Registry",

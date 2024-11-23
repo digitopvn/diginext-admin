@@ -1,14 +1,16 @@
+import { Editor } from "@monaco-editor/react";
+import { useDarkMode } from "usehooks-ts";
+
 import { useAppDeployEnvironmentSlugApi, useAppDeployEnvironmentUpdateApi } from "@/api/api-app";
 import { useClusterListApi } from "@/api/api-cluster";
 import CopyCode from "@/commons/CopyCode";
-import SmartForm from "@/commons/smart-form/SmartForm";
 import type { SmartFormElementProps } from "@/commons/smart-form/SmartFormTypes";
 import { useRouterQuery } from "@/plugins/useRouterQuery";
 import { useDrawerProvider } from "@/providers/DrawerProvider";
 
 const DeploymentYaml = () => {
 	const [{ project: projectSlug, app: appSlug, env }, { setQuery }] = useRouterQuery();
-
+	const { isDarkMode } = useDarkMode();
 	const { closeDrawer } = useDrawerProvider();
 
 	// clusters
@@ -31,14 +33,14 @@ const DeploymentYaml = () => {
 	];
 
 	return (
-		<div className="h-full w-full">
-			<div className="flex h-full w-full flex-col">
-				<SmartForm
-					name="deployment_yaml"
-					formType="edit"
-					api={{ useSlugApi, useUpdateApi }}
-					configs={smartFormConfigs}
-					className="flex w-full !overflow-x-auto pb-4"
+		<div className="size-full">
+			<div className="flex size-full flex-col">
+				<Editor
+					theme={isDarkMode ? "vs-dark" : "vs-light"}
+					height="100%"
+					defaultLanguage="yaml"
+					value={useSlugApi.data?.deploymentYaml || ""}
+					options={{ minimap: { enabled: false }, scrollBeyondLastLine: false }}
 				/>
 				<CopyCode className="px-4 pb-8" value={useSlugApi.data?.deploymentYaml || ""} mode="hidden" />
 			</div>

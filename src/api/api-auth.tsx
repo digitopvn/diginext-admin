@@ -58,8 +58,9 @@ export const useAuthApi = (props: { access_token?: string } = {}) => {
 				if (response?.data?.token?.access_token) setCookie("x-auth-cookie", response?.data?.token?.access_token);
 				if (response?.data?.token?.refresh_token) setCookie("refresh_token", response?.data?.token?.refresh_token);
 				return response;
-			} catch (e) {
+			} catch (e: any) {
 				console.error("[HOOK] useAuthApi >", e);
+				// return e.response;
 				return undefined;
 			}
 		},
@@ -71,7 +72,7 @@ export const useAuth = () => {
 	const [urlQuery] = useRouterQuery();
 
 	const authActions = useAuthApi();
-	const { data: response, status: apiStatus, refetch, isStale, isRefetching } = authActions;
+	const { data: response, status: apiStatus, error, refetch, isStale, isRefetching } = authActions;
 	const { status: responseStatus } = response || {};
 	const user = response?.data as IUser | undefined;
 	const queryClient = useQueryClient();
@@ -86,9 +87,10 @@ export const useAuth = () => {
 	// console.log("url query > tokens :>> ", urlQuery);
 
 	useEffect(() => {
+		console.log("error :>> ", error);
 		// console.log(`[1] ----------------------------------`);
 		// console.log("apiStatus :>> ", apiStatus);
-		// console.log("responseStatus :>> ", responseStatus);
+		// console.log("response :>> ", response);
 		// console.log("user :>> ", user);
 
 		// const access_token = (router.query.access_token || getCookie("x-auth-cookie")) as string;
@@ -99,6 +101,11 @@ export const useAuth = () => {
 		// console.log(`---------------------------------- [1]`);
 
 		const redirectUrl = window?.location.href;
+
+		if (error) {
+			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
+			return;
+		}
 
 		if (!access_token) {
 			router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
@@ -112,6 +119,12 @@ export const useAuth = () => {
 		if (isRefetching) return;
 		if (typeof responseStatus === "undefined") return;
 		if (apiStatus === "loading") return;
+
+		// if (responseStatus === 401) {
+		// 	// console.log(`Redirect to "Login" page :>>`, { access_token, refresh_token });
+		// 	router.push(redirectUrl ? `/login?redirect_url=${redirectUrl}` : `/login`);
+		// 	return;
+		// }
 
 		if (!responseStatus && !user) {
 			// console.log(`Redirect to "Login" page :>>`, { access_token, refresh_token });

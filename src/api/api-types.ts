@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import type { AxiosRequestConfig } from "axios";
 
 import type { CloudStorageProvider } from "@/components/workspaces/WorkspaceStorageForm";
@@ -320,6 +319,12 @@ export interface IWorkspace extends IGeneral {
 	 */
 	settings?: {
 		database?: any;
+		ai?: {
+			enabled?: boolean;
+			apiBaseUrl?: string;
+			model?: string;
+			apiKey?: string;
+		};
 		activity?: {
 			/**
 			 * Data retention information
@@ -362,6 +367,18 @@ export interface IWorkspace extends IGeneral {
 			endpoint: string;
 			baseUrl: string;
 			basePath: string;
+		};
+		notification?: {
+			jojo?: {
+				enabled?: boolean;
+				apiKey?: string;
+				events?: string[];
+			};
+			elasticEmail?: {
+				enabled?: boolean;
+				apiKey?: string;
+				events?: string[];
+			};
 		};
 	};
 }
@@ -893,6 +910,11 @@ export interface DiginextEnvironmentVariable {
 }
 
 export interface IDeployEnvironment {
+	env?: string;
+	appSlug?: string;
+	appName?: string;
+	projectSlug?: string;
+	projectName?: string;
 	/**
 	 * Container registry slug
 	 */
@@ -933,13 +955,33 @@ export interface IDeployEnvironment {
 	namespace?: string;
 	/**
 	 * Container quota resources
+	 * @deprecated
 	 * @example
 	 * "none" - {}
 	 * "1x" - { requests: { cpu: `50m`, memory: `256Mi` }, limits: { cpu: `50m`, memory: `256Mi` } }
 	 * "2x" - { requests: { cpu: `100m`, memory: `512Mi` }, limits: { cpu: `100m`, memory: `512Mi` } }
 	 */
 	size?: "none" | "1x" | "2x" | "3x" | "4x" | "5x" | "6x" | "7x" | "8x" | "9x" | "10x";
+	cpu?: string;
+	memory?: string;
+	resources?: {
+		usage?: {
+			cpu?: string;
+			memory?: string;
+		};
+		limits?: {
+			cpu?: string;
+			memory?: string;
+		};
+	};
+
+	/**
+	 * Inherit configuration from the last deployment
+	 */
 	shouldInherit?: boolean;
+	/**
+	 * Redirect to first domain
+	 */
 	redirect?: boolean;
 	/**
 	 * Container's scaling replicas

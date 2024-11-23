@@ -1,8 +1,8 @@
 import { useState } from "react";
 
 import { useCloudDatabaseCreateApi, useCloudDatabaseSlugApi, useCloudDatabaseUpdateApi } from "@/api/api-cloud-database";
-import type { CloudDatabaseType } from "@/api/api-types";
-import { type ICloudDatabase, cloudDatabaseList } from "@/api/api-types";
+import type { CloudDatabaseType, ICloudDatabase } from "@/api/api-types";
+import { cloudDatabaseList } from "@/api/api-types";
 import SmartForm from "@/commons/smart-form/SmartForm";
 import type { SmartFormElementProps } from "@/commons/smart-form/SmartFormTypes";
 import { useRouterQuery } from "@/plugins/useRouterQuery";

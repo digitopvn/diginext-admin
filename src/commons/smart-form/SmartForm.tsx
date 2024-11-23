@@ -255,7 +255,7 @@ const SmartForm = <T extends object>(props: SmartFormProps<T>) => {
 					{children}
 
 					{isNew && (
-						<div className="absolute left-0 bottom-0 w-full px-6 py-3" style={{ backgroundColor: colorBgContainer }}>
+						<div className="absolute bottom-0 left-0 w-full px-6 py-3" style={{ backgroundColor: colorBgContainer }}>
 							<Space align="center">
 								<Form.Item style={{ marginBottom: 0 }}>
 									<Button type="primary" htmlType="submit" icon={<PlusOutlined />}>

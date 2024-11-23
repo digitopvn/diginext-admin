@@ -1,0 +1,14 @@
+{
+	"presets": ["next/babel"],
+	"plugins": [
+		[
+			"module-resolver",
+			{
+				"alias": {
+					"@codemirror/view": "@codemirror/view/dist/index.js",
+					"@codemirror/language": "@codemirror/language/dist/index.js"
+				}
+			}
+		]
+	]
+}

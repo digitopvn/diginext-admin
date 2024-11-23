@@ -39,6 +39,7 @@ const WorkspaceSetupPage = () => {
 	// const [dxKey, setDxKey] = useState("");
 	const [wsName, setWsName] = useState("");
 	const [err, setErr] = useState("");
+	const [isLoadingWorkspace, setIsLoadingWorkspace] = useState(false);
 
 	const onChange = (e: SyntheticEvent) => setWsName((e.currentTarget as any).value);
 	const [user, { refetch, status: authStatus }] = useAuth();
@@ -53,6 +54,7 @@ const WorkspaceSetupPage = () => {
 			notification.error({ message: `Unauthenticated.` });
 			return;
 		}
+		setIsLoadingWorkspace(true);
 		const res = await joinWorkspaceApi({ userId: user._id, workspace: workspaceId });
 		if (res?.status) {
 			await queryClient.invalidateQueries({ queryKey: ["auth"] });
@@ -61,8 +63,10 @@ const WorkspaceSetupPage = () => {
 			// redirect to workspace URL:
 			const url = new URL(window.location.href);
 			const redirectUrl = url.searchParams.get("redirect_url") || window.location.origin;
+			console.log("redirectUrl :>> ", redirectUrl);
 			router.push(redirectUrl);
 		}
+		setIsLoadingWorkspace(false);
 	};
 
 	const createWorkspace = async (values: any) => {
@@ -129,6 +133,8 @@ const WorkspaceSetupPage = () => {
 											options={workspaces?.map((workspace) => {
 												return { label: `${workspace.name} (${workspace.slug})`, value: workspace._id };
 											})}
+											loading={isLoadingWorkspace}
+											disabled={isLoadingWorkspace}
 										/>
 									</Form.Item>
 								</Form>
@@ -139,7 +145,13 @@ const WorkspaceSetupPage = () => {
 						{(createStatus === "idle" || createStatus === "error") && (
 							<div>
 								<Title level={3}>Create a new workspace:</Title>
-								<Form name="create" onFinish={createWorkspace} onFinishFailed={onFinishFailed} autoComplete="off">
+								<Form
+									name="create"
+									onFinish={createWorkspace}
+									onFinishFailed={onFinishFailed}
+									autoComplete="off"
+									disabled={isLoadingWorkspace}
+								>
 									<div className="flex gap-2">
 										<Form.Item name="public" valuePropName="checked">
 											<Checkbox>Public</Checkbox>
